@@ -221,6 +221,10 @@ td.cell.aligned .xl-error, td.cell.aligned .xl-bool { text-align: inherit; }
 
 table.value-table { border-collapse: collapse; font-size: 11px; margin: 1px 0; }
 table.value-table td { border: 1px solid var(--line); padding: 0 4px; min-width: 18px; }
+/* correlation-table (P118): headings, then each correlation filling its cell */
+table.value-table.r-correlations th { border: 1px solid var(--line); padding: 0 4px; font-weight: 400; text-align: left; color: var(--muted); }
+table.value-table.r-correlations td { padding: 0; text-align: right; font-variant-numeric: tabular-nums; }
+table.value-table.r-correlations td > .r-fill { margin: 0; padding: 0 4px; min-height: 0; }
 /* (grid-view) on a 2-D value: fills the cell like a grid drawn in it */
 table.value-table.value-grid { width: 100%; font-size: 12px; margin: 0; }
 table.value-table.value-grid th { border: 1px solid var(--line); padding: 1px 4px; text-align: left; }
@@ -432,10 +436,10 @@ ul.tree.steps-tree a.step-into { flex: none; white-space: nowrap; font-size: 11.
 .ref-tools .ref-filter { flex: 1; min-width: 0; }
 .ref-tools .show-code { white-space: nowrap; font-size: 12px; cursor: pointer; }
 .ref-actions { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; font-size: 11.5px; }
-.library button.link { padding: 0; border: none; background: none; color: var(--accent);
+.library button.link, .repl button.link { padding: 0; border: none; background: none; color: var(--accent);
   font-size: 11.5px; cursor: pointer; }
-.library button.link:hover { text-decoration: underline; }
-.library button.link:disabled { color: var(--muted); text-decoration: none; cursor: default; }
+.library button.link:hover, .repl button.link:hover { text-decoration: underline; }
+.library button.link:disabled, .repl button.link:disabled { color: var(--muted); text-decoration: none; cursor: default; }
 .ref-entry dt button.link.edit { margin-left: 8px; }
 .ref-section button.link.add { margin: 0 0 4px 14px; }
 .ref-section.own > summary { color: var(--accent); }
@@ -635,6 +639,7 @@ button.ref-mode { font-size: 11px; padding: 1px 4px; color: var(--muted); font-f
    off the right edge and clips every tab. */
 .side { flex: none; border-left: none; max-width: calc(100% - 205px); }
 .main.expanded .grid-scroll { display: none; }
+.main.expanded .grid-col { display: none; }
 .main.expanded .side { flex: 1; width: auto; max-width: none; min-width: 0; }
 .tabs button.expand { margin-left: auto; color: var(--muted); }
 .name-field { display: flex; gap: 4px; }
@@ -647,7 +652,6 @@ button.ref-mode { font-size: 11px; padding: 1px 4px; color: var(--muted); font-f
 /* ---- Status bar ------------------------------------------------------------ */
 .status-bar { display: flex; gap: 16px; align-items: center; min-height: 24px; padding: 3px 10px; border-top: 1px solid var(--line);
   background: var(--panel); color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-.status-bar span:first-child { color: var(--text); font-family: var(--mono); }
 .status-bar .message { margin-left: auto; font-size: 12px; }
 .status-bar .calculating { color: var(--muted); font-variant-numeric: tabular-nums; }
 .status-bar .busy { color: var(--text); }
@@ -1077,6 +1081,8 @@ a.live.paused { color: var(--accent); }
 .render-gallery .g-tile.small.tall .g-clip { max-height: 120px; }
 .render-gallery .g-tile.small.tall td.cell { --row-h: 110px; }
 .render-gallery .g-custom { font-size: 12px; }
+.render-gallery .r-series { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.render-gallery .r-series input[type=color] { width: 28px; height: 20px; padding: 0; border: 1px solid var(--line); vertical-align: middle; }
 .render-gallery .g-choices { display: flex; flex-direction: column; gap: 6px; }
 .render-gallery .g-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .render-gallery .g-chip { font-size: 12px; padding: 2px 9px; border-radius: 12px; border: 1px solid var(--line);
@@ -1277,9 +1283,26 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
 .dg-body tr.dg-loading td.cell { background: var(--head); }
 .dg sup.big { font-size: 9px; color: var(--muted); margin-left: 2px; }
 .dg-foot { font-size: 11px; padding: 3px 2px 0; }
-/* every column's details, under its header (▸ details): a row each, so they line up */
+/* every column's details, under its header (Details + data): a row each, so they line up */
 .dg-head th.col-head { cursor: default; }
-.dg-details-toggle { font-size: 10.5px; white-space: nowrap; }
+/* what the grid shows (P117): its corner's drop-down */
+.dg-mode { width: 100%; font-size: 11px; padding: 0 1px; height: 20px; box-sizing: border-box; }
+/* the correlation matrix: a row per column, under the grid's header (sticky) */
+.dg-corr thead th { position: sticky; top: 0; z-index: 2; }
+.dg-corr thead th.corner { z-index: 4; }
+.dg-corr th.dg-corr-name { text-align: left; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 25px; }
+.dg-corr td.dg-corr-cell { height: 25px; box-sizing: border-box; padding: 0 6px; text-align: right;
+  font-variant-numeric: tabular-nums; cursor: default; overflow: hidden; }
+/* heat colours are fixed (black, green, red: the user's), not the theme's */
+.dg-corr td.dg-corr-self { opacity: .55; }
+.dg-corr td.dg-corr-cell.dg-found { box-shadow: inset 0 0 0 2px var(--accent); opacity: 1; }
+.dg-corr-bar { padding: 4px 2px 0; font-size: 12px; line-height: 1.7; }
+.dg-corr-method { font-size: 12px; }
+.dg-corr-legend { white-space: nowrap; font-size: 11px; }
+.dg-corr-scale { display: inline-block; width: 70px; height: 10px; vertical-align: middle; border: 1px solid var(--line);
+  background: linear-gradient(to right, rgb(239, 68, 68), rgb(0, 0, 0), rgb(34, 197, 94)); }
+.dg-corr-scale.any { background: linear-gradient(to right, rgb(0, 0, 0), rgb(34, 197, 94)); }
+.dg-corr-chip { display: inline-block; padding: 0 4px; border-radius: 3px; font-size: 11px; font-variant-numeric: tabular-nums; }
 .dg-detail-row th { font-weight: 400; font-size: 11.5px; text-align: left; vertical-align: top; white-space: normal;
   overflow-wrap: anywhere; padding: 3px 6px; color: var(--text); background: var(--panel); }
 .dg-detail-row th.dg-detail-label { color: var(--muted); font-size: 11px; background: var(--head); white-space: nowrap; }
@@ -1448,3 +1471,107 @@ button.recipe-chip { cursor: pointer; }
 /* P84: the mean (solid) and the median (dashed) on a column's histogram */
 .dg-hist line.dg-hist-mean { stroke: var(--text); stroke-width: 1.5; }
 .dg-hist line.dg-hist-median { stroke: var(--text); stroke-width: 1.5; stroke-dasharray: 3 2; opacity: .7; }
+
+/* Sheet tabs (P111): the strip under the grid */
+.grid-col { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.grid-col > .grid-scroll { min-height: 0; }
+.sheet-tabs { flex: none; display: flex; align-items: stretch; gap: 2px; padding: 0 6px;
+  border-top: 1px solid var(--line); background: var(--head); font-size: 12px; min-height: 26px; }
+.sheet-tabs .tab-list { display: flex; gap: 1px; overflow-x: auto; min-width: 0; scrollbar-width: none; }
+.sheet-tabs .tab-list::-webkit-scrollbar { display: none; }
+.sheet-tabs button { border: none; border-radius: 0; background: transparent; color: var(--muted);
+  padding: 3px 12px; white-space: nowrap; }
+.sheet-tabs button:hover { color: var(--text); background: var(--sel-bg); }
+.sheet-tabs button.tab { font-family: var(--mono); border-right: 1px solid var(--line); }
+.sheet-tabs button.tab.on { background: var(--panel); color: var(--text); font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent); }
+.sheet-tabs .tab-nav { padding: 3px 6px; }
+.sheet-tabs .tab-add { font-weight: 600; padding: 3px 10px; }
+.sheet-tabs .tab-edit { font: inherit; font-family: var(--mono); margin: 2px 0; padding: 0 6px;
+  border: 1px solid var(--accent); background: var(--panel); color: var(--text); }
+.tab-menu { max-height: 60vh; overflow-y: auto; }
+.tab-menu .menu-item.on { font-weight: 600; }
+
+/* The Tests tab's cases, as the Scenarios tab's table (P112): a column per
+   case, a row per input and expected value */
+.tests-tab .tests-scoped { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 4px; }
+.tests-tab .tests-scoped h3 { font-size: 13px; margin: 6px 0 4px; font-family: var(--mono); }
+.tests-tab .tests-grid-row { margin: 4px 0 6px; font-size: 12px; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.tests-tab .case-table { overflow-x: auto; margin: 0 0 8px; }
+.tests-tab .case-table table { border-collapse: collapse; font-size: 12px; }
+.tests-tab .case-table th, .tests-tab .case-table td { border-bottom: 1px solid var(--line); padding: 2px 4px;
+  text-align: left; vertical-align: middle; }
+.tests-tab .case-table th { font-weight: 600; color: var(--muted); white-space: nowrap; }
+.tests-tab .case-table th.key, .tests-tab .case-table th.corner, .tests-tab .case-table tr.add-row th {
+  position: sticky; left: 0; z-index: 1; background: var(--panel); padding-right: 8px; }
+.tests-tab .case-table th.key.broken { color: var(--warn); }
+.tests-tab .case-table tr.part th { color: var(--text); padding-top: 8px; position: static; }
+.tests-tab .case-table .key-head, .tests-tab .case-table .add-row { display: inline-flex; gap: 4px; align-items: center; }
+.tests-tab .case-table th.case { vertical-align: top; padding-bottom: 4px; }
+.tests-tab .case-table .case-head { display: flex; align-items: center; gap: 2px; }
+.tests-tab .case-table th.case .icon { font-weight: 700; width: 1.1em; text-align: center; }
+.tests-tab .case-table th.case.pass .icon { color: var(--good); }
+.tests-tab .case-table th.case.fail .icon { color: var(--test-fail); }
+.tests-tab .case-table th.case.error .icon { color: var(--warn); }
+.tests-tab .case-table th.case button.accept { display: block; margin: 2px 0 0 3px; font-size: 11px; }
+.tests-tab .case-table .case-error { color: var(--warn); font-weight: 400; white-space: normal; max-width: 16em; font-size: 11.5px; }
+.tests-tab .case-table input { font-family: var(--mono); font-size: 11.5px; color: var(--text); background: transparent;
+  border: 1px solid transparent; border-radius: 3px; padding: 1px 3px; width: 7.5em; box-sizing: border-box; }
+.tests-tab .case-table input.case-name { font-family: inherit; font-weight: 600; }
+.tests-tab .case-table input.key-path { width: 8em; border-color: var(--line); background: var(--bg); }
+.tests-tab .case-table input:hover, .tests-tab .case-table input:focus { border-color: var(--line); background: var(--bg); }
+.tests-tab .case-table td.differs { background: var(--test-fail-tint); }
+.tests-tab .case-table .got { color: var(--test-fail); font-family: var(--mono); font-size: 11px; padding: 0 3px; }
+.tests-tab .case-table button.remove { padding: 0 3px; border-color: transparent; background: transparent; color: var(--muted); }
+.tests-tab .case-table button.remove:hover { color: var(--text); border-color: var(--line); }
+.tests-tab .case-table a.cell-link { font-family: var(--mono); }
+
+/* A status-bar count in two halves (P29): everywhere | here */
+.flag-pair { display: inline-flex; align-items: stretch; white-space: nowrap; }
+.flag-pair > a.flag:first-child:not(:last-child) { border-radius: 4px 0 0 4px; }
+.flag-pair > :nth-child(2) { border-radius: 0 4px 4px 0; margin-left: -1px; }
+.flag-pair > a.flag.here { font-weight: 500; }
+.flag-pair > .flag-here-none { color: var(--muted); font-size: 11.5px; line-height: 17px; padding: 0 6px;
+  box-shadow: inset 0 0 0 1px var(--line); }
+
+/* REPL tab (§37) */
+.repl { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; }
+.repl-foot { display: flex; gap: 8px; justify-content: space-between; align-items: baseline; }
+.repl-defs { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; max-height: 40%;
+  overflow: auto; flex: none; font-size: 12.5px; }
+.repl-defs ul { list-style: none; margin: 4px 0 0; padding: 0; }
+.repl-defs li { padding: 2px 0; }
+.repl-defs-head { display: flex; gap: 6px; align-items: baseline; }
+.repl-defs-buttons { margin-left: auto; display: flex; gap: 6px; }
+.repl-def-actions { margin-left: 8px; }
+.repl-def-actions .link { margin-right: 6px; }
+.repl .tag { font-size: 10.5px; padding: 0 5px; border-radius: 7px; border: 1px solid var(--line); color: var(--muted); }
+.repl .tag.new, .repl .tag.changed { color: var(--accent); border-color: var(--accent); }
+.repl .tag.err { color: var(--err); border-color: var(--err); }
+.repl-publish { margin-top: 6px; padding: 6px 8px; border-top: 1px solid var(--line); }
+.repl-publish ul { margin: 4px 0; }
+.repl-publish select { font: inherit; margin-left: 4px; }
+.repl-transcript { flex: 1; min-height: 80px; overflow: auto; font-size: 12.5px; }
+.repl-entry { padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.repl-transcript pre { margin: 2px 0; white-space: pre-wrap; word-break: break-word; font-family: var(--mono, monospace); }
+pre.repl-in { cursor: pointer; color: var(--muted); }
+pre.repl-in::before { content: "› "; }
+pre.repl-in:hover { color: var(--text); }
+pre.repl-out { color: var(--muted); font-style: italic; }
+pre.repl-error { color: var(--err); }
+.repl-defined { color: var(--muted); }
+.repl-drawn { padding: 4px; border: 1px solid var(--line); border-radius: 4px; display: inline-block; }
+.repl-input { flex: none; }
+.repl-editor { min-height: 44px; max-height: 240px; overflow: auto; border: 1px solid var(--line); border-radius: 4px; }
+.repl-editor .cm-editor { max-height: none; }
+.repl .small { font-size: 11.5px; }
+
+/* the cross-plot of a pair in the correlation matrix (P122) */
+.dg-corr td.dg-corr-cell { cursor: pointer; }
+.dg-corr-plot { border: 1px solid var(--line); border-top: 0; padding: 4px 8px 6px; font-size: 12px; }
+.dg-corr-plot-head { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; margin-bottom: 2px; }
+.dg-corr-plot-head .dg-plot-close { margin-left: auto; font-size: 15px; line-height: 1; }
+.dg-corr-ranks { margin-left: 10px; font-size: 11px; color: var(--muted); cursor: pointer; }
+/* drawn by the sheet's chart view (Vega-Lite): its box sizes it */
+.dg-corr-chart .r-vega { height: 260px; }
+
