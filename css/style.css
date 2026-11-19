@@ -9,6 +9,9 @@
   --text: #22211f; --muted: #8a867d; --accent: #2f6fdb; --sel-bg: #eaf1fd;
   --err: #c0392b; --err-bg: #fdecea; --pos: #4a7fd6; --neg: #d6694a;
   --array-edge: #7fa6e8;
+  /* the frame round cells open to typing in a protected grid (P193): a
+     quiet sage, a hue nothing else on a cell uses */
+  --open-edge: #8aa58c;
   /* What's flagged, one hue each, the same wherever it shows: the cell's
      corner (and edge), its count in the status bar, the Outline and the
      Formats tab, and the tabs that list them. Errors red, failing
@@ -42,6 +45,7 @@
     --text: #e8e6e1; --muted: #9a968d; --accent: #6fa0ff; --sel-bg: #263449;
     --err: #ff7b6b; --err-bg: #3a2220; --pos: #6f9bea; --neg: #e8866a;
     --array-edge: #4d6fa8;
+    --open-edge: #6f8f72;
     --err-edge: rgba(255, 123, 107, .8);
     --invalid: #f070c0; --invalid-edge: rgba(240, 112, 192, .8); --invalid-tint: rgba(240, 112, 192, .16);
     --test-fail: #ad8cff; --test-fail-tint: rgba(173, 140, 255, .16);
@@ -65,6 +69,7 @@
     --text: #e8e6e1; --muted: #9a968d; --accent: #6fa0ff; --sel-bg: #263449;
     --err: #ff7b6b; --err-bg: #3a2220; --pos: #6f9bea; --neg: #e8866a;
     --array-edge: #4d6fa8;
+    --open-edge: #6f8f72;
     --err-edge: rgba(255, 123, 107, .8);
     --invalid: #f070c0; --invalid-edge: rgba(240, 112, 192, .8); --invalid-tint: rgba(240, 112, 192, .16);
     --test-fail: #ad8cff; --test-fail-tint: rgba(173, 140, 255, .16);
@@ -114,6 +119,7 @@ select.theme { font: inherit; padding: 2px 4px; background: var(--panel); color:
   border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.18); padding: 6px 10px 10px; }
 .render-gallery .g-head { font-size: 12px; position: sticky; top: -6px; background: var(--panel);
   padding: 4px 0; z-index: 1; }
+.render-gallery .g-held { margin-top: 4px; padding: 2px 0 2px 8px; border-left: 3px solid var(--warn); }
 .render-gallery h4 { margin: 8px 0 4px; font-size: 11px; font-weight: 600; color: var(--muted);
   text-transform: uppercase; letter-spacing: .04em; }
 .render-gallery .g-tiles { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -237,10 +243,16 @@ svg.chart { display: block; width: 100%; height: 40px; }
 .span-box .r-vega { height: 100%; }
 .r-vega-view { width: 100%; height: 100%; overflow: hidden; }
 .r-vega-view svg { display: block; }
+/* A chart whose kind the data doesn't suit says so, and what would (§4) */
+.r-chart-refusal { display: block; white-space: normal; font-size: 11.5px; padding: 4px; }
 .r-vega-error { position: absolute; inset: 0; padding: 4px; color: var(--err); background: var(--err-bg);
   font-size: 11.5px; overflow: hidden; }
 svg.chart rect.pos { fill: var(--ink, var(--pos)); }
 svg.chart rect.neg { fill: var(--neg); }
+svg.chart rect.mark.high, svg.chart rect.mark.end { fill: var(--accent); }
+svg.chart rect.mark.low { fill: var(--muted); }
+svg.chart line.dot { stroke: var(--accent); stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+svg.chart line.dot.low, svg.chart line.dot.negative { stroke: var(--neg); }
 svg.chart .line { fill: none; stroke: var(--ink, var(--pos)); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 /* a simulation's runs (§29): histogram, percentile band */
 svg.chart rect.tail { fill: var(--ink, var(--pos)); opacity: .35; }
@@ -252,11 +264,23 @@ svg.chart line.mean { stroke: var(--text); stroke-width: 1; stroke-dasharray: 2 
 .r-band .median { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .r-band .mean { fill: var(--text); }
 .cell-button { padding: 0 10px; font-size: 12px; }
+/* a button that can't do its work now (P220): it says why on hover and when pressed */
+.cell-button.refused { color: var(--muted); border-style: dashed; }
 /* panels (stdlib Panels): several items in one cell, side by side or stacked */
 .r-beside { display: flex; gap: 3px; align-items: center; min-width: 0; }
 .r-beside > span:first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .r-stacked { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .r-stacked .r-dropdown { width: 100%; min-width: 0; }
+/* month-view (P215): a day, and a chip per resource */
+.r-month-day { display: flex; flex-direction: column; gap: 2px; min-height: 100%; padding: 1px 2px; font-size: 12px; box-sizing: border-box; }
+.r-month-day .d { font-weight: 600; }
+.r-month-day.off { background: var(--head); color: var(--muted); }
+.r-month-day.over { background: var(--invalid-tint); color: var(--bad); }
+.r-month-chip { border-radius: 3px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 16px; }
+.r-month-chip.on { background: var(--lint-tint); color: var(--lint); }
+.r-month-chip.part { background: var(--unit-tint); color: var(--unit); }
+.r-month-chip.off { color: var(--muted); text-decoration: line-through; }
+.r-month-chip.over { background: var(--invalid-tint); color: var(--bad); font-weight: 600; }
 /* a checkbox keeps its own size: stretched across the cell, some browsers
    draw it at the far edge, away from where it takes clicks */
 .r-stacked > input[type=checkbox], .r-beside > input[type=checkbox] { align-self: flex-start; flex: none; margin: 3px 2px; }
@@ -368,6 +392,15 @@ td.cell .r-stepper .num { min-width: 20px; text-align: center; }
   border: 1px solid var(--line); border-radius: 3px; }
 .r-radio { display: inline-flex; gap: 8px; }
 .r-radio label { display: inline-flex; gap: 2px; align-items: center; }
+/* choosing several (P140): ticks in a list; folded to a line in a filter's header */
+.r-checklist { display: inline-flex; flex-direction: column; gap: 1px; max-height: 12em; overflow-y: auto; }
+.r-checklist label { display: inline-flex; gap: 3px; align-items: center; white-space: nowrap; }
+.r-checklist-fold { font-size: 12px; max-width: 100%; }
+.r-checklist-fold > summary { cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  border: 1px solid var(--border, #ccc); border-radius: 3px; padding: 0 4px; background: var(--bg); }
+.r-checklist-fold[open] > .r-checklist { position: absolute; z-index: 30; background: var(--bg);
+  border: 1px solid var(--border, #ccc); padding: 3px 6px; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+td.cell.table-head .r-checklist-fold { font-weight: 400; }
 .r-color { width: 36px; height: 18px; padding: 0; border: 1px solid var(--line); background: none; }
 button.cp-button.r-color { padding: 2px; border-radius: 3px; display: inline-flex; }
 button.cp-button.r-color .cp-patch { flex: 1; border-radius: 2px; }
@@ -461,6 +494,25 @@ table.cheat td:first-child { white-space: nowrap; }
 .cell-out { display: block; width: var(--spill, auto); max-height: var(--row-h, none);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 td.cell.spill > .cell-out { pointer-events: none; }   /* clicks reach the cells it covers */
+/* The formula bar's draft, drawn in the cell it edits (P32): over the
+   cell's content, from its top-left, at least as big, running on over
+   its neighbours; under the sticky headers (z-index 1); clicks pass
+   through to the cell (point mode). */
+td.cell.drafting { position: relative; }
+td.cell.drafting > :not(.cell-draft) { visibility: hidden; }
+.cell-draft { position: absolute; left: 0; top: 0; z-index: 0; box-sizing: border-box;
+  min-width: 100%; min-height: 100%; width: max-content; max-width: 60vw;
+  padding: 2px 5px; line-height: 20px; text-align: left; font-weight: normal; font-style: normal;
+  background: var(--panel); color: var(--text); box-shadow: inset 0 0 0 2px var(--accent), 0 2px 6px rgba(0,0,0,.18);
+  white-space: pre-wrap; overflow-wrap: anywhere; pointer-events: none; }
+.cell-draft.formula { font-family: var(--mono); font-size: 11.5px; }
+table.grid.inline .cell-draft { padding: 1px 4px; line-height: 18px; }
+/* the caret takes no width (a border with a negative margin threw out the
+   max-content width by a fraction, so the draft wrapped its last word) */
+.draft-caret { position: relative; display: inline-block; width: 0; height: 1.15em; vertical-align: text-bottom; }
+.draft-caret::after { content: ""; position: absolute; left: -1px; top: 0; bottom: 0;
+  border-left: 1.5px solid var(--text); animation: draft-blink 1.06s steps(1) infinite; }
+@keyframes draft-blink { 50% { opacity: 0; } }
 /* A span (§4): the cell's content laid over the block of cells it covers,
    placed from the cell's top-left and sized by measuring (span-box). It
    sits under the sticky headers (z-index 1). When the active cell is one
@@ -473,6 +525,11 @@ table.grid.inline .span-box { padding: 1px 4px; }
 td.cell.sel > .span-box { box-shadow: inset 0 0 0 2px var(--muted); }
 .grid-scroll:focus td.cell.sel > .span-box { box-shadow: inset 0 0 0 2px var(--accent); }
 .span-box.faded { opacity: .25; pointer-events: none; }
+/* the box covers the cell's corner marks: a formula check's (§26; a
+   template placed with inputs left at its own values, P35) is drawn over
+   it, above what it draws */
+td.cell.span-anchor.lint > .span-box::after { content: ""; position: absolute; inset: 0; z-index: 2;
+  pointer-events: none; background-image: var(--mk-lint); }
 .span-box > .cell-out { flex: 1; min-height: 0; width: 100%; max-height: none; white-space: normal; }
 .span-box svg.chart, table.grid.inline .span-box svg.chart { height: 100%; }
 .span-box svg.r-pie, table.grid.inline .span-box svg.r-pie { width: 100%; height: 100%; }
@@ -492,17 +549,21 @@ td.cell.span-blocked { background-image: repeating-linear-gradient(135deg, trans
 
 /* Cell shadows compose from variables, top first: the coloured edges of
    references in the formula being written (--ref-outline, set inline), the
-   frame of a spilled 2-D result (--arr-*), then the selection tint (--tint). */
+   frame of a spilled 2-D result (--arr-*), the frame of cells open to typing
+   in a protected grid (--open-*), then the selection tint (--tint). */
 td.cell {
   /* reset on every cell: custom properties inherit, and a cell can hold an
      inline grid whose cells mustn't take on its tint or edges */
   --ref-outline: 0 0 transparent; --tint: 0 0 transparent;
   --arr-t: 0 0 transparent; --arr-l: 0 0 transparent;
   --arr-b: 0 0 transparent; --arr-r: 0 0 transparent;
+  --open-t: 0 0 transparent; --open-l: 0 0 transparent;
+  --open-b: 0 0 transparent; --open-r: 0 0 transparent;
   --bad-shadow: 0 0 transparent; --heat-tint: 0 0 transparent;
   --row-h: initial;   /* a set row height is the row's own, not its inner grids' */
   --ink: initial;     /* a text colour drawing the renderer (P34): the cell's own */
-  box-shadow: var(--ref-outline), var(--arr-t), var(--arr-l), var(--arr-b), var(--arr-r), var(--bad-shadow), var(--tint),
+  box-shadow: var(--ref-outline), var(--arr-t), var(--arr-l), var(--arr-b), var(--arr-r),
+              var(--open-t), var(--open-l), var(--open-b), var(--open-r), var(--bad-shadow), var(--tint),
               var(--heat-tint); }
 /* the Profile tab's overlay (§23): a tint as hot as --heat (0..1, set
    inline), and the time or step as a tag, bottom right. The cell is
@@ -537,6 +598,12 @@ td.cell.array-t { --arr-t: inset 0 1px 0 var(--array-edge); }
 td.cell.array-l { --arr-l: inset 1px 0 0 var(--array-edge); }
 td.cell.array-b { --arr-b: inset 0 -1px 0 var(--array-edge); }
 td.cell.array-r { --arr-r: inset -1px 0 0 var(--array-edge); }
+/* open to typing in a protected grid (P193, while the toolbar's lock is
+   closed): one quiet frame round each region of open cells */
+td.cell.open-t { --open-t: inset 0 2px 0 var(--open-edge); }
+td.cell.open-l { --open-l: inset 2px 0 0 var(--open-edge); }
+td.cell.open-b { --open-b: inset 0 -2px 0 var(--open-edge); }
+td.cell.open-r { --open-r: inset -2px 0 0 var(--open-edge); }
 td.cell.precedent:not(.sel) { outline: 1px dashed var(--accent); outline-offset: -3px; }
 /* Corner marks, as background layers (a background image, not a positioned
    ::before: a positioned cell would paint over text spilling into it). Each
@@ -654,6 +721,11 @@ button.ref-mode { font-size: 11px; padding: 1px 4px; color: var(--muted); font-f
   background: var(--panel); color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .status-bar .message { margin-left: auto; font-size: 12px; }
 .status-bar .calculating { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Enter / Edit while the formula bar edits a cell (P32) */
+/* at the right end, after any message: nothing else moves as it comes and goes */
+.status-bar .entry-mode { margin-left: auto; font-size: 12px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); }
+.status-bar .message + .entry-mode { margin-left: 0; }
+.status-bar .entry-mode.enter { color: var(--text); border-color: var(--accent); }
 .status-bar .busy { color: var(--text); }
 .status-bar .preparing { color: var(--text); font-variant-numeric: tabular-nums; }
 button:disabled { color: var(--muted); background: var(--bg); cursor: default; border-color: var(--line); }
@@ -682,6 +754,74 @@ table.grid.inline th { position: static; font-size: 10px; padding: 0 3px; }
 table.grid.inline th.col-head { height: 15px; }
 table.grid.inline th.row-head { padding-right: 3px; }
 table.grid.inline td.cell { height: 20px; padding: 1px 4px; }
+/* a grid drawn in an inline grid's cell has the same sides as one in the sheet's, so the room
+   its column makes for it (recdep.widths/window-allowance, P128) is the same */
+table.grid.inline td.cell.has-grid { padding-left: 2px; padding-right: 2px; }
+/* On a mesh (P129) a grid drawn whole in a cell sits on the cell's left edge with no frame,
+   its columns whole tracks: its lines fall on the sheet's. Its window is as wide as its
+   columns (fit-window!); the last column's right border lies on the cell's own, which the
+   cell clips. */
+.app.meshed table.grid td.cell.whole-grid,
+.app.meshed table.grid td.cell.whole-instance { padding-left: 0; padding-right: 0; }
+.app.meshed table.grid td.cell.whole-grid > .cell-out > .grid-window.fill { border: 0; border-radius: 0; overflow: visible; max-width: none; }
+/* (clipped, not hidden: a hidden overflow can still be scrolled, and the browser's scrolling
+   something inside into view moved the grid a pixel off the lattice) */
+.app.meshed table.grid td.cell.whole-grid > .cell-out { overflow: clip; }
+.app.meshed table.grid td.cell.whole-instance table.instance-grid { align-self: flex-start; border: 0; }
+/* a grid drawn whole over a span (a view placed from the Shelf): the same, its box taking
+   no padding, so its lines fall on the mesh's too */
+.app.meshed table.grid td.cell.has-grid > .span-box:has(> .cell-out > .grid-window.fill) { padding: 0; }
+.app.meshed table.grid td.cell.has-grid > .span-box > .cell-out > .grid-window.fill { border: 0; border-radius: 0; max-width: none; }
+/* Rows on the mesh (P131): every row whole row tracks, set by recdep.ui.rowsnap from what's
+   drawn in it, so cells and headings take no height of their own; a grid or an instance drawn
+   whole sits at its cell's top with nothing above or below, and lies over the cell's bottom
+   border (its last row's border on it), so the row is its height exactly; an instance's line
+   over it is one track, standing for a grid's headings */
+/* (the main area's grids only: the Data explorer's tables keep their fixed heights) */
+.app.meshed .grid-scroll table.grid td.cell, .app.meshed .grid-scroll table.grid th.col-head { height: auto; }
+.app.meshed table.grid td.cell.whole-grid,
+.app.meshed table.grid td.cell.whole-instance { vertical-align: top; padding-top: 0; padding-bottom: 0; }
+.app.meshed table.grid td.cell.whole-grid > .cell-out,
+.app.meshed table.grid td.cell.whole-instance > .room { margin-bottom: -1px; }
+.app.meshed table.grid td.cell.whole-instance .instance { gap: 0; }
+.app.meshed table.grid td.cell.whole-instance .instance-head { height: var(--row-step); box-sizing: border-box;
+  display: flex; align-items: center; overflow: hidden; }
+/* the toolbar's mesh group: the Mesh button, and when it's on, its track width and lines,
+   framed together so they read as the mesh's */
+.mesh-group { display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 4px; }
+.mesh-group.on { border-color: var(--line); padding-right: 8px; }
+.mesh-group button.mesh-toggle.on { background: var(--sel-bg); border-color: var(--accent); }
+.mesh-group label.mesh-step input[type=number] { width: 3.5em; }
+.mesh-group label.mesh-lines { gap: 3px; cursor: pointer; }
+.mesh-group label.mesh-lines input[type=checkbox] { width: auto; margin: 0; padding: 0; }
+/* the mesh's lines over the sheet (P129), when asked for: a line on every track's right edge,
+   from the first column's left (past the row headings), over the cells and the grids drawn
+   in them; clicks pass through */
+.app.mesh-lines .grid-scroll > table.grid:not(.inline) { position: relative; }
+.app.mesh-lines .grid-scroll > table.grid:not(.inline)::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: var(--mesh-origin); right: 0;
+  pointer-events: none; z-index: 3;
+  background-image: repeating-linear-gradient(to right, transparent 0 calc(var(--mesh-step) - 1px),
+    color-mix(in srgb, var(--accent) 35%, transparent) calc(var(--mesh-step) - 1px) var(--mesh-step)); }
+/* the rows' lines (P131), from the body's top, under the frozen column headings (z 1, later in
+   the page), which they'd otherwise cross when the sheet scrolls down */
+.app.mesh-lines .grid-scroll > table.grid:not(.inline)::before {
+  content: ""; position: absolute; top: var(--mesh-top, 0px); bottom: 0; left: var(--mesh-origin); right: 0;
+  pointer-events: none; z-index: 1;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--row-step) - 1px),
+    color-mix(in srgb, var(--accent) 35%, transparent) calc(var(--row-step) - 1px) var(--row-step)); }
+/* the sheet's frozen row headings (and corner) stay above the lines when it scrolls sideways;
+   its column headings don't, so an edge being dragged there has its lines */
+.app.mesh-lines .grid-scroll > table.grid:not(.inline) > tbody > tr > th.row-head { z-index: 5; }
+.app.mesh-lines .grid-scroll > table.grid:not(.inline) > thead th.corner { z-index: 6; }
+/* with the lines showing, a column's edge is one of many lines: alternate column headings
+   shade, subtly, so where each column begins and ends still shows */
+.app.mesh-lines table.grid th.col-head.alt:not(.hl),
+.app.mesh-lines table.grid th.row-head.alt:not(.hl) { background: color-mix(in srgb, var(--head), var(--text) 7%); }
+/* whole columns selected, with the lines showing: their tracks tinted down the whole sheet,
+   faintly, over the cells and grids in them (under the frozen row headings) */
+.mesh-band { position: absolute; pointer-events: none; z-index: 2;
+  background: color-mix(in srgb, var(--accent) 7%, transparent); }
 
 table.grid.inline svg.chart { height: 24px; }
 .grid-chip { display: inline-block; padding: 0 6px; border: 1px solid var(--line); border-radius: 10px;
@@ -724,6 +864,9 @@ table.inputs { border-collapse: collapse; width: 100%; }
 a.make-input { margin-left: 8px; font-size: 11px; color: var(--accent); }
 .lint-warnings a { margin-left: 8px; }
 table.inputs td { padding: 1px 6px 1px 0; vertical-align: middle; }
+/* an input of a placed template still at the template's own value (P35) */
+.to-set-mark { color: var(--lint); }
+table.inputs tr.to-set input.text-field { border-color: var(--lint); }
 /* the input's name and kind never break mid-word; the field takes the rest */
 table.inputs td:not(:last-child) { white-space: nowrap; }
 table.inputs td:last-child { width: 100%; }
@@ -766,6 +909,7 @@ table.grid.inline th { position: relative; }
 .row-resize { position: absolute; left: 0; bottom: 0; width: 100%; height: 5px; cursor: row-resize; z-index: 4; }
 .col-resize:hover, .row-resize:hover { background: var(--accent); opacity: .5; }
 .status-bar .message.info { color: var(--text); background: var(--sel-bg); }
+.status-bar .message + .message { margin-left: 4px; }
 
 /* ---- Virtualised drawing ---------------------------------------------------- */
 tr.spacer td, td.spacer, th.spacer { padding: 0; border: none; background: none; }
@@ -871,8 +1015,8 @@ mark { background: #ffe066; color: #22211f; border-radius: 2px; }
 .trace svg { position: absolute; left: 0; top: 0; overflow: visible; }
 .trace .pre { --trace: #2f6fdb; }
 .trace .dep { --trace: #d9480f; }
-.trace line { stroke: var(--trace); stroke-width: 1.6; }
-.trace line.cross { stroke-dasharray: 5 3; }
+.trace line, .trace path:not(marker path) { stroke: var(--trace); stroke-width: 1.6; fill: none; }
+.trace line.cross, .trace path.cross { stroke-dasharray: 5 3; }
 .trace circle { fill: var(--trace); }
 .trace marker path.pre { fill: #2f6fdb; }
 .trace marker path.dep { fill: #d9480f; }
@@ -896,6 +1040,15 @@ table.instance-grid td.overridden { box-shadow: inset 3px 0 0 var(--accent); }
                   font: inherit; color: inherit; padding: 0 2px; }
 .instance-input:hover, .instance-input:focus { border-color: var(--line); background: var(--panel); }
 td.overridden .instance-input { font-weight: 600; color: var(--accent); }
+/* an instance drawn clean, (instance-view :clean): only its cells, their formats and the lines
+   between them; no frame, no background, no bars marking its own values (the cell holding it is
+   framed by the outer grid's own lines) */
+.instance.clean > table.instance-grid { border-color: transparent; background: transparent; }
+.instance.clean > table.instance-grid > tbody > tr > td.instance-cell:first-child { border-left-color: transparent; }
+.instance.clean > table.instance-grid > tbody > tr > td.instance-cell:last-child { border-right-color: transparent; }
+.instance.clean > table.instance-grid > tbody > tr:first-child > td.instance-cell { border-top-color: transparent; }
+.instance.clean > table.instance-grid > tbody > tr:last-child > td.instance-cell { border-bottom-color: transparent; }
+.instance.clean td.overridden { box-shadow: none; }
 
 /* ---- Profile tab (DESIGN.md §23) ------------------------------------------ */
 .profile h4 { margin: 12px 0 4px; font-size: 12.5px; display: flex; align-items: center; gap: 8px; }
@@ -1051,11 +1204,14 @@ a.live.paused { color: var(--accent); }
 .scenarios-tab ul.scenario-broken { color: var(--warn); font-size: 12px; margin: 0 0 8px; padding-left: 18px; }
 
 /* an error next to the button or field that caused it (panels/message-pop) */
-.message-pop { position: fixed; z-index: 30; max-width: 360px; padding: 6px 10px; font-size: 12px;
+.message-pop { position: fixed; z-index: 32; max-width: 360px; padding: 6px 10px; font-size: 12.5px;
   line-height: 1.4; color: var(--err); background: var(--panel); border: 1px solid var(--err);
-  border-left-width: 4px; border-radius: 4px; box-shadow: 0 6px 24px rgba(0, 0, 0, .22);
+  border-left-width: 5px; border-radius: 5px; box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
   cursor: pointer; animation: message-pop .35s ease-out; }
 .message-pop::before { content: "⚠ "; }
+/* a note on what a control just did (P220), not an error */
+.message-pop.note { color: var(--text); border-color: var(--muted); animation: none; }
+.message-pop.note::before { content: "ⓘ "; }
 @keyframes message-pop {
   0% { opacity: 0; transform: translateY(-4px); }
   40% { opacity: 1; transform: translateX(-4px); }
@@ -1063,6 +1219,27 @@ a.live.paused { color: var(--accent); }
   80% { transform: translateX(-2px); }
   100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .message-pop { animation: none; } }
+/* errors an edit has just made (P197, ui/alerts): the status bar's count
+   flashes, and a toast beside the cell edited names the first */
+.status-bar .error-flash { display: contents; }
+.status-bar .error-flash.on .flag.error-count { animation: error-flash .5s ease-in-out 5; }
+@keyframes error-flash {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 0 3px var(--err); background: var(--err); color: var(--panel); } }
+.error-toast { position: fixed; z-index: 31; width: 420px; max-width: calc(100vw - 16px); padding: 8px 10px;
+  font-size: 12.5px; line-height: 1.4; color: var(--text); background: var(--panel);
+  border: 1px solid var(--err); border-left-width: 5px; border-radius: 5px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .28); animation: message-pop .35s ease-out; }
+.error-toast.corner { left: 8px; bottom: 34px; }
+.error-toast .toast-head { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.error-toast .toast-title { color: var(--err); font-weight: 600; }
+.error-toast .toast-head a { font-family: var(--mono, monospace); font-weight: 600; }
+.error-toast .toast-buttons { margin-left: auto; display: flex; gap: 2px; }
+.error-toast .toast-buttons button { padding: 0 5px; border-color: transparent; background: transparent; cursor: pointer; }
+.error-toast .toast-buttons button:hover { border-color: var(--line); }
+.error-toast .toast-msg { margin-top: 3px; }
+.error-toast .toast-more { margin-top: 3px; font-size: 11.5px; }
+@media (prefers-reduced-motion: reduce) { .error-toast { animation: none; } }
 /* The gallery's refine mode: rows of variations on the chosen renderer */
 .render-gallery .g-refine-head { display: flex; gap: 10px; align-items: baseline; font-size: 12px; margin-bottom: 6px; }
 .render-gallery .g-back { font-size: 12px; padding: 1px 8px; }
@@ -1090,6 +1267,17 @@ a.live.paused { color: var(--accent); }
 .render-gallery .g-chip:hover { border-color: var(--accent); }
 .render-gallery .g-chip.current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .render-gallery input.g-control[type="number"] { width: 170px; }
+.render-gallery .g-group { border-top: 1px solid var(--line); }
+.g-more { margin-top: 6px; font-size: 12px; text-align: left; white-space: normal; }
+.render-gallery .g-group-head { display: block; width: 100%; text-align: left; font: inherit; font-size: 12px; font-weight: 600;
+  padding: 6px 0; background: none; border: 0; color: inherit; cursor: pointer; }
+.render-gallery .g-group-head:hover { color: var(--accent); }
+.render-gallery .g-group.open { padding-bottom: 4px; }
+.render-gallery .g-group .g-row { padding-left: 12px; }
+.render-gallery .r-series label { display: inline-flex; gap: 3px; align-items: center; white-space: nowrap; }
+.render-gallery table.r-series-table { border-collapse: collapse; font-size: 12px; }
+.render-gallery table.r-series-table th { font-weight: 500; color: var(--muted); text-align: left; padding: 0 8px 2px 0; }
+.render-gallery table.r-series-table td { padding: 1px 8px 1px 0; }
 /* Placing a chart dropped on a selection: the block it will span */
 td.cell.place { --tint: inset 0 0 0 9999px var(--range-tint); outline: 1px dashed var(--accent); outline-offset: -1px; }
 td.cell.place.place-bad { --tint: inset 0 0 0 9999px var(--err-bg); outline-color: var(--err); }
@@ -1099,6 +1287,8 @@ td.cell.span-drag.span-drag-bad { --tint: inset 0 0 0 9999px var(--err-bg); outl
 .place-banner { position: absolute; top: 100%; left: 10px; z-index: 40; font-size: 12px; padding: 4px 10px;
   background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; display: flex; gap: 6px; align-items: center; }
 .place-banner button { font-size: 11px; padding: 0 6px; }
+/* a placing refused (P124): said in the banner, where one's looking */
+.place-banner .place-refused { color: var(--bad); font-weight: 600; }
 
 /* The number format field and its gallery (§10): under the field, on the
    left; the renderer gallery's tiles and rows */
@@ -1124,11 +1314,28 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
   background: var(--bg); color: var(--text); }
 .inspector .comment-field textarea:placeholder-shown { border-left-color: var(--line); }
 .inspector .comment-field button { font-size: 11px; padding: 0 6px; }
-.inspector .display-row button { margin-left: 4px; font-size: 11px; padding: 0 6px; }
+/* what shows in a grid's cell: one of three, the current one marked */
+.inspector .display-choice { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.inspector .display-choice button { font-size: 11px; padding: 0 6px; }
+.inspector .display-choice button.on { background: var(--sel-bg); border-color: var(--accent); font-weight: 600; cursor: default; }
+.inspector .display-row > .muted { margin-top: 2px; }
 /* The Shelf tab: the selection as a new cell (views, charts, templates) */
 .shelf-tab { display: flex; flex-direction: column; gap: 6px; }
 .shelf-tab .shelf-search { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 4px 8px; }
 .shelf-tab .shelf-for { font-size: 12px; margin: 0; }
+/* placed inline, a template's working cells come too (P124) */
+/* a library's copies of standard code (P126) */
+.library .lib-copies { font-size: 12px; margin: 6px 0; padding: 3px 0 3px 8px; border-left: 3px solid var(--line); }
+.library .lib-copies.old { border-left-color: var(--warn); }
+.shelf-tab .shelf-refused { font-size: 12px; margin: 4px 0; padding: 2px 0 2px 8px; border-left: 3px solid var(--bad); }
+/* P146: the repeat's references, each moving along the line or staying */
+.shelf-repeat-refs { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 2px 0 4px; font-size: 12px; }
+.shelf-repeat-ref select { font-size: 11.5px; }
+.shelf-tab .shelf-warn { font-size: 12px; margin: 4px 0; padding: 2px 0 2px 8px; border-left: 3px solid var(--warn); }
+/* a template's inputs, wired on its card */
+.shelf-tab .shelf-wiring { display: flex; flex-direction: column; gap: 3px; margin: 4px 0; }
+.shelf-tab .shelf-wire { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.shelf-tab .shelf-wire .text-field { flex: 1; min-width: 0; font: inherit; font-family: var(--mono); font-size: 12px; padding: 2px 6px; }
 .shelf-tab .g-section h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 600; color: var(--muted);
   text-transform: uppercase; letter-spacing: .04em; }
 .shelf-tab .g-count { text-transform: none; font-weight: 400; }
@@ -1149,7 +1356,10 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
 .shelf-tab .g-wiring { display: flex; flex-wrap: wrap; gap: 2px 8px; color: var(--muted); font-size: 10.5px; }
 .shelf-tab .g-wiring .wired { color: var(--accent); }
 .shelf-tab .shelf-put { align-self: flex-start; margin: 2px 0 4px; }
-.shelf-tab .shelf-templates { display: flex; flex-direction: column; gap: 8px; }
+.shelf-tab .shelf-templates { display: flex; flex-direction: column; gap: 0; }
+/* a muted line between items, the title of each at its top */
+.shelf-tab .shelf-template { padding: 8px 0; }
+.shelf-tab .shelf-template + .shelf-template { border-top: 1px solid var(--line); }
 .shelf-tab .shelf-template { display: flex; flex-direction: column; gap: 3px; }
 .shelf-tab .shelf-template-bar { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 .shelf-tab .shelf-template-info { flex: 1; min-width: 0; }
@@ -1187,6 +1397,10 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
   border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
 .lib-file-pop p { margin: 0 0 2px; font-size: 11.5px; }
 .lib-file-pop button, .lib-file-pop .button { text-align: left; }
+/* Examples ▾ (§46): an example per line, its title over what it is */
+.examples-pop { width: 340px; }
+.examples-pop button.example { display: flex; flex-direction: column; gap: 2px; white-space: normal; }
+.examples-pop button.example .muted { font-size: 11.5px; }
 /* a dialog over everything: opening a library file */
 .modal-back { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.25); display: flex;
   align-items: flex-start; justify-content: center; padding-top: 12vh; }
@@ -1197,6 +1411,16 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
 .modal .modal-choice { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
 .modal .modal-buttons { display: flex; gap: 6px; justify-content: flex-end; margin-top: 10px; }
 .modal button.primary { border-color: var(--accent); color: var(--accent); }
+/* the Solver dialog (§39) */
+.modal.solver { width: min(560px, calc(100vw - 32px)); max-width: none; }
+.modal.solver .solver-row { display: flex; flex-direction: column; gap: 3px; margin: 8px 0 0; }
+.modal.solver .solver-inputs, .modal.solver .solver-constraints { width: 100%; box-sizing: border-box; font-family: var(--mono, monospace); }
+.modal.solver .solver-error { color: var(--err); margin: 8px 0 0; }
+.modal.solver .solver-result { margin-top: 10px; max-height: 40vh; overflow: auto; }
+.modal.solver .solver-result p { margin: 0 0 6px; }
+.modal.solver table { border-collapse: collapse; width: 100%; }
+.modal.solver th, .modal.solver td { text-align: left; padding: 2px 8px 2px 0; border-bottom: 1px solid var(--line); }
+.modal.solver tr.miss td { color: var(--err); }
 /* the unit popover (§25), under the unit field */
 .unit-field { position: relative; }
 .unit-field .unit-pick { padding: 0 5px; margin-left: 1px; }
@@ -1393,6 +1617,22 @@ button.recipe-chip { cursor: pointer; }
 .recipe-chip .recipe-edit, .recipe-chip .recipe-remove { color: var(--muted); font-size: 11px; }
 .recipe-chip .recipe-edit:hover, .recipe-chip .recipe-remove:hover { color: var(--text); }
 .recipe-arrow { color: var(--muted); font-size: 10px; }
+/* a steps formula's steps in the Inspector (the table verbs, recdep.ui.stepsgadget) */
+.steps-gadget .recipe-bar { margin: 0 0 4px; }
+.steps-gadget .steps-add { font-size: 11.5px; }
+.steps-gadget input.steps-expr { width: 100%; font-family: var(--mono); }
+.steps-gadget .recipe-chip button.link { border: none; background: none; padding: 0; min-width: 0; box-shadow: none; }
+/* a chip selected: the cell shows the table after that step, in the sheet (recdep.ui.stepsview) */
+td.cell.steps-shown-cell { position: relative; overflow: visible; z-index: 30; }
+/* drawn over the cell and its neighbours while shown, as big as the table needs (a long one scrolls) */
+.steps-shown { position: absolute; top: 0; left: 0; min-width: 100%; width: max-content; max-width: 70vw;
+  max-height: 22em; overflow: auto; font-size: 12px; background: var(--panel); text-align: left;
+  border: 2px dashed var(--accent); box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+.steps-shown-head { position: sticky; top: 0; z-index: 1; padding: 1px 6px; background: var(--sel-bg); color: var(--text);
+  border-bottom: 1px solid var(--accent); white-space: nowrap; }
+.steps-shown table { border-collapse: collapse; }
+.steps-shown th, .steps-shown td { border: 1px solid var(--line); padding: 1px 6px; text-align: left; white-space: nowrap; }
+.steps-shown td.steps-num { text-align: right; font-variant-numeric: tabular-nums; }
 .recipe-add { display: inline-flex; gap: 4px; margin-left: 6px; }
 .recipe-add button.fmt { font-size: 11.5px; padding: 1px 8px; }
 .data-tab .recipe-sql-toggle { margin-left: auto; font-size: 12px; }
@@ -1575,3 +1815,172 @@ pre.repl-error { color: var(--err); }
 /* drawn by the sheet's chart view (Vega-Lite): its box sizes it */
 .dg-corr-chart .r-vega { height: 260px; }
 
+
+/* a repeat sketched on its Shelf tile (P146): the line, not its values */
+.g-repeat { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 4px 2px;
+  font-family: var(--mono); font-size: 11px; }
+.g-repeat.across { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.g-repeat-item { display: inline-flex; align-items: center; gap: 4px; }
+.g-repeat-cell { border: 1px solid var(--line); border-radius: 2px; padding: 0 5px; min-width: 38px; text-align: center; }
+.g-repeat-cell.formula { border-color: var(--accent); }
+.g-repeat-cell.result { border-style: dashed; color: var(--muted); }
+.g-repeat-ref { color: var(--accent); }
+.g-repeat-arrow, .g-repeat-gap { color: var(--muted); }
+.g-repeat-gap { padding-left: 2px; }
+.g-repeat-n { color: var(--muted); font-family: var(--sans, inherit); margin-top: 2px; }
+.g-repeat.across .g-repeat-n { margin: 0 0 0 6px; }
+
+/* The Shelf in two parts (P172): for this selection, and the shelf */
+.shelf-tab .shelf-part { margin: 12px 0 0; padding-top: 6px; border-top: 1px solid var(--line); font-size: 12.5px; font-weight: 600; }
+.shelf-tab .shelf-part:first-of-type { border-top: none; margin-top: 4px; padding-top: 0; }
+.shelf-tab .shelf-rows { display: flex; flex-direction: column; gap: 2px; margin: 4px 0; }
+.shelf-tab .shelf-row { display: block; text-align: left; font-size: 12px; padding: 3px 6px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; background: none; cursor: pointer; }
+.shelf-tab .shelf-row:hover { border-color: var(--accent); }
+.shelf-tab .shelf-row.picked { border-color: var(--accent); }
+.shelf-tab .shelf-template.picked { border: 1px solid var(--accent); border-radius: 4px; padding: 6px 8px; margin: 4px 0; }
+.shelf-tab .shelf-misses { font-size: 12px; margin: 2px 0 4px; }
+.shelf-tab .shelf-misses summary { cursor: pointer; }
+.shelf-tab .shelf-misses ul { margin: 2px 0 0; padding-left: 18px; }
+/* a template's face, at its own values, over its line on the shelf (P177) */
+.shelf-tab .shelf-row-wrap { position: relative; }
+.shelf-tab .shelf-face-pop { position: absolute; left: 12px; top: 100%; z-index: 30; padding: 4px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); pointer-events: none; }
+/* picking from what a cell's validation allows (P219): the ▾ on the active
+   cell, and its popover */
+.pick-arrow { float: right; margin: -1px -3px 0 4px; padding: 0 3px; border: 1px solid var(--line);
+  border-radius: 3px; background: var(--panel); color: var(--muted); font-size: 10px; line-height: 16px;
+  cursor: pointer; }
+.pick-arrow:hover { color: var(--text); border-color: var(--muted); }
+.pick-backdrop { position: fixed; inset: 0; z-index: 20; }
+.pick-pop { position: fixed; z-index: 21; width: 220px; max-height: 50vh; padding: 6px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.pick-head { font-size: 11px; color: var(--muted); }
+.pick-filter { width: 100%; box-sizing: border-box; }
+.pick-list { overflow: auto; display: flex; flex-direction: column; min-height: 0; }
+.pick-option { text-align: left; border: 0; background: none; padding: 2px 4px; cursor: pointer; color: inherit; font: inherit; }
+.pick-option:hover, .pick-tick:hover { background: var(--sel-bg); }
+.pick-option.current { font-weight: 600; }
+.pick-tick { display: flex; gap: 6px; align-items: center; padding: 1px 4px; cursor: pointer; }
+.pick-none, .pick-odd { color: var(--muted); font-size: 11px; }
+.pick-foot { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
+.pick-done { margin-left: auto; }
+/* an option with its row's description beside it (P231): a lookup of IDs */
+.pick-pop.described { width: 360px; }
+.pick-option:has(.pick-key) { display: flex; gap: 8px; }
+.pick-key { flex: none; min-width: 2.5em; font-variant-numeric: tabular-nums; }
+.pick-desc { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a table column's kind on its heading (P194) */
+td.cell.table-head[data-kind]::after { content: attr(data-kind); float: right; margin-left: 4px;
+  font-size: 9.5px; font-weight: 400; color: var(--muted); font-family: var(--mono); }
+
+/* Frozen rows and columns (P191): kept in view while the rest scrolls. A frozen
+   row sticks at its own offset (--frz-top, measured); a frozen column at the
+   headings plus the frozen columns before it (--frz-l-N). Above them the
+   headings, so they stack: headings, then frozen rows, then frozen columns. */
+table.grid tr.frz-r > td.cell { position: sticky; top: var(--frz-top); z-index: 3; }
+table.grid tr.frz-r > th.row-head { position: sticky; top: var(--frz-top); z-index: 6; }
+table.grid:not(.inline) > thead th.col-head, .grid-window.windowed > table.grid.inline > thead th.col-head { z-index: 7; }
+table.grid:not(.inline) > thead th.corner, .grid-window.windowed > table.grid.inline > thead th.corner { z-index: 9; }
+table.grid tr.frz-r > td.cell { box-shadow: inset 0 -1px 0 var(--line); }
+table.grid.frz-c1 > tbody > tr > td.cell:nth-of-type(-n+1) { position: sticky; z-index: 2; }
+table.grid.frz-c1 > tbody > tr.frz-r > td.cell:nth-of-type(-n+1) { z-index: 4; }
+table.grid.frz-c1 > thead th.col-head:nth-of-type(-n+2) { position: sticky; z-index: 8; }
+table.grid.frz-c2 > tbody > tr > td.cell:nth-of-type(-n+2) { position: sticky; z-index: 2; }
+table.grid.frz-c2 > tbody > tr.frz-r > td.cell:nth-of-type(-n+2) { z-index: 4; }
+table.grid.frz-c2 > thead th.col-head:nth-of-type(-n+3) { position: sticky; z-index: 8; }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(-n+3) { position: sticky; z-index: 2; }
+table.grid.frz-c3 > tbody > tr.frz-r > td.cell:nth-of-type(-n+3) { z-index: 4; }
+table.grid.frz-c3 > thead th.col-head:nth-of-type(-n+4) { position: sticky; z-index: 8; }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(-n+4) { position: sticky; z-index: 2; }
+table.grid.frz-c4 > tbody > tr.frz-r > td.cell:nth-of-type(-n+4) { z-index: 4; }
+table.grid.frz-c4 > thead th.col-head:nth-of-type(-n+5) { position: sticky; z-index: 8; }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(-n+5) { position: sticky; z-index: 2; }
+table.grid.frz-c5 > tbody > tr.frz-r > td.cell:nth-of-type(-n+5) { z-index: 4; }
+table.grid.frz-c5 > thead th.col-head:nth-of-type(-n+6) { position: sticky; z-index: 8; }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(-n+6) { position: sticky; z-index: 2; }
+table.grid.frz-c6 > tbody > tr.frz-r > td.cell:nth-of-type(-n+6) { z-index: 4; }
+table.grid.frz-c6 > thead th.col-head:nth-of-type(-n+7) { position: sticky; z-index: 8; }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(-n+7) { position: sticky; z-index: 2; }
+table.grid.frz-c7 > tbody > tr.frz-r > td.cell:nth-of-type(-n+7) { z-index: 4; }
+table.grid.frz-c7 > thead th.col-head:nth-of-type(-n+8) { position: sticky; z-index: 8; }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(-n+8) { position: sticky; z-index: 2; }
+table.grid.frz-c8 > tbody > tr.frz-r > td.cell:nth-of-type(-n+8) { z-index: 4; }
+table.grid.frz-c8 > thead th.col-head:nth-of-type(-n+9) { position: sticky; z-index: 8; }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(-n+9) { position: sticky; z-index: 2; }
+table.grid.frz-c9 > tbody > tr.frz-r > td.cell:nth-of-type(-n+9) { z-index: 4; }
+table.grid.frz-c9 > thead th.col-head:nth-of-type(-n+10) { position: sticky; z-index: 8; }
+table.grid.frz-c1 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c1 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c2 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c2 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c2 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c2 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c3 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c3 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c3 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c4 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c4 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c4 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c4 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c5 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c5 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c5 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c5 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c5 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c6 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c6 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c6 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c6 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c6 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c6 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c7 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c7 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c7 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c7 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c7 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c7 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c7 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c8 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c8 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c8 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c8 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c8 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c8 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c8 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(8), table.grid.frz-c8 > thead th.col-head:nth-of-type(9) { left: var(--frz-l-7); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c9 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c9 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c9 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c9 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c9 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c9 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c9 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(8), table.grid.frz-c9 > thead th.col-head:nth-of-type(9) { left: var(--frz-l-7); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(9), table.grid.frz-c9 > thead th.col-head:nth-of-type(10) { left: var(--frz-l-8); }
+/* the toolbar's lock (P193): protection off is worth seeing */
+.toolbar button.lock.off { background: var(--warn-bg, #fff1c2); }
+/* a flat list of values shown in a cell (P196): on one line, each in the cell's format */
+td.cell .r-list-inline, td.cell .r-list-inline .num { display: inline; }
+td.cell .r-list-inline { display: block; text-align: right; }
+td.cell .r-list-inline.text { text-align: left; }
+/* a menu item folding a few choices into a submenu, beside it (fixed: the
+   menu itself scrolls, which would clip it) */
+.menu.submenu { z-index: 22; min-width: 180px; }
+.menu-item.has-sub.open { background: var(--sel-bg); }
+/* a view's cell that writes back to its table (P198): typing here changes
+   the table's cell; marked so it isn't taken for a formula's result */
+td.cell.writes-through { box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* the place right of a table's last column, where typing adds one (P207) */
+th.col-head.next-col { color: var(--muted, #888); font-weight: normal; opacity: .6; }
+td.cell.next-col { background: transparent; border-left: 1px dashed var(--line); }
+/* + Step… of a steps formula just placed from the Shelf (P211) */
+select.steps-add.ready { outline: 2px solid var(--accent); outline-offset: 1px; animation: steps-ready 0.8s ease-in-out 3; }
+@keyframes steps-ready { 50% { outline-color: transparent; } }
+@media (prefers-reduced-motion: reduce) { select.steps-add.ready { animation: none; } }
+/* the Shelf's Start steps line (P211) */
+.shelf-steps-start { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 10px; padding: 6px 8px;
+  border: 1px solid var(--line); border-radius: 5px; font-size: 12.5px; }
+.shelf-steps-start select { max-width: 220px; }
+/* a long error kept in the status bar: one line, the whole in its title (P208) */
+.status-bar .message { max-width: 55vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

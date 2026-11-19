@@ -1,0 +1,4 @@
+{:examples
+ [{:file "project-plan.recdep.edn"
+   :title "Project plan"
+   :about "Resources and tasks in; a schedule out that keeps to the links and to what each resource can do; a Gantt chart, a baseline, tracking with earned value, weekly loading, and a second project planned into what the first leaves."}]}
