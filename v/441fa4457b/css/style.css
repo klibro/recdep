@@ -1,0 +1,1986 @@
+/* Light and dark (ui/theme): the system's choice, unless the toolbar's
+   picker sets data-theme on <html>. color-scheme makes the browser's own
+   parts (scrollbars, drop-downs, checkboxes, date pickers) follow. */
+:root { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+:root {
+  --bg: #fafaf8; --panel: #ffffff; --line: #dedbd4; --head: #f0eee9;
+  --text: #22211f; --muted: #8a867d; --accent: #2f6fdb; --sel-bg: #eaf1fd;
+  --err: #c0392b; --err-bg: #fdecea; --pos: #4a7fd6; --neg: #d6694a;
+  --array-edge: #7fa6e8;
+  /* the frame round cells open to typing in a protected grid (P193): a
+     quiet sage, a hue nothing else on a cell uses */
+  --open-edge: #8aa58c;
+  /* What's flagged, one hue each, the same wherever it shows: the cell's
+     corner (and edge), its count in the status bar, the Outline and the
+     Formats tab, and the tabs that list them. Errors red, failing
+     validation magenta, failing tests violet, units amber, unsettled
+     cycles teal, formula checks green; comments, which aren't wrong, gold. (--warn, --good and --bad, below,
+     are the renderers'.) */
+  --err-edge: rgba(192, 57, 43, .75);
+  --invalid: #b8237a; --invalid-edge: rgba(184, 35, 122, .75); --invalid-tint: rgba(184, 35, 122, .10);
+  --test-fail: #6f3fd6; --test-fail-tint: rgba(111, 63, 214, .10);
+  --unit: #c76d00; --unit-tint: rgba(199, 109, 0, .12);
+  --unsettled: #0a8696; --unsettled-tint: rgba(10, 134, 150, .11);
+  --lint: #1e8e3e; --lint-tint: rgba(30, 142, 62, .1);
+  --comment: #a57a00; --comment-tint: rgba(196, 146, 0, .12);
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* code: CodeMirror's default highlighting (editor.cljs) */
+  --syn-meta: #404740; --syn-keyword: #708; --syn-atom: #219; --syn-literal: #164;
+  --syn-string: #a11; --syn-regexp: #e40; --syn-definition: #00f; --syn-local: #30a;
+  --syn-type: #085; --syn-class: #167; --syn-special: #256; --syn-property: #00c;
+  --syn-comment: #940; --syn-invalid: #f00;
+  /* references in a formula, and the outlines on their cells (assist) */
+  --ref-0: #2f6fdb; --ref-1: #d6336c; --ref-2: #2b8a3e; --ref-3: #ae3ec9;
+  --ref-4: #e8590c; --ref-5: #1098ad; --ref-6: #a07a12; --ref-7: #5c7cfa;
+  /* brackets in code by depth, and the pair at the cursor (editor.cljs) */
+  --paren-0: #9c5f00; --paren-1: #c2185b; --paren-2: #1565c0;
+  --paren-3: #2e7d32; --paren-4: #7b1fa2; --paren-5: #00838f;
+  --paren-match-bg: rgba(34, 33, 31, .12); --paren-match-edge: rgba(34, 33, 31, .7);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1b1a; --panel: #232322; --line: #3a3936; --head: #2b2a28;
+    --text: #e8e6e1; --muted: #9a968d; --accent: #6fa0ff; --sel-bg: #263449;
+    --err: #ff7b6b; --err-bg: #3a2220; --pos: #6f9bea; --neg: #e8866a;
+    --array-edge: #4d6fa8;
+    --open-edge: #6f8f72;
+    --err-edge: rgba(255, 123, 107, .8);
+    --invalid: #f070c0; --invalid-edge: rgba(240, 112, 192, .8); --invalid-tint: rgba(240, 112, 192, .16);
+    --test-fail: #ad8cff; --test-fail-tint: rgba(173, 140, 255, .16);
+    --unit: #f5a442; --unit-tint: rgba(245, 164, 66, .16);
+    --unsettled: #3cc6d6; --unsettled-tint: rgba(60, 198, 214, .15);
+    --lint: #5cc878; --lint-tint: rgba(92, 200, 120, .14);
+    --comment: #f0c540; --comment-tint: rgba(240, 197, 64, .15);
+    --syn-meta: #a8b0a8; --syn-keyword: #d68cf0; --syn-atom: #7fb2ff; --syn-literal: #6fd39a;
+    --syn-string: #ff8f80; --syn-regexp: #ffa45c; --syn-definition: #8fb0ff; --syn-local: #b39cff;
+    --syn-type: #5fd3b4; --syn-class: #6cc6d6; --syn-special: #7cc4e8; --syn-property: #8fb0ff;
+    --syn-comment: #d9a35c; --syn-invalid: #ff6b6b;
+    --ref-0: #6fa0ff; --ref-1: #f06595; --ref-2: #51cf66; --ref-3: #cc5de8;
+    --ref-4: #ff922b; --ref-5: #3bc9db; --ref-6: #e0b84a; --ref-7: #91a7ff;
+    --paren-0: #ffd54f; --paren-1: #f48fb1; --paren-2: #64b5f6;
+    --paren-3: #81c784; --paren-4: #ce93d8; --paren-5: #4dd0e1;
+    --paren-match-bg: rgba(232, 230, 225, .2); --paren-match-edge: rgba(232, 230, 225, .85);
+  }
+}
+:root[data-theme="dark"] {
+    --bg: #1b1b1a; --panel: #232322; --line: #3a3936; --head: #2b2a28;
+    --text: #e8e6e1; --muted: #9a968d; --accent: #6fa0ff; --sel-bg: #263449;
+    --err: #ff7b6b; --err-bg: #3a2220; --pos: #6f9bea; --neg: #e8866a;
+    --array-edge: #4d6fa8;
+    --open-edge: #6f8f72;
+    --err-edge: rgba(255, 123, 107, .8);
+    --invalid: #f070c0; --invalid-edge: rgba(240, 112, 192, .8); --invalid-tint: rgba(240, 112, 192, .16);
+    --test-fail: #ad8cff; --test-fail-tint: rgba(173, 140, 255, .16);
+    --unit: #f5a442; --unit-tint: rgba(245, 164, 66, .16);
+    --unsettled: #3cc6d6; --unsettled-tint: rgba(60, 198, 214, .15);
+    --lint: #5cc878; --lint-tint: rgba(92, 200, 120, .14);
+    --comment: #f0c540; --comment-tint: rgba(240, 197, 64, .15);
+    --syn-meta: #a8b0a8; --syn-keyword: #d68cf0; --syn-atom: #7fb2ff; --syn-literal: #6fd39a;
+    --syn-string: #ff8f80; --syn-regexp: #ffa45c; --syn-definition: #8fb0ff; --syn-local: #b39cff;
+    --syn-type: #5fd3b4; --syn-class: #6cc6d6; --syn-special: #7cc4e8; --syn-property: #8fb0ff;
+    --syn-comment: #d9a35c; --syn-invalid: #ff6b6b;
+    --ref-0: #6fa0ff; --ref-1: #f06595; --ref-2: #51cf66; --ref-3: #cc5de8;
+    --ref-4: #ff922b; --ref-5: #3bc9db; --ref-6: #e0b84a; --ref-7: #91a7ff;
+    --paren-0: #ffd54f; --paren-1: #f48fb1; --paren-2: #64b5f6;
+    --paren-3: #81c784; --paren-4: #ce93d8; --paren-5: #4dd0e1;
+    --paren-match-bg: rgba(232, 230, 225, .2); --paren-match-edge: rgba(232, 230, 225, .85);
+  }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+#app, .app { height: 100%; }
+.app { display: flex; flex-direction: column; }
+button, label.button { font: inherit; padding: 3px 10px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); border-radius: 4px; cursor: pointer; }
+button:hover, label.button:hover { border-color: var(--accent); }
+code, pre { font-family: var(--mono); font-size: 12px; }
+
+.toolbar { display: flex; gap: 8px; align-items: center; padding: 6px 10px;
+  border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+.brand { font-weight: 700; margin-right: 8px; letter-spacing: .02em; }
+.dim { display: inline-flex; gap: 4px; align-items: center; color: var(--muted); }
+select.theme { font: inherit; padding: 2px 4px; background: var(--panel); color: var(--text);
+  border: 1px solid var(--line); border-radius: 4px; }
+.dim input { width: 56px; font: inherit; padding: 2px 4px; background: var(--bg);
+  color: var(--text); border: 1px solid var(--line); border-radius: 4px; }
+.message { color: var(--err); background: var(--err-bg); padding: 2px 8px; border-radius: 4px;
+  cursor: pointer; }
+
+.formula-bar { display: flex; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--line);
+  background: var(--panel); align-items: flex-start; }
+
+.formula-bar { position: relative; }
+/* The renderer gallery: under the formula bar, on the right, so the grid's
+   selection (drawn live while a tile is hovered) stays in sight */
+.render-gallery { position: absolute; top: 100%; right: 8px; z-index: 40; width: min(560px, 60vw);
+  max-height: 70vh; overflow: auto; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.18); padding: 6px 10px 10px; }
+.render-gallery .g-head { font-size: 12px; position: sticky; top: -6px; background: var(--panel);
+  padding: 4px 0; z-index: 1; }
+.render-gallery .g-held { margin-top: 4px; padding: 2px 0 2px 8px; border-left: 3px solid var(--warn); }
+.render-gallery h4 { margin: 8px 0 4px; font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .04em; }
+.render-gallery .g-tiles { display: flex; flex-wrap: wrap; gap: 6px; }
+.render-gallery .g-tile { display: flex; flex-direction: column; gap: 3px; padding: 4px; text-align: left;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; font: inherit;
+  color: inherit; max-width: 250px; }
+.render-gallery .g-tile:hover { border-color: var(--accent); }
+.render-gallery .g-tile.current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.render-gallery .g-face { border-collapse: collapse; table-layout: fixed; pointer-events: none;
+  background: var(--panel); }
+.render-gallery .g-face td.cell { border: 1px solid var(--line); overflow: hidden; vertical-align: top; }
+.render-gallery .g-clip { max-height: 120px; overflow: hidden; }
+.render-gallery .g-tile.tall .g-clip { max-height: 190px; }
+/* a selection's strip of cells: closer set than the grid's */
+.render-gallery .g-face.strip td.cell { height: 18px; padding: 0 4px; font-size: 11.5px; line-height: 17px; }
+.render-gallery .g-src { font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.formula-bar .fields { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.formula-bar .field { display: flex; gap: 6px; align-items: flex-start; }
+.formula-bar .field label { width: 16px; color: var(--muted); padding-top: 4px; text-align: center; }
+/* ƒ / T: edit the cell as a formula or as text */
+.formula-bar .field button.edit-mode { width: 20px; padding: 2px 0; font-size: 12px; line-height: 1.2;
+  color: var(--muted); border-color: transparent; background: transparent; font-style: italic; }
+.formula-bar .field button.edit-mode.text { color: var(--accent); border-color: var(--accent); font-style: normal; font-weight: 600; }
+.code-editor.text .cm-editor { max-height: 45vh; }
+.code-editor { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--bg); position: relative; }
+/* the formula bar's editors: one line until focused, so clicking a cell
+   with a long formula or text doesn't push the grid down */
+.code-editor.collapsible .cm-editor:not(.cm-focused) { height: 26px; max-height: 26px; }
+.code-editor.collapsible .cm-editor:not(.cm-focused) .cm-scroller { overflow: hidden; }
+.code-editor.collapsible .cm-editor:not(.cm-focused) .cm-content { white-space: pre; }
+.code-editor.collapsible .cm-editor:not(.cm-focused) .cm-line ~ .cm-line { visibility: hidden; }
+.code-editor.collapsible.overflowing:not(:focus-within)::after {
+  content: "⋯"; position: absolute; right: 0; bottom: 0; padding: 0 6px; line-height: 24px;
+  color: var(--muted); background: linear-gradient(to right, transparent, var(--bg) 35%); pointer-events: none; }
+.code-editor .cm-editor { max-height: 160px; }
+.code-editor .cm-editor.cm-focused { outline: 2px solid var(--accent); outline-offset: -1px; }
+.code-editor .cm-content { font-family: var(--mono); font-size: 12.5px; caret-color: var(--text); }
+.code-editor .cm-placeholder { color: var(--muted); }
+.code-editor.render .cm-content { font-size: 12px; }
+/* formula help: coloured references, hover tips, completion */
+.code-editor .cm-ref { font-weight: 600; }
+/* brackets coloured by depth; the pair at the cursor boxed (CodeMirror's
+   own tint was a light-theme teal, near invisible in dark) */
+.code-editor .cm-paren { font-weight: 700; }
+.code-editor .cm-paren-0 { color: var(--paren-0); }
+.code-editor .cm-paren-1 { color: var(--paren-1); }
+.code-editor .cm-paren-2 { color: var(--paren-2); }
+.code-editor .cm-paren-3 { color: var(--paren-3); }
+.code-editor .cm-paren-4 { color: var(--paren-4); }
+.code-editor .cm-paren-5 { color: var(--paren-5); }
+.code-editor .cm-paren-bad { color: var(--err); background: var(--err-bg); }
+.code-editor .cm-editor.cm-focused .cm-matchingBracket {
+  background: var(--paren-match-bg); box-shadow: 0 0 0 1px var(--paren-match-edge); border-radius: 2px; }
+.code-editor .cm-editor.cm-focused .cm-nonmatchingBracket {
+  background: var(--err-bg); box-shadow: 0 0 0 1px var(--err); border-radius: 2px; }
+/* stepping through a formula (§30): the part under the mouse, the one that failed */
+.code-editor .cm-step { background: var(--sel-bg); box-shadow: 0 0 0 1px var(--array-edge); border-radius: 2px; }
+.code-editor .cm-step-fail { text-decoration: underline wavy var(--err); text-underline-offset: 3px; }
+.cm-tooltip.cm-tooltip-hover { border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel); color: var(--text); box-shadow: 0 2px 8px rgba(0, 0, 0, .15); }
+.cm-assist-tip { padding: 4px 8px; max-width: 420px; font-size: 12px; }
+.cm-assist-tip .tip-title { font-family: var(--mono); font-weight: 600; }
+.cm-assist-tip .tip-body { font-family: var(--mono); white-space: pre-wrap; word-break: break-word;
+  margin-top: 2px; max-height: 160px; overflow: auto; }
+.cm-tooltip.cm-tooltip-autocomplete { border: 1px solid var(--line); background: var(--panel);
+  color: var(--text); font-family: var(--mono); font-size: 12px; }
+.cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] { background: var(--accent); color: #fff; }
+.cm-tooltip.cm-completionInfo { border: 1px solid var(--line); background: var(--panel); color: var(--text);
+  max-width: 360px; font-size: 12px; white-space: pre-wrap; }
+.cm-completionDetail { color: var(--muted); margin-left: 8px; font-style: normal; }
+
+.main { flex: 1; display: flex; min-height: 0; }
+.grid-scroll { flex: 1; overflow: auto; outline: none; min-width: 0; }
+.grid-scroll:focus .cell.sel { outline-color: var(--accent); }
+/* Fixed layout: column widths come from the <col>s (defaults, or set by
+   dragging header edges), never from content. */
+table.grid { border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+table.grid th { background: var(--head); color: var(--muted); font-weight: 500; font-size: 11px;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  position: sticky; z-index: 1; user-select: none; }
+table.grid th.hl { color: var(--text); background: var(--sel-bg); }
+th.col-head { top: 0; height: 22px; }
+th.row-head { left: 0; text-align: right; padding-right: 6px; }
+th.corner { top: 0; left: 0; z-index: 2; }
+td.cell { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  padding: 2px 5px; height: 24px; vertical-align: middle;
+  background: var(--panel); white-space: nowrap; text-overflow: ellipsis; cursor: cell; }
+td.cell.sel { outline: 2px solid var(--muted); outline-offset: -2px; background: var(--sel-bg); }
+td.cell.has-error { background: var(--err-bg); }
+/* not settled yet (P16): the old value, dimmed until it's calculated */
+td.cell.stale:not(.has-grid) > * { opacity: .4; }
+.stale-value { opacity: .5; }
+td.cell .num { display: block; text-align: right; font-variant-numeric: tabular-nums; }
+td.cell .code, td.cell .kw { font-family: var(--mono); font-size: 11.5px; }
+td.cell .fn { color: var(--muted); font-style: italic; }
+.error { color: var(--err); font-family: var(--mono); font-size: 11.5px; font-weight: 600; }
+.error-text { color: var(--err); }
+/* Excel's error values (#N/A, #DIV/0!) and logicals, centred as Excel shows them */
+td.cell .xl-error, td.cell .xl-bool { display: block; text-align: center; }
+.xl-error { color: var(--err); font-weight: 600; }
+td.cell.aligned .xl-error, td.cell.aligned .xl-bool { text-align: inherit; }
+.muted { color: var(--muted); }
+
+table.value-table { border-collapse: collapse; font-size: 11px; margin: 1px 0; }
+table.value-table td { border: 1px solid var(--line); padding: 0 4px; min-width: 18px; }
+/* correlation-table (P118): headings, then each correlation filling its cell */
+table.value-table.r-correlations th { border: 1px solid var(--line); padding: 0 4px; font-weight: 400; text-align: left; color: var(--muted); }
+table.value-table.r-correlations td { padding: 0; text-align: right; font-variant-numeric: tabular-nums; }
+table.value-table.r-correlations td > .r-fill { margin: 0; padding: 0 4px; min-height: 0; }
+/* (grid-view) on a 2-D value: fills the cell like a grid drawn in it */
+table.value-table.value-grid { width: 100%; font-size: 12px; margin: 0; }
+table.value-table.value-grid th { border: 1px solid var(--line); padding: 1px 4px; text-align: left; }
+table.value-table.value-grid td { padding: 1px 4px; }
+table.value-table.value-grid td:has(> .num) { text-align: right; }
+svg.chart { display: block; width: 100%; height: 40px; }
+/* Vega-Lite charts (ui/chart): as tall as a set row height, else 180px;
+   filling a span */
+.r-vega { position: relative; width: 100%; height: var(--row-h, 180px); white-space: normal; }
+.span-box .r-vega { height: 100%; }
+.r-vega-view { width: 100%; height: 100%; overflow: hidden; }
+.r-vega-view svg { display: block; }
+/* A chart whose kind the data doesn't suit says so, and what would (§4) */
+.r-chart-refusal { display: block; white-space: normal; font-size: 11.5px; padding: 4px; }
+.r-vega-error { position: absolute; inset: 0; padding: 4px; color: var(--err); background: var(--err-bg);
+  font-size: 11.5px; overflow: hidden; }
+svg.chart rect.pos { fill: var(--ink, var(--pos)); }
+svg.chart rect.neg { fill: var(--neg); }
+svg.chart rect.mark.high, svg.chart rect.mark.end { fill: var(--accent); }
+svg.chart rect.mark.low { fill: var(--muted); }
+svg.chart line.dot { stroke: var(--accent); stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+svg.chart line.dot.low, svg.chart line.dot.negative { stroke: var(--neg); }
+svg.chart .line { fill: none; stroke: var(--ink, var(--pos)); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+/* a simulation's runs (§29): histogram, percentile band */
+svg.chart rect.tail { fill: var(--ink, var(--pos)); opacity: .35; }
+svg.chart line.mean { stroke: var(--text); stroke-width: 1; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; }
+.r-band { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.r-band svg { flex: 1 1 auto; min-width: 20px; height: 16px; }
+.r-band .whisker { stroke: var(--ink, var(--pos)); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.r-band .box { fill: var(--ink, var(--pos)); opacity: .45; }
+.r-band .median { stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.r-band .mean { fill: var(--text); }
+.cell-button { padding: 0 10px; font-size: 12px; }
+/* a button that can't do its work now (P220): it says why on hover and when pressed */
+.cell-button.refused { color: var(--muted); border-style: dashed; }
+/* panels (stdlib Panels): several items in one cell, side by side or stacked */
+.r-beside { display: flex; gap: 3px; align-items: center; min-width: 0; }
+.r-beside > span:first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r-stacked { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.r-stacked .r-dropdown { width: 100%; min-width: 0; }
+/* month-view (P215): a day, and a chip per resource */
+.r-month-day { display: flex; flex-direction: column; gap: 2px; min-height: 100%; padding: 1px 2px; font-size: 12px; box-sizing: border-box; }
+.r-month-day .d { font-weight: 600; }
+.r-month-day.off { background: var(--head); color: var(--muted); }
+.r-month-day.over { background: var(--invalid-tint); color: var(--bad); }
+.r-month-chip { border-radius: 3px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 16px; }
+.r-month-chip.on { background: var(--lint-tint); color: var(--lint); }
+.r-month-chip.part { background: var(--unit-tint); color: var(--unit); }
+.r-month-chip.off { color: var(--muted); text-decoration: line-through; }
+.r-month-chip.over { background: var(--invalid-tint); color: var(--bad); font-weight: 600; }
+/* a checkbox keeps its own size: stretched across the cell, some browsers
+   draw it at the far edge, away from where it takes clicks */
+.r-stacked > input[type=checkbox], .r-beside > input[type=checkbox] { align-self: flex-start; flex: none; margin: 3px 2px; }
+.r-beside .cell-button, .r-stacked .cell-button { flex: none; padding: 0 5px; }
+/* in a header row (filter-view, group-view): small controls in normal weight */
+td.cell.table-head .cell-button { padding: 0 3px; font-size: 11px; line-height: 1.2; font-weight: 400; }
+td.cell.table-head .r-dropdown { font-size: 11px; font-weight: 400; }
+.slider { display: flex; gap: 4px; align-items: center; }
+.slider input { width: 64px; min-width: 0; }
+.text-input { width: 100%; font: inherit; border: 1px solid var(--line); background: var(--bg);
+  color: var(--text); border-radius: 3px; padding: 0 3px; }
+
+/* Standard renderers (src/recdep/stdlib/) */
+:root { --heat-lo: #f4f8fc; --heat-hi: #6aa6d8; --good: #2e8b57; --warn: #d9a400; --bad: #c0392b; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --heat-lo: #1f2630; --heat-hi: #2f5f9e; --good: #5cc28a; --warn: #e8c04a; --bad: #ff7b6b; }
+}
+:root[data-theme="dark"] { --heat-lo: #1f2630; --heat-hi: #2f5f9e; --good: #5cc28a; --warn: #e8c04a; --bad: #ff7b6b; }
+.r-code { white-space: pre-wrap; font-size: 11.5px; }
+.r-link { color: var(--accent); }
+/* markdown and note: text wrapped to the cell */
+.r-md { white-space: normal; overflow-wrap: anywhere; line-height: 1.4; padding: 2px 0; }
+.r-md > *, .r-md li > *, .r-md blockquote > * { margin: 0; }
+.r-md > * + *, .r-md li > * + *, .r-md blockquote > * + * { margin-top: .45em; }
+.r-md h1 { font-size: 1.35em; font-weight: 700; }
+.r-md h2 { font-size: 1.18em; font-weight: 650; }
+.r-md h3 { font-size: 1.05em; font-weight: 650; }
+.r-md h4, .r-md h5, .r-md h6 { font-size: 1em; font-weight: 600; }
+.r-md-list { padding-left: 1.4em; }
+.r-md blockquote { border-left: 3px solid var(--line); padding-left: 8px; color: var(--muted); }
+.r-md hr { border: none; border-top: 1px solid var(--line); }
+.r-md-code { font-family: var(--mono); font-size: .9em; background: var(--head); padding: 0 3px; border-radius: 3px; }
+.r-md-pre { font-size: 11.5px; background: var(--head); padding: 4px 6px; border-radius: 4px; white-space: pre-wrap; }
+.r-md-table { border-collapse: collapse; }
+.r-md-table th, .r-md-table td { border: 1px solid var(--line); padding: 1px 6px; text-align: left; }
+.r-md-table th { background: var(--head); font-weight: 600; }
+.r-note { line-height: 1.35; }
+.r-note > * + *, .r-note li > * + * { margin-top: .3em; }
+.r-wikilink { color: var(--accent); text-decoration: none; border-bottom: 1px dotted currentColor; }
+a.r-wikilink { cursor: pointer; }
+a.r-wikilink:hover { border-bottom-style: solid; }
+.r-image { display: block; max-width: 100%; }
+/* a test's result (§27) */
+.r-test { font-weight: 600; }
+.r-test.pass { color: var(--good); }
+.r-test.fail { color: var(--test-fail); font-weight: 500; }
+.r-check.yes { color: var(--good); }
+.r-check.no { color: var(--bad); }
+.r-swatch { display: inline-flex; gap: 4px; align-items: center; font-family: var(--mono); font-size: 11.5px; }
+.r-swatch .chip { width: 12px; height: 12px; border-radius: 2px; border: 1px solid var(--line); flex: none; }
+.r-badge { display: inline-block; padding: 0 7px; border-radius: 9px; font-size: 11.5px; line-height: 17px;
+  color: #22211f; }
+.r-progress { position: relative; height: 16px; background: var(--head); border-radius: 3px; overflow: hidden; }
+.r-progress .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink, var(--pos)); opacity: .55; }
+/* the label is on the bar, never on the cell's fill: the theme's text, so a
+   cell's text colour (the bar's, P34) doesn't draw it on its own colour */
+.r-progress .label { position: relative; display: block; text-align: center; font-size: 11px; line-height: 16px;
+  color: var(--text); }
+.r-data-bar { position: relative; }
+.r-data-bar .fill { position: absolute; left: 0; top: 1px; bottom: 1px; border-radius: 2px; opacity: .35; }
+.r-data-bar .fill.pos, .r-bar-list .fill.pos { background: var(--ink, var(--pos)); }
+.r-data-bar .fill.neg, .r-bar-list .fill.neg { background: var(--neg); }
+.r-data-bar .label { position: relative; }
+.r-fill { margin: -2px -5px; padding: 2px 5px; min-height: 20px; }
+.r-trend { display: flex; justify-content: flex-end; align-items: baseline; gap: 3px; }
+.r-trend .arrow { font-size: 9px; }
+/* the arrow says rise or fall; the number keeps the cell's (or its format's) colour */
+.r-trend.up .arrow { color: var(--good); }
+.r-trend.down .arrow { color: var(--bad); }
+.r-trend.flat .arrow { color: var(--muted); }
+.r-light { display: flex; align-items: center; gap: 5px; }
+.r-light > :last-child:not(.dot) { flex: 1; }
+.r-light .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.r-light .dot.red { background: var(--bad); }
+.r-light .dot.amber { background: var(--warn); }
+.r-light .dot.green { background: var(--good); }
+.r-stars { color: var(--ink, var(--warn)); letter-spacing: 1px; }
+.r-stars .off { color: var(--line); }
+.r-stars .half { background: linear-gradient(90deg, var(--ink, var(--warn)) 50%, var(--line) 50%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.r-kpi { text-align: center; line-height: 1.15; }
+.r-kpi .big { font-size: 20px; font-weight: 600; }
+.r-kpi .big .num, .r-gauge .label .num { text-align: center; }
+.r-kpi .caption { font-size: 11px; color: var(--muted); }
+.r-gauge svg { display: block; width: 100%; max-width: 76px; height: auto; margin: 0 auto; }
+.r-gauge .track, .r-gauge .value { fill: none; stroke-width: 9; }
+.r-gauge .track { stroke: var(--head); }
+.r-gauge .value { stroke: var(--ink, var(--pos)); }
+.r-gauge .label { font-size: 11px; line-height: 13px; }
+.r-list { margin: 0; padding-left: 18px; white-space: normal; }
+td.cell .r-list .num { display: inline; }
+table.r-kv th { text-align: left; font-weight: 600; padding: 0 4px; border: 1px solid var(--line);
+  background: var(--head); }
+.r-bar-list { display: flex; flex-direction: column; gap: 1px; font-size: 11px; }
+.r-bar-list .row { display: grid; grid-template-columns: minmax(24px, 35%) 1fr auto; gap: 4px; align-items: center; }
+.r-bar-list .label { overflow: hidden; text-overflow: ellipsis; }
+.r-bar-list .track { height: 9px; }
+.r-bar-list .fill { display: block; height: 100%; border-radius: 2px; }
+td.cell .r-bar-list .num { display: inline; }
+svg.r-pie { display: block; width: 60px; height: 60px; margin: 0 auto; }
+svg.r-pie path, svg.r-pie circle { stroke: var(--panel); stroke-width: .8; }
+svg.r-pie .hole { fill: var(--panel); }
+svg.r-pie text { font-size: 14px; fill: var(--text); }
+table.grid.inline svg.r-pie { width: 36px; height: 36px; }
+.r-stepper { display: inline-flex; gap: 4px; align-items: center; }
+.r-stepper button { padding: 0 6px; font-size: 12px; line-height: 16px; }
+td.cell .r-stepper .num { min-width: 20px; text-align: center; }
+.r-dropdown { font: inherit; font-size: 12px; max-width: 100%; background: var(--bg); color: var(--text);
+  border: 1px solid var(--line); border-radius: 3px; }
+.r-radio { display: inline-flex; gap: 8px; }
+.r-radio label { display: inline-flex; gap: 2px; align-items: center; }
+/* choosing several (P140): ticks in a list; folded to a line in a filter's header */
+.r-checklist { display: inline-flex; flex-direction: column; gap: 1px; max-height: 12em; overflow-y: auto; }
+.r-checklist label { display: inline-flex; gap: 3px; align-items: center; white-space: nowrap; }
+.r-checklist-fold { font-size: 12px; max-width: 100%; }
+.r-checklist-fold > summary { cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  border: 1px solid var(--border, #ccc); border-radius: 3px; padding: 0 4px; background: var(--bg); }
+.r-checklist-fold[open] > .r-checklist { position: absolute; z-index: 30; background: var(--bg);
+  border: 1px solid var(--border, #ccc); padding: 3px 6px; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+td.cell.table-head .r-checklist-fold { font-weight: 400; }
+.r-color { width: 36px; height: 18px; padding: 0; border: 1px solid var(--line); background: none; }
+button.cp-button.r-color { padding: 2px; border-radius: 3px; display: inline-flex; }
+button.cp-button.r-color .cp-patch { flex: 1; border-radius: 2px; }
+
+.side { border-left: 1px solid var(--line); background: var(--panel);
+  display: flex; flex-direction: column; min-height: 0; }
+.tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.tabs button { border: none; border-radius: 0; background: none; padding: 7px 12px;
+  border-bottom: 2px solid transparent; color: var(--muted); }
+.tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab-body { flex: 1; overflow: auto; padding: 10px 12px; min-height: 0; }
+.inspector h3, .help h3 { margin: 0 0 8px; font-size: 14px; }
+.help h3 { margin-top: 14px; }
+.inspector dl { margin: 0; display: grid; grid-template-columns: 90px 1fr; gap: 6px 8px; }
+.inspector dt { color: var(--muted); }
+.inspector dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+pre.value { margin: 0; white-space: pre-wrap; max-height: 240px; overflow: auto;
+  background: var(--bg); padding: 4px 6px; border-radius: 4px; }
+ul.refs { margin: 0; padding-left: 16px; }
+/* Steps (§30): the parts of a formula as a tree, across the whole Inspector */
+.inspector dd.steps { grid-column: 1 / -1; border-left: 2px solid var(--line); padding: 2px 0 4px 8px; }
+.steps-trail { margin: 0 0 4px; }
+.steps-trail a { margin-right: 4px; }
+.steps-summary p { margin: 0 0 4px; }
+.steps-summary code { font-family: var(--mono); font-size: 12px; }
+ul.tree.steps-tree .step { display: flex; gap: 6px; align-items: baseline; padding: 1px 4px; border-radius: 3px;
+  font-size: 12.5px; min-width: 0; }
+ul.tree.steps-tree .step:hover { background: var(--sel-bg); }
+ul.tree.steps-tree .step.on-path { background: var(--head); }
+ul.tree.steps-tree .step.failed, ul.tree.steps-tree .step.source { background: var(--err-bg); }
+ul.tree.steps-tree .step.not-run .step-src { color: var(--muted); }
+.step-src { font-family: var(--mono); font-size: 12px; flex: 0 1 auto; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; cursor: default; }
+.step-label { font-family: var(--mono); font-size: 12px; font-style: italic; flex: none; }
+.step-val { flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+ul.tree.steps-tree a.step-into { flex: none; white-space: nowrap; font-size: 11.5px; }
+.step-val code { font-family: var(--mono); font-size: 12px; }
+.step-note { color: var(--err); font-size: 11.5px; white-space: nowrap; }
+.links { display: flex; flex-wrap: wrap; gap: 6px; }
+.links a { color: var(--accent); font-family: var(--mono); font-size: 12px; }
+.library { display: flex; flex-direction: column; gap: 8px; }
+.library > p { margin: 0; }
+.lib-head select { font: inherit; margin-left: 4px; padding: 1px 4px; background: var(--bg);
+  color: var(--text); border: 1px solid var(--line); border-radius: 4px; }
+.lib-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.lib-actions > button, .lib-actions > label.button { white-space: nowrap; }
+.library-editor { height: 260px; min-height: 120px; resize: vertical; overflow: hidden; }
+.library-editor .cm-editor { max-height: none; height: 100%; }
+.library-editor .cm-scroller { overflow: auto; }
+.reference h3 { margin: 6px 0 4px; font-size: 14px; }
+.reference > p { margin: 0; }
+.ref-filter { width: 100%; font: inherit; padding: 3px 6px; margin: 6px 0; border: 1px solid var(--line);
+  background: var(--bg); color: var(--text); border-radius: 4px; }
+.ref-section { border-top: 1px solid var(--line); padding: 4px 0; }
+.ref-section summary { cursor: pointer; font-weight: 600; padding: 2px 0; }
+.ref-section .intro { margin: 2px 0 6px; }
+.ref-section dl { margin: 2px 0 4px; }
+.ref-entry { margin-bottom: 7px; }
+.ref-entry dt code.name { font-weight: 600; }
+.ref-entry dt .args { color: var(--muted); }
+.ref-entry dd { margin: 1px 0 0 14px; }
+.ref-entry .tag { margin-left: 6px; font-size: 10.5px; padding: 0 5px; border-radius: 7px;
+  background: var(--head); color: var(--muted); }
+.ref-entry.shadowed dt code.name { text-decoration: line-through; }
+.ref-tools { display: flex; align-items: center; gap: 10px; }
+.ref-tools .ref-filter { flex: 1; min-width: 0; }
+.ref-tools .show-code { white-space: nowrap; font-size: 12px; cursor: pointer; }
+.ref-actions { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; font-size: 11.5px; }
+.library button.link, .repl button.link { padding: 0; border: none; background: none; color: var(--accent);
+  font-size: 11.5px; cursor: pointer; }
+.library button.link:hover, .repl button.link:hover { text-decoration: underline; }
+.library button.link:disabled, .repl button.link:disabled { color: var(--muted); text-decoration: none; cursor: default; }
+.ref-entry dt button.link.edit { margin-left: 8px; }
+.ref-section button.link.add { margin: 0 0 4px 14px; }
+.ref-section.own > summary { color: var(--accent); }
+.def-edit { margin: 4px 0 6px; display: flex; flex-direction: column; gap: 4px; }
+.def-edit > p { margin: 0; font-size: 12px; }
+.def-editor { min-height: 60px; max-height: 360px; overflow: auto; border: 1px solid var(--line); border-radius: 4px; }
+.def-editor .cm-editor { max-height: none; }
+.edit-all { display: flex; flex-direction: column; gap: 6px; }
+.lib-pending { display: flex; flex-direction: column; gap: 6px; padding: 6px 8px; font-size: 12.5px;
+  border: 1px solid var(--accent); border-radius: 4px; background: var(--sel-bg); }
+pre.ref-source { margin: 4px 0 2px; padding: 4px 6px; max-height: 320px; overflow: auto;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 4px;
+  font-family: var(--mono); font-size: 11.5px; white-space: pre; }
+table.cheat { border-collapse: collapse; width: 100%; }
+table.cheat td { padding: 3px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cheat td:first-child { white-space: nowrap; }
+/* Cell content: as wide as the cell (or, for text spilling over empty
+   neighbours, --spill), and as tall as a set row height allows. */
+.cell-out { display: block; width: var(--spill, auto); max-height: var(--row-h, none);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.cell.spill > .cell-out { pointer-events: none; }   /* clicks reach the cells it covers */
+/* The formula bar's draft, drawn in the cell it edits (P32): over the
+   cell's content, from its top-left, at least as big, running on over
+   its neighbours; under the sticky headers (z-index 1); clicks pass
+   through to the cell (point mode). */
+td.cell.drafting { position: relative; }
+td.cell.drafting > :not(.cell-draft) { visibility: hidden; }
+.cell-draft { position: absolute; left: 0; top: 0; z-index: 0; box-sizing: border-box;
+  min-width: 100%; min-height: 100%; width: max-content; max-width: 60vw;
+  padding: 2px 5px; line-height: 20px; text-align: left; font-weight: normal; font-style: normal;
+  background: var(--panel); color: var(--text); box-shadow: inset 0 0 0 2px var(--accent), 0 2px 6px rgba(0,0,0,.18);
+  white-space: pre-wrap; overflow-wrap: anywhere; pointer-events: none; }
+.cell-draft.formula { font-family: var(--mono); font-size: 11.5px; }
+table.grid.inline .cell-draft { padding: 1px 4px; line-height: 18px; }
+/* the caret takes no width (a border with a negative margin threw out the
+   max-content width by a fraction, so the draft wrapped its last word) */
+.draft-caret { position: relative; display: inline-block; width: 0; height: 1.15em; vertical-align: text-bottom; }
+.draft-caret::after { content: ""; position: absolute; left: -1px; top: 0; bottom: 0;
+  border-left: 1.5px solid var(--text); animation: draft-blink 1.06s steps(1) infinite; }
+@keyframes draft-blink { 50% { opacity: 0; } }
+/* A span (§4): the cell's content laid over the block of cells it covers,
+   placed from the cell's top-left and sized by measuring (span-box). It
+   sits under the sticky headers (z-index 1). When the active cell is one
+   it covers, it fades so that cell shows, and lets clicks through. */
+td.cell.span-anchor { position: relative; vertical-align: top; }
+.span-box { position: absolute; left: 0; top: 0; z-index: 0; box-sizing: border-box;
+  padding: 2px 5px; background: var(--panel); overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; }
+table.grid.inline .span-box { padding: 1px 4px; }
+td.cell.sel > .span-box { box-shadow: inset 0 0 0 2px var(--muted); }
+.grid-scroll:focus td.cell.sel > .span-box { box-shadow: inset 0 0 0 2px var(--accent); }
+.span-box.faded { opacity: .25; pointer-events: none; }
+/* the box covers the cell's corner marks: a formula check's (§26; a
+   template placed with inputs left at its own values, P35) is drawn over
+   it, above what it draws */
+td.cell.span-anchor.lint > .span-box::after { content: ""; position: absolute; inset: 0; z-index: 2;
+  pointer-events: none; background-image: var(--mk-lint); }
+.span-box > .cell-out { flex: 1; min-height: 0; width: 100%; max-height: none; white-space: normal; }
+.span-box svg.chart, table.grid.inline .span-box svg.chart { height: 100%; }
+.span-box svg.r-pie, table.grid.inline .span-box svg.r-pie { width: 100%; height: 100%; }
+/* Its handles (a span set on the cell): move at the top-left corner,
+   resize at the bottom-right, shown when the cell is active or the span
+   hovered. While one is dragged the span is see-through and the block it
+   would cover is outlined. */
+.span-handle { display: none; position: absolute; width: 9px; height: 9px; z-index: 1;
+  background: var(--accent); border: 1px solid var(--panel); box-sizing: border-box; }
+.span-handle.resize { right: 0; bottom: 0; cursor: nwse-resize; }
+.span-handle.move { left: 0; top: 0; cursor: move; }
+td.cell.sel > .span-box > .span-handle, .span-box:hover > .span-handle, .span-box.dragging > .span-handle { display: block; }
+.span-box.dragging { opacity: .35; }
+td.cell.span-blocked { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--err-bg) 5px 7px); }
+
+/* ---- Selection, names, point mode ---------------------------------------- */
+
+/* Cell shadows compose from variables, top first: the coloured edges of
+   references in the formula being written (--ref-outline, set inline), the
+   frame of a spilled 2-D result (--arr-*), the frame of cells open to typing
+   in a protected grid (--open-*), then the selection tint (--tint). */
+td.cell {
+  /* reset on every cell: custom properties inherit, and a cell can hold an
+     inline grid whose cells mustn't take on its tint or edges */
+  --ref-outline: 0 0 transparent; --tint: 0 0 transparent;
+  --arr-t: 0 0 transparent; --arr-l: 0 0 transparent;
+  --arr-b: 0 0 transparent; --arr-r: 0 0 transparent;
+  --open-t: 0 0 transparent; --open-l: 0 0 transparent;
+  --open-b: 0 0 transparent; --open-r: 0 0 transparent;
+  --bad-shadow: 0 0 transparent; --heat-tint: 0 0 transparent;
+  --row-h: initial;   /* a set row height is the row's own, not its inner grids' */
+  --ink: initial;     /* a text colour drawing the renderer (P34): the cell's own */
+  box-shadow: var(--ref-outline), var(--arr-t), var(--arr-l), var(--arr-b), var(--arr-r),
+              var(--open-t), var(--open-l), var(--open-b), var(--open-r), var(--bad-shadow), var(--tint),
+              var(--heat-tint); }
+/* the Profile tab's overlay (§23): a tint as hot as --heat (0..1, set
+   inline), and the time or step as a tag, bottom right. The cell is
+   positioned for the tag, which lets it paint over text spilling into it:
+   acceptable while profiling. */
+td.cell.heat { --heat-tint: inset 0 0 0 9999px rgba(var(--heat-rgb), calc(.06 + var(--heat) * .5));
+  position: relative; }
+td.cell.heat[data-heat]::after { content: attr(data-heat); position: absolute; right: 1px; bottom: 1px;
+  font: 8.5px/1 var(--mono); color: var(--heat-text); background: var(--panel); opacity: .8;
+  padding: 0 1px; border-radius: 2px; pointer-events: none; }
+:root { --heat-rgb: 232, 98, 26; --heat-text: #a4440d; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --heat-rgb: 255, 128, 64; --heat-text: #ffa36e; }
+}
+:root[data-theme="dark"] { --heat-rgb: 255, 128, 64; --heat-text: #ffa36e; }
+/* selection tints, per theme: a light theme's blue at 13% is plain on white
+   but all but lost on the dark panel, which needs a lighter blue, stronger */
+:root { --range-tint: rgba(47, 111, 219, .13); --active-tint: rgba(47, 111, 219, .08);
+  --point-tint: rgba(26, 166, 102, .18); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --range-tint: rgba(111, 160, 255, .25); --active-tint: rgba(111, 160, 255, .10);
+    --point-tint: rgba(81, 207, 102, .22); }
+}
+:root[data-theme="dark"] { --range-tint: rgba(111, 160, 255, .25); --active-tint: rgba(111, 160, 255, .10);
+  --point-tint: rgba(81, 207, 102, .22); }
+td.cell.in-sel { --tint: inset 0 0 0 9999px var(--range-tint); }
+td.cell.sel { --tint: inset 0 0 0 9999px var(--active-tint); }
+td.cell.pointing { --tint: inset 0 0 0 9999px var(--point-tint);
+  outline: 1px dashed #1a6; outline-offset: -2px; }
+/* a spilled result: one thin frame around the cells it fills */
+td.cell.array-t { --arr-t: inset 0 1px 0 var(--array-edge); }
+td.cell.array-l { --arr-l: inset 1px 0 0 var(--array-edge); }
+td.cell.array-b { --arr-b: inset 0 -1px 0 var(--array-edge); }
+td.cell.array-r { --arr-r: inset -1px 0 0 var(--array-edge); }
+/* open to typing in a protected grid (P193, while the toolbar's lock is
+   closed): one quiet frame round each region of open cells */
+td.cell.open-t { --open-t: inset 0 2px 0 var(--open-edge); }
+td.cell.open-l { --open-l: inset 2px 0 0 var(--open-edge); }
+td.cell.open-b { --open-b: inset 0 -2px 0 var(--open-edge); }
+td.cell.open-r { --open-r: inset -2px 0 0 var(--open-edge); }
+td.cell.precedent:not(.sel) { outline: 1px dashed var(--accent); outline-offset: -3px; }
+/* Corner marks, as background layers (a background image, not a positioned
+   ::before: a positioned cell would paint over text spilling into it). Each
+   mark is a variable, so any of them combine: a name (top left, small, over
+   a check's green), failing validation (top right), a units mistake (bottom
+   left), a formula check (top left, green, as Excel's), a comment (top
+   right, as Excel's note, smaller, over failing validation's magenta, which
+   grows to show round it). Reset on every cell, since a cell inside a marked
+   cell's grid would inherit them. */
+td.cell { --mk-name: none; --mk-bad: none; --mk-unit: none; --mk-lint: none; --mk-bound: none; --mk-comment: none; }
+td.cell.named { --mk-name: linear-gradient(135deg, var(--accent) 0 4px, transparent 4px); }
+/* fails its validation: a magenta edge and tint (--bad-shadow, in the shadows
+   above), and the magenta corner. A rule with its own :style is drawn with that instead
+   of the edge and tint; the corner stays. */
+td.cell.invalid { --bad-shadow: inset 0 0 0 2px var(--invalid-edge), inset 0 0 0 9999px var(--invalid-tint);
+  --mk-bad: linear-gradient(225deg, var(--invalid) 0 7px, transparent 7px); }
+td.cell.invalid.invalid-styled { --bad-shadow: 0 0 transparent; }
+/* a units mistake (§25): the value stays */
+td.cell.unit-warn { --mk-unit: linear-gradient(45deg, var(--unit) 0 7px, transparent 7px); }
+/* worth a second look (§26): the value stays */
+td.cell.lint { --mk-lint: linear-gradient(135deg, var(--lint) 0 7px, transparent 7px); }
+/* given its value by its grid cell's bindings (§6): the bottom-right corner */
+td.cell.bound { --mk-bound: linear-gradient(315deg, var(--accent) 0 7px, transparent 7px); }
+/* a cycle that didn't settle in its rounds (§30): the values stay */
+td.cell.unsettled { --mk-unit: linear-gradient(45deg, var(--unsettled) 0 7px, transparent 7px); }
+/* a comment written on it (§33) */
+td.cell.commented { --mk-comment: linear-gradient(225deg, var(--comment) 0 6px, transparent 6px); }
+td.cell.commented.invalid { --mk-bad: linear-gradient(225deg, var(--invalid) 0 10px, transparent 10px); }
+td.cell.named, td.cell.invalid, td.cell.unit-warn, td.cell.unsettled, td.cell.lint, td.cell.bound, td.cell.commented {
+  background-image: var(--mk-name), var(--mk-comment), var(--mk-bad), var(--mk-unit), var(--mk-lint), var(--mk-bound); }
+td.cell.aligned .num { text-align: inherit; }
+/* a renderer's layout follows the cell's alignment when its style sets one */
+td.cell.aligned .r-kpi, td.cell.aligned .r-kpi .big .num, td.cell.aligned .r-gauge .label .num,
+td.cell.aligned .r-progress .label, td.cell.aligned .r-stepper .num { text-align: inherit; }
+td.cell.align-left .r-trend, td.cell.align-left .r-light { justify-content: flex-start; }
+td.cell.align-center .r-trend, td.cell.align-center .r-light { justify-content: center; }
+td.cell.align-right .r-trend, td.cell.align-right .r-light { justify-content: flex-end; }
+td.cell.aligned .r-light > :last-child:not(.dot) { flex: none; }
+th.col-head, th.row-head { cursor: pointer; }
+
+/* ---- Toolbar / format bar ------------------------------------------------- */
+.sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 2px; }
+.format-bar { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+button.fmt { padding: 2px 8px; min-width: 28px; }
+button.fmt.on { background: var(--sel-bg); border-color: var(--accent); }
+/* text / fill colour buttons (ui/colors): a glyph over a bar of the colour */
+button.cp-button.fmt { display: inline-flex; flex-direction: column; align-items: center;
+  padding: 1px 6px 2px; line-height: 1.1; }
+button.cp-button.color .cp-glyph { font-weight: 700; }
+button.cp-button.background-color .cp-glyph { color: var(--muted); }
+.cp-bar { display: block; width: 16px; height: 4px; border-radius: 1px; border: 1px solid var(--line); }
+.cp-bar.none, .cp-chip.none { background: repeating-linear-gradient(135deg, var(--panel) 0 3px, var(--line) 3px 5px); }
+
+/* ---- Colour picker popover (ui/colors) ------------------------------------- */
+.color-picker { position: fixed; z-index: 21; width: 252px; padding: 8px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column; gap: 6px; outline: none; }
+.cp-title { font-weight: 600; font-size: 12px; }
+.cp-label { font-size: 11px; color: var(--muted); }
+.cp-empty { font-size: 11px; color: var(--muted); font-style: italic; height: 20px; }
+.cp-palette { display: grid; grid-template-columns: repeat(10, 20px); gap: 3px; justify-content: space-between; }
+button.cp-swatch { width: 20px; height: 20px; padding: 0; border: 1px solid rgba(128, 128, 128, .45);
+  border-radius: 3px; }
+button.cp-swatch:hover { border-color: var(--accent); transform: scale(1.12); }
+button.cp-swatch.on { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent); }
+.cp-custom { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+.cp-custom label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+input.cp-wheel { width: 28px; height: 22px; padding: 0; border: none; background: none; cursor: pointer; }
+input.cp-hex { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px; padding: 2px 4px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 3px; }
+button.cp-none { padding: 1px 6px; font-size: 12px; }
+button.cp-none.on { background: var(--sel-bg); border-color: var(--accent); }
+.cp-foot { display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  border-top: 1px solid var(--line); padding-top: 6px; }
+.cp-preview { display: inline-flex; gap: 4px; align-items: center; color: var(--muted); }
+.cp-chip { display: inline-block; width: 26px; height: 18px; border-radius: 3px; border: 1px solid var(--line); }
+.cp-buttons { display: inline-flex; gap: 6px; }
+button.cp-apply { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.cp-apply:hover { filter: brightness(1.1); }
+label.numfmt select { height: 24px; max-width: 170px; font-size: 12px; border: 1px solid var(--line);
+  border-radius: 4px; background: var(--panel); color: inherit; }
+
+/* ---- Formula bar ----------------------------------------------------------- */
+/* the name box grows with its text (a path through named grids, basics>A1),
+   from 110px up to a cap; its inline width is set from the text's length */
+.addr-col { display: flex; flex-direction: column; gap: 4px; flex: none;
+  min-width: 110px; max-width: min(280px, 30vw); }
+input.name-box { font-family: var(--mono); font-weight: 600; font-size: 12px; padding: 4px 6px;
+  background: var(--head); color: var(--text); border: 1px solid transparent; border-radius: 4px;
+  text-align: center; box-sizing: border-box; min-width: 100%; max-width: 100%; }
+input.name-box:focus { outline: 2px solid var(--accent); background: var(--bg); }
+button.ref-mode { font-size: 11px; padding: 1px 4px; color: var(--muted); font-family: var(--mono); }
+
+/* ---- Side panel ------------------------------------------------------------ */
+.splitter { width: 5px; cursor: col-resize; background: var(--line); flex: none; }
+.splitter:hover { background: var(--accent); }
+/* The width is stored (dragged on one window, loaded on another, or the
+   window narrowed or zoomed since): never wider than the window leaves room
+   for, keeping 200px of grid as the splitter's drag does, or the panel runs
+   off the right edge and clips every tab. */
+.side { flex: none; border-left: none; max-width: calc(100% - 205px); }
+.main.expanded .grid-scroll { display: none; }
+.main.expanded .grid-col { display: none; }
+.main.expanded .side { flex: 1; width: auto; max-width: none; min-width: 0; }
+.tabs button.expand { margin-left: auto; color: var(--muted); }
+.name-field { display: flex; gap: 4px; }
+.name-field input { font-family: var(--mono); font-size: 12px; width: 140px; padding: 1px 4px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 3px; }
+.name-field button { font-size: 11px; padding: 0 6px; }
+.help ul { padding-left: 18px; margin: 4px 0; }
+.help li { margin: 3px 0; }
+
+/* ---- Status bar ------------------------------------------------------------ */
+.status-bar { display: flex; gap: 16px; align-items: center; min-height: 24px; padding: 3px 10px; border-top: 1px solid var(--line);
+  background: var(--panel); color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.status-bar .message { margin-left: auto; font-size: 12px; }
+.status-bar .calculating { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Enter / Edit while the formula bar edits a cell (P32) */
+/* at the right end, after any message: nothing else moves as it comes and goes */
+.status-bar .entry-mode { margin-left: auto; font-size: 12px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); }
+.status-bar .message + .entry-mode { margin-left: 0; }
+.status-bar .entry-mode.enter { color: var(--text); border-color: var(--accent); }
+.status-bar .busy { color: var(--text); }
+.status-bar .preparing { color: var(--text); font-variant-numeric: tabular-nums; }
+button:disabled { color: var(--muted); background: var(--bg); cursor: default; border-color: var(--line); }
+td.cell.copied { outline: 2px dashed #1a6; outline-offset: -2px; }
+
+/* ---- Cell menu ------------------------------------------------------------- */
+.menu-backdrop { position: fixed; inset: 0; z-index: 20; }
+.menu { position: fixed; z-index: 21; min-width: 220px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 0;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+  max-height: calc(100vh - 16px); overflow-y: auto; }
+.menu-item { display: flex; justify-content: space-between; gap: 24px; padding: 5px 12px; cursor: pointer; }
+.menu-item:hover { background: var(--sel-bg); }
+.menu-item .keys { color: var(--muted); font-size: 12px; }
+.menu-sep { height: 1px; background: var(--line); margin: 4px 0; }
+
+/* ---- Grids in cells ---------------------------------------------------------- */
+td.cell.has-grid > .cell-out { white-space: normal; }
+td.cell.has-grid { vertical-align: top; padding: 2px; }
+/* the header row of a grid with headers (DESIGN.md §19) */
+td.cell.table-head { font-weight: 600; background-color: var(--head); box-shadow: inset 0 -2px 0 var(--accent); }
+.grid-controls .headers-toggle { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; }
+table.grid.inline { border: 1px solid var(--line); border-radius: 3px; margin: 0;
+  background: var(--panel); font-size: 11.5px; }
+table.grid.inline th { position: static; font-size: 10px; padding: 0 3px; }
+table.grid.inline th.col-head { height: 15px; }
+table.grid.inline th.row-head { padding-right: 3px; }
+table.grid.inline td.cell { height: 20px; padding: 1px 4px; }
+/* a grid drawn in an inline grid's cell has the same sides as one in the sheet's, so the room
+   its column makes for it (recdep.widths/window-allowance, P128) is the same */
+table.grid.inline td.cell.has-grid { padding-left: 2px; padding-right: 2px; }
+/* On a mesh (P129) a grid drawn whole in a cell sits on the cell's left edge with no frame,
+   its columns whole tracks: its lines fall on the sheet's. Its window is as wide as its
+   columns (fit-window!); the last column's right border lies on the cell's own, which the
+   cell clips. */
+.app.meshed table.grid td.cell.whole-grid,
+.app.meshed table.grid td.cell.whole-instance { padding-left: 0; padding-right: 0; }
+.app.meshed table.grid td.cell.whole-grid > .cell-out > .grid-window.fill { border: 0; border-radius: 0; overflow: visible; max-width: none; }
+/* (clipped, not hidden: a hidden overflow can still be scrolled, and the browser's scrolling
+   something inside into view moved the grid a pixel off the lattice) */
+.app.meshed table.grid td.cell.whole-grid > .cell-out { overflow: clip; }
+.app.meshed table.grid td.cell.whole-instance table.instance-grid { align-self: flex-start; border: 0; }
+/* a grid drawn whole over a span (a view placed from the Shelf): the same, its box taking
+   no padding, so its lines fall on the mesh's too */
+.app.meshed table.grid td.cell.has-grid > .span-box:has(> .cell-out > .grid-window.fill) { padding: 0; }
+.app.meshed table.grid td.cell.has-grid > .span-box > .cell-out > .grid-window.fill { border: 0; border-radius: 0; max-width: none; }
+/* Rows on the mesh (P131): every row whole row tracks, set by recdep.ui.rowsnap from what's
+   drawn in it, so cells and headings take no height of their own; a grid or an instance drawn
+   whole sits at its cell's top with nothing above or below, and lies over the cell's bottom
+   border (its last row's border on it), so the row is its height exactly; an instance's line
+   over it is one track, standing for a grid's headings */
+/* (the main area's grids only: the Data explorer's tables keep their fixed heights) */
+.app.meshed .grid-scroll table.grid td.cell, .app.meshed .grid-scroll table.grid th.col-head { height: auto; }
+.app.meshed table.grid td.cell.whole-grid,
+.app.meshed table.grid td.cell.whole-instance { vertical-align: top; padding-top: 0; padding-bottom: 0; }
+.app.meshed table.grid td.cell.whole-grid > .cell-out,
+.app.meshed table.grid td.cell.whole-instance > .room { margin-bottom: -1px; }
+.app.meshed table.grid td.cell.whole-instance .instance { gap: 0; }
+.app.meshed table.grid td.cell.whole-instance .instance-head { height: var(--row-step); box-sizing: border-box;
+  display: flex; align-items: center; overflow: hidden; }
+/* the toolbar's mesh group: the Mesh button, and when it's on, its track width and lines,
+   framed together so they read as the mesh's */
+.mesh-group { display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 4px; }
+.mesh-group.on { border-color: var(--line); padding-right: 8px; }
+.mesh-group button.mesh-toggle.on { background: var(--sel-bg); border-color: var(--accent); }
+.mesh-group label.mesh-step input[type=number] { width: 3.5em; }
+.mesh-group label.mesh-lines { gap: 3px; cursor: pointer; }
+.mesh-group label.mesh-lines input[type=checkbox] { width: auto; margin: 0; padding: 0; }
+/* the mesh's lines over the sheet (P129), when asked for: a line on every track's right edge,
+   from the first column's left (past the row headings), over the cells and the grids drawn
+   in them; clicks pass through */
+.app.mesh-lines .grid-scroll > table.grid:not(.inline) { position: relative; }
+.app.mesh-lines .grid-scroll > table.grid:not(.inline)::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: var(--mesh-origin); right: 0;
+  pointer-events: none; z-index: 3;
+  background-image: repeating-linear-gradient(to right, transparent 0 calc(var(--mesh-step) - 1px),
+    color-mix(in srgb, var(--accent) 35%, transparent) calc(var(--mesh-step) - 1px) var(--mesh-step)); }
+/* the rows' lines (P131), from the body's top, under the frozen column headings (z 1, later in
+   the page), which they'd otherwise cross when the sheet scrolls down */
+.app.mesh-lines .grid-scroll > table.grid:not(.inline)::before {
+  content: ""; position: absolute; top: var(--mesh-top, 0px); bottom: 0; left: var(--mesh-origin); right: 0;
+  pointer-events: none; z-index: 1;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--row-step) - 1px),
+    color-mix(in srgb, var(--accent) 35%, transparent) calc(var(--row-step) - 1px) var(--row-step)); }
+/* the sheet's frozen row headings (and corner) stay above the lines when it scrolls sideways;
+   its column headings don't, so an edge being dragged there has its lines */
+.app.mesh-lines .grid-scroll > table.grid:not(.inline) > tbody > tr > th.row-head { z-index: 5; }
+.app.mesh-lines .grid-scroll > table.grid:not(.inline) > thead th.corner { z-index: 6; }
+/* with the lines showing, a column's edge is one of many lines: alternate column headings
+   shade, subtly, so where each column begins and ends still shows */
+.app.mesh-lines table.grid th.col-head.alt:not(.hl),
+.app.mesh-lines table.grid th.row-head.alt:not(.hl) { background: color-mix(in srgb, var(--head), var(--text) 7%); }
+/* whole columns selected, with the lines showing: their tracks tinted down the whole sheet,
+   faintly, over the cells and grids in them (under the frozen row headings) */
+.mesh-band { position: absolute; pointer-events: none; z-index: 2;
+  background: color-mix(in srgb, var(--accent) 7%, transparent); }
+
+table.grid.inline svg.chart { height: 24px; }
+.grid-chip { display: inline-block; padding: 0 6px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--head); font-size: 11.5px; cursor: zoom-in; }
+.grid-chip:hover { border-color: var(--accent); }
+
+
+/* ---- Breadcrumb (zoom) --------------------------------------------------------- */
+.crumbs { display: flex; gap: 6px; align-items: center; padding: 3px 10px; font-size: 12px;
+  border-bottom: 1px solid var(--line); background: var(--panel); color: var(--muted); }
+.crumbs a { color: var(--accent); font-family: var(--mono); text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.crumbs .here { color: var(--text); font-family: var(--mono); font-weight: 600; }
+.crumbs button { font-size: 11px; padding: 0 8px; }
+.crumbs .hint { margin-left: auto; }
+
+/* ---- Parameters (§6): a grid's named values, outside its cells ------------- */
+.params-strip { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 3px 10px;
+  font-size: 12px; border-bottom: 1px solid var(--line); background: var(--head); }
+.params-label { color: var(--muted); }
+.param { display: inline-flex; align-items: center; gap: 3px; padding: 1px 2px 1px 6px;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--panel); }
+.param-name { font-family: var(--mono); font-weight: 600; cursor: pointer;
+  background-image: linear-gradient(135deg, var(--accent) 0 4px, transparent 4px); padding-left: 6px; }
+.param .eq { color: var(--muted); }
+.param-value, .param-add { font: 12px var(--mono); padding: 1px 4px; border: 1px solid transparent;
+  border-radius: 3px; background: transparent; color: var(--text); }
+.param-value:hover, .param-value:focus, .param-add:focus { border-color: var(--line); background: var(--bg); outline: none; }
+.param-value.bound { color: var(--accent); font-weight: 600; }
+.param-value.has-error { color: var(--err); }
+.param-add { width: 17ch; border-color: var(--line); border-style: dashed; }
+.param-remove { border: none; background: none; color: var(--muted); padding: 0 4px; cursor: pointer; }
+/* a formula check on the parameter (§26): the checks' colour, as a cell's corner */
+.param.lint { border-color: var(--lint); box-shadow: inset 3px 0 0 var(--lint); }
+.param-fix { font-size: 11px; padding: 0 6px; }
+.param-grid { font: 12px var(--mono); padding: 1px 4px; color: var(--accent); }
+.param-remove:hover { color: var(--err); }
+.params-strip .params-hide { margin-left: auto; font-size: 11px; padding: 0 8px; }
+table.inputs { border-collapse: collapse; width: 100%; }
+a.make-input { margin-left: 8px; font-size: 11px; color: var(--accent); }
+.lint-warnings a { margin-left: 8px; }
+table.inputs td { padding: 1px 6px 1px 0; vertical-align: middle; }
+/* an input of a placed template still at the template's own value (P35) */
+.to-set-mark { color: var(--lint); }
+table.inputs tr.to-set input.text-field { border-color: var(--lint); }
+/* the input's name and kind never break mid-word; the field takes the rest */
+table.inputs td:not(:last-child) { white-space: nowrap; }
+table.inputs td:last-child { width: 100%; }
+table.inputs td:last-child input { width: 100%; box-sizing: border-box; }
+input.text-field { font: 12px var(--mono); padding: 1px 4px; background: var(--bg); color: var(--text);
+  border: 1px solid var(--line); border-radius: 3px; min-width: 14ch; }
+input.text-field:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.grid-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.grid-controls input { width: 52px; font: inherit; padding: 1px 4px; background: var(--bg); color: var(--text);
+  border: 1px solid var(--line); border-radius: 3px; }
+table.grid.inline th.corner { cursor: pointer; color: var(--muted); font-size: 9px; line-height: 1; }
+table.grid.inline th.corner:hover { color: var(--accent); }
+
+/* ---- Grid links and windows -------------------------------------------------- */
+button.grid-link { padding: 0 8px; font-size: 12px; border-radius: 10px; color: var(--accent);
+  background: var(--head); cursor: zoom-in; white-space: nowrap; }
+.grid-window { overflow: auto; max-width: 100%; width: fit-content; border: 1px solid var(--line);
+  border-radius: 3px; background: var(--panel); }
+/* (grid-view): fill the cell; the table stretches, and scrolls only when the
+   cell is smaller than the grid */
+.grid-window.fill, .grid-window.windowed { width: 100%; box-sizing: border-box; }
+.grid-window > table.grid.inline { border: none; }
+/* in a scrolling window, keep the headers in view */
+.grid-window.windowed > table.grid.inline > thead th { position: sticky; top: 0; z-index: 2; }
+.grid-window.windowed > table.grid.inline > tbody th.row-head { position: sticky; left: 0; z-index: 1; }
+.grid-window.windowed > table.grid.inline > thead th.corner { left: 0; z-index: 3; }
+td.cell { scroll-margin-top: 24px; scroll-margin-left: 42px; }
+table.grid.inline td.cell { scroll-margin-top: 16px; scroll-margin-left: 18px; }
+.links.users { flex-direction: column; gap: 2px; }
+.links .via { font-family: var(--mono); font-size: 11px; }
+
+/* ---- Resizing columns and rows ---------------------------------------------- */
+table.grid th { position: sticky; }
+table.grid.inline th { position: relative; }
+.grid-window.windowed > table.grid.inline > thead th,
+.grid-window.windowed > table.grid.inline > tbody th.row-head { position: sticky; }
+/* inside the header cell: a handle sticking out past the last column / row
+   would make an inline grid overflow its window and grow scrollbars */
+.col-resize { position: absolute; top: 0; right: 0; width: 5px; height: 100%; cursor: col-resize; z-index: 4; }
+.row-resize { position: absolute; left: 0; bottom: 0; width: 100%; height: 5px; cursor: row-resize; z-index: 4; }
+.col-resize:hover, .row-resize:hover { background: var(--accent); opacity: .5; }
+.status-bar .message.info { color: var(--text); background: var(--sel-bg); }
+.status-bar .message + .message { margin-left: 4px; }
+
+/* ---- Virtualised drawing ---------------------------------------------------- */
+tr.spacer td, td.spacer, th.spacer { padding: 0; border: none; background: none; }
+/* a grid drawn in a cell stretches its rows by --fill-pad (set by its
+   window): extra padding on each cell, so every row grows by the same amount */
+table.grid { --fill-pad: 0px; }
+table.grid.inline > tbody > tr[data-r] > td.cell,
+table.grid.inline > tbody > tr[data-r] > th.row-head {
+  padding-top: calc(1px + var(--fill-pad)); padding-bottom: calc(1px + var(--fill-pad)); }
+
+/* Formats tab */
+.formats { display: flex; flex-direction: column; gap: 8px; }
+.formats h3 { margin: 0; font-size: 14px; }
+.formats p { margin: 0; }
+.formats ol.rules { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.formats .rule-area { font-weight: 600; }
+.formats .rule-buttons { margin-left: 6px; white-space: nowrap; }
+.formats .rule-buttons button { padding: 0 5px; margin-left: 2px; }
+.formats-editor { min-height: 120px; }
+
+/* ---- Finding your way around: outline and its search, find, trace arrows ---- */
+.outline-head { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+.outline-head span { margin-right: auto; font-size: 12px; }
+.outline-head button { font-size: 11px; padding: 0 8px; }
+ul.tree, ul.tree ul { list-style: none; margin: 0; padding: 0; }
+ul.tree ul { padding-left: 16px; border-left: 1px dotted var(--line); margin-left: 6px; }
+ul.tree .node { display: flex; gap: 6px; align-items: baseline; padding: 1px 4px; border-radius: 3px;
+  font-size: 12.5px; }
+ul.tree .node.on-path { background: var(--head); }
+ul.tree .node.here { background: var(--sel-bg); }
+ul.tree .node.here > a { font-weight: 600; }
+ul.tree .twisty { width: 12px; cursor: pointer; color: var(--muted); user-select: none; flex: none; }
+ul.tree a:where(:not(.flag)) { color: var(--accent); font-family: var(--mono); text-decoration: none; }
+ul.tree a:where(:not(.flag)):hover { text-decoration: underline; }
+ul.tree .muted { font-size: 11.5px; }
+/* What's flagged, counted (cells with errors, failing validation, failing
+   tests, units warnings, unsettled cycles, formula checks, comments): links that step
+   through them, drawn as small tags in the flag's colour (--flag), the same
+   in the status bar, the Outline and the Formats tab */
+a.flag { --flag: var(--err); --flag-tint: var(--err-bg); --flag-edge: var(--err-edge);
+  color: var(--flag); background: var(--flag-tint); box-shadow: inset 0 0 0 1px var(--flag-edge);
+  font-family: inherit; font-size: 11.5px; font-weight: 600; line-height: 17px; padding: 0 6px;
+  border-radius: 4px; white-space: nowrap; text-decoration: none; }
+a.flag:hover { text-decoration: underline; }
+a.flag.invalid-count { --flag: var(--invalid); --flag-tint: var(--invalid-tint); --flag-edge: var(--invalid-edge); }
+a.flag.test-count { --flag: var(--test-fail); --flag-tint: var(--test-fail-tint); --flag-edge: var(--test-fail); }
+a.flag.unit-count { --flag: var(--unit); --flag-tint: var(--unit-tint); --flag-edge: var(--unit); }
+a.flag.unsettled-count { --flag: var(--unsettled); --flag-tint: var(--unsettled-tint); --flag-edge: var(--unsettled); }
+a.flag.lint-count { --flag: var(--lint); --flag-tint: var(--lint-tint); --flag-edge: var(--lint); }
+a.flag.comment-count { --flag: var(--comment); --flag-tint: var(--comment-tint); --flag-edge: var(--comment); }
+/* tests all passing: a quiet green, no tag */
+a.flag.test-count.pass { color: var(--good); background: none; box-shadow: none; }
+.lint-warnings { margin: 2px 0 0; padding-left: 16px; list-style: none; }
+.lint-warnings li { color: var(--lint); }
+.lint-warnings li.ignored { color: var(--muted); }
+.lint-warnings a { margin-left: 6px; font-size: 11.5px; }
+.unit-warnings { margin: 2px 0 0; padding-left: 16px; color: var(--unit); }
+/* the Inspector's word on a failing validation and an unsettled cycle: in their flags' colours */
+.invalid-text { color: var(--invalid); }
+.unsettled-text { color: var(--unsettled); }
+.format-bar input.unit { width: 64px; font-family: var(--mono); font-size: 12px; }
+/* the unit dropdown: just its arrow, beside the field; the list opens full width */
+.format-bar select.unit-pick { width: 26px; margin-left: 2px; padding: 0 2px; }
+.unit-field { display: inline-flex; align-items: center; }
+ul.tree a.locate { color: var(--muted); font-family: inherit; }
+ul.tree li.leaf { display: flex; gap: 6px; align-items: baseline; padding: 0 4px 0 22px; font-size: 12px;
+  border-radius: 3px; }
+ul.tree .node.active, ul.tree li.leaf.active, ul.go-refs li.active { outline: 2px solid var(--accent);
+  outline-offset: -2px; }
+.outline > .find-row { margin-bottom: 6px; }
+ul.go-refs { list-style: none; margin: 0 0 4px; padding: 0; }
+ul.go-refs li { display: flex; gap: 6px; align-items: baseline; padding: 2px 4px; border-radius: 3px;
+  cursor: pointer; font-size: 12.5px; }
+ul.go-refs li:hover { background: var(--head); }
+ul.go-refs code { color: var(--accent); }
+.hint { font-size: 12px; }
+.find { display: flex; flex-direction: column; gap: 6px; }
+.find-row { display: flex; gap: 6px; align-items: center; }
+.find-row.options { flex-wrap: wrap; font-size: 12px; }
+.find-row select { font: inherit; font-size: 12px; background: var(--bg); color: var(--text);
+  border: 1px solid var(--line); border-radius: 4px; padding: 2px; }
+input.find-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; padding: 3px 6px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; }
+input.find-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input.find-input:disabled { opacity: .5; }
+label.check { display: inline-flex; gap: 3px; align-items: center; cursor: pointer; }
+.find-count { font-size: 12px; }
+ul.results { list-style: none; margin: 0; padding: 0; }
+ul.results li { display: flex; gap: 8px; align-items: baseline; padding: 2px 4px; border-radius: 3px;
+  cursor: pointer; }
+ul.results li:hover { background: var(--head); }
+ul.results li.current { background: var(--sel-bg); }
+ul.results .addr { color: var(--accent); flex: none; }
+ul.results .snip { font-family: var(--mono); font-size: 12px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; min-width: 0; }
+mark { background: #ffe066; color: #22211f; border-radius: 2px; }
+
+
+/* trace arrows: an overlay scrolling with the grid (its svg is 1px and
+   overflows, so it never makes the scroll area bigger) */
+.grid-scroll { position: relative; }
+.trace { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 0; pointer-events: none; }
+.trace svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.trace .pre { --trace: #2f6fdb; }
+.trace .dep { --trace: #d9480f; }
+.trace line, .trace path:not(marker path) { stroke: var(--trace); stroke-width: 1.6; fill: none; }
+.trace line.cross, .trace path.cross { stroke-dasharray: 5 3; }
+.trace circle { fill: var(--trace); }
+.trace marker path.pre { fill: #2f6fdb; }
+.trace marker path.dep { fill: #d9480f; }
+.trace rect.range { fill: none; stroke: var(--trace); stroke-width: 1.5; }
+.trace-label, .trace-off { position: absolute; pointer-events: auto; white-space: nowrap; font-size: 11px;
+  font-family: var(--mono); background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
+  padding: 0 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
+.trace-label.pre a, .trace-off .pre a { color: #2f6fdb; }
+.trace-label.dep a, .trace-off .dep a { color: #d9480f; }
+.trace-off { padding: 2px 6px; display: flex; flex-direction: column; gap: 1px; z-index: 1; }
+.trace-off .muted { font-family: inherit; }
+
+/* linked grid instances (DESIGN.md §21) */
+.instance { display: flex; flex-direction: column; gap: 2px; }
+.instance-head { font-size: 11px; }
+.instance-head a { color: var(--accent); text-decoration: none; }
+table.instance-grid td.instance-cell { padding: 1px 4px; border: 1px solid var(--line);
+  --ink: initial; }   /* not its outer cell's text colour (P34) */
+table.instance-grid td.overridden { box-shadow: inset 3px 0 0 var(--accent); }
+.instance-input { width: 100%; box-sizing: border-box; border: 1px solid transparent; background: transparent;
+                  font: inherit; color: inherit; padding: 0 2px; }
+.instance-input:hover, .instance-input:focus { border-color: var(--line); background: var(--panel); }
+td.overridden .instance-input { font-weight: 600; color: var(--accent); }
+/* an instance drawn clean, (instance-view :clean): only its cells, their formats and the lines
+   between them; no frame, no background, no bars marking its own values (the cell holding it is
+   framed by the outer grid's own lines) */
+.instance.clean > table.instance-grid { border-color: transparent; background: transparent; }
+.instance.clean > table.instance-grid > tbody > tr > td.instance-cell:first-child { border-left-color: transparent; }
+.instance.clean > table.instance-grid > tbody > tr > td.instance-cell:last-child { border-right-color: transparent; }
+.instance.clean > table.instance-grid > tbody > tr:first-child > td.instance-cell { border-top-color: transparent; }
+.instance.clean > table.instance-grid > tbody > tr:last-child > td.instance-cell { border-bottom-color: transparent; }
+.instance.clean td.overridden { box-shadow: none; }
+
+/* ---- Profile tab (DESIGN.md §23) ------------------------------------------ */
+.profile h4 { margin: 12px 0 4px; font-size: 12.5px; display: flex; align-items: center; gap: 8px; }
+.profile-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.overlay-picker { display: inline-flex; gap: 3px; }
+.overlay-picker button { font-size: 11.5px; }
+.profile-summary { margin: 0 0 4px; }
+.profile a.cell-link, .inspector a.cell-link { color: var(--accent); font-family: var(--mono); font-size: 12px;
+  text-decoration: none; }
+.profile a.cell-link:hover { text-decoration: underline; }
+ol.profile-steps { margin: 0 0 6px; padding-left: 30px; font-size: 12px; }
+ol.profile-steps li { margin: 1px 0 3px; }
+ol.profile-steps .step-head { display: flex; gap: 8px; align-items: baseline; }
+ol.profile-steps .why { display: block; color: var(--muted); }
+.profile .ms { font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap; }
+.profile .pass { font-size: 10.5px; padding: 0 4px; border-radius: 3px; background: var(--head); }
+table.profile-table { border-collapse: collapse; font-size: 12px; width: 100%; }
+table.profile-table td { padding: 1px 6px 1px 0; vertical-align: baseline; }
+table.profile-table td.ms { text-align: right; }
+table.profile-table code { font-size: 11px; color: var(--muted); word-break: break-all; }
+.profile button.refresh { font-size: 11px; padding: 0 6px; font-weight: normal; }
+
+/* ---- Map tab (DESIGN.md §24) ---------------------------------------------- */
+:root { --dm-const: #eef4ea; --dm-const-edge: #86a875; --dm-formula: #eaf1fd; --dm-formula-edge: #6f94d6;
+  --dm-grid: #f5eefb; --dm-grid-edge: #9b72c4; --dm-ext: #f2f0eb; --dm-ext-edge: #a39e93;
+  --dm-edge: #a8a399; --dm-chain: #c29200; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --dm-const: #222d1e; --dm-const-edge: #7fa36c; --dm-formula: #1e283a;
+    --dm-formula-edge: #6f9bea; --dm-grid: #2b2235; --dm-grid-edge: #b08ad8; --dm-ext: #2a2927;
+    --dm-ext-edge: #8a857b; --dm-edge: #6f6b63; --dm-chain: #f0c43c; }
+}
+:root[data-theme="dark"] { --dm-const: #222d1e; --dm-const-edge: #7fa36c; --dm-formula: #1e283a;
+  --dm-formula-edge: #6f9bea; --dm-grid: #2b2235; --dm-grid-edge: #b08ad8; --dm-ext: #2a2927;
+  --dm-ext-edge: #8a857b; --dm-edge: #6f6b63; --dm-chain: #f0c43c; }
+.depmap { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; }
+.depmap p { margin: 0; }
+.dm-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dm-spacer { flex: 1; }
+.dm-crumbs a { color: var(--accent); text-decoration: none; font-family: var(--mono); }
+.dm-crumbs b { font-family: var(--mono); }
+.dm-toggle { display: inline-flex; align-items: center; gap: 3px; }
+.dm-summary { display: flex; flex-direction: column; gap: 2px; }
+.depmap a.cell-link { color: var(--accent); font-family: var(--mono); font-size: 12px; text-decoration: none; }
+.depmap a.cell-link:hover { text-decoration: underline; }
+.dm-canvas { position: relative; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }
+.dm-canvas svg { display: block; width: 100%; cursor: grab;   /* height: set by the map's size */
+  user-select: none; }
+.dm-canvas svg:active { cursor: grabbing; }
+.dm-zoom { position: absolute; right: 6px; top: 6px; display: flex; gap: 3px; }
+.dm-zoom button { padding: 0 7px; font-size: 12px; background: var(--panel); }
+.dm-node { cursor: pointer; }
+.dm-node rect { fill: var(--dm-formula); stroke: var(--dm-formula-edge); stroke-width: 1.2; }
+.dm-node.const rect { fill: var(--dm-const); stroke: var(--dm-const-edge); }
+.dm-node.grid rect { fill: var(--dm-grid); stroke: var(--dm-grid-edge); stroke-width: 1.6; }
+.dm-node.ext rect { fill: var(--dm-ext); stroke: var(--dm-ext-edge); stroke-dasharray: 4 3; }
+.dm-node.empty rect { fill: none; stroke: var(--dm-ext-edge); stroke-dasharray: 2 2; }
+.dm-node.chain rect { stroke: var(--dm-chain); stroke-width: 2.2; }
+/* after the chain: a node on it with an error stays red (the chain still
+   shows in its arrows) */
+.dm-node.error rect { stroke: var(--err); stroke-width: 2.2; }
+.dm-node.passed rect { stroke: var(--err); stroke-dasharray: 3 2; }
+.dm-node.selected rect { stroke: var(--accent); stroke-width: 3; }
+.dm-node text { fill: var(--text); font-family: var(--mono); font-size: 11.5px; pointer-events: none; }
+.dm-node.dim, .dm-edge.dim { opacity: .2; }
+.dm-edge { fill: none; stroke: var(--dm-edge); }
+.dm-edge.range { stroke-dasharray: 5 3; }
+.dm-edge.chain { stroke: var(--dm-chain); }
+.dm-edge.hi { stroke: var(--accent); }
+marker path.arrow { fill: var(--dm-edge); }
+marker path.arrow.chain { fill: var(--dm-chain); }
+marker path.arrow.hi { fill: var(--accent); }
+.dm-here { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 3; pointer-events: none; }
+.dm-details { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; display: flex;
+  flex-direction: column; gap: 4px; background: var(--panel); }
+.dm-details button { font-size: 11.5px; padding: 1px 8px; }
+code.dm-src { font-size: 11.5px; word-break: break-all; }
+.dm-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--muted); font-size: 11.5px; }
+.dm-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.dm-legend svg { overflow: visible; }
+.dm-legend .dm-node { cursor: default; }
+.dm-legend .dm-edge { stroke-width: 2; }
+.dm-stale { padding: 4px 8px; border-radius: 4px; background: var(--sel-bg); }
+.dm-stale button { font-size: 11.5px; padding: 0 8px; margin-left: 4px; }
+
+/* The Tests tab (§27) */
+.tests-tab .test-summary { display: flex; gap: 12px; margin: 0 0 6px; font-weight: 600; }
+.tests-tab .test-summary .fail { color: var(--test-fail); }
+.tests-tab .test-summary .error { color: var(--warn); }
+.tests-tab .test-summary .pass { color: var(--good); }
+ul.test-list { list-style: none; margin: 0 0 6px; padding: 0; font-size: 12px; }
+ul.test-list li { display: flex; gap: 6px; align-items: baseline; padding: 2px 0; border-bottom: 1px solid var(--line); }
+ul.test-list .icon, .test-case .icon { width: 1.1em; flex: none; text-align: center; font-weight: 700; }
+ul.test-list li.pass .icon, .test-case.pass .icon { color: var(--good); }
+ul.test-list li.fail .icon, .test-case.fail .icon { color: var(--test-fail); }
+ul.test-list li.error .icon, .test-case.error .icon { color: var(--warn); }
+ul.test-list .what { flex: none; }
+ul.test-list .why { color: var(--text); overflow-wrap: anywhere; }
+ul.test-list code.src { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.tests-tab a.cell-link { color: var(--accent); font-family: var(--mono); font-size: 12px; text-decoration: none; }
+.tests-tab a.cell-link:hover { text-decoration: underline; }
+.tests-tab details.passing summary { cursor: pointer; font-size: 12px; color: var(--muted); margin: 4px 0; }
+.tests-tab h4 { margin: 14px 0 6px; font-size: 12.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.test-case { border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; margin: 0 0 6px; font-size: 12px; }
+.test-case.fail { border-color: var(--test-fail); }
+.test-case .case-head { display: flex; gap: 6px; align-items: center; }
+.test-case input.case-name { flex: 1; min-width: 0; font: inherit; font-weight: 600; border: 1px solid transparent;
+  background: transparent; color: var(--text); padding: 1px 3px; border-radius: 3px; }
+.test-case input.case-name:hover, .test-case input.case-name:focus { border-color: var(--line); background: var(--bg); }
+.test-case label { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+.test-case textarea.case-map { display: block; width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 11.5px;
+  color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; resize: vertical; }
+.test-case .case-why { margin-top: 4px; color: var(--test-fail); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;
+  overflow-wrap: anywhere; }
+.test-case.error .case-why { color: var(--warn); }
+.tests-tab .test-summary .not-run { color: var(--muted); }
+ul.test-list li.not-run .icon, .test-case.not-run .icon { color: var(--muted); }
+.test-case.not-run .case-why { color: var(--muted); }
+.tests-tab .case-mode { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0 0; font-size: 12px; }
+.tests-tab .case-mode .stale { color: var(--warn); }
+a.cases-stale { color: var(--muted); text-decoration: none; font-size: 12px; padding: 0 6px; white-space: nowrap; }
+a.cases-stale:hover { color: var(--accent); text-decoration: underline; }
+a.live, a.recalc { color: var(--muted); text-decoration: none; font-size: 12px; padding: 0 6px; white-space: nowrap; }
+a.live:hover, a.recalc:hover { color: var(--accent); text-decoration: underline; }
+a.live.paused { color: var(--accent); }
+
+/* The Scenarios tab (§32) */
+.scenarios-tab .scenario-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 8px; }
+.scenarios-tab .scenario-table { overflow-x: auto; margin: 0 0 8px; }
+.scenarios-tab table { border-collapse: collapse; font-size: 12px; }
+.scenarios-tab th, .scenarios-tab td { border-bottom: 1px solid var(--line); padding: 2px 4px; text-align: left; vertical-align: middle; }
+.scenarios-tab th { font-weight: 600; color: var(--muted); white-space: nowrap; }
+.scenarios-tab th.broken { color: var(--warn); }
+.scenarios-tab .input-head { display: inline-flex; gap: 4px; align-items: center; }
+.scenarios-tab a.cell-link { color: var(--accent); font-family: var(--mono); font-size: 12px; text-decoration: none; }
+.scenarios-tab a.cell-link:hover { text-decoration: underline; }
+.scenarios-tab input { font-family: var(--mono); font-size: 11.5px; color: var(--text); background: transparent;
+  border: 1px solid transparent; border-radius: 3px; padding: 1px 3px; width: 7em; box-sizing: border-box; }
+.scenarios-tab input.scenario-name { font-family: inherit; font-weight: 600; width: 9em; }
+.scenarios-tab input.input-path { width: 12em; border-color: var(--line); background: var(--bg); }
+.scenarios-tab input:hover, .scenarios-tab input:focus { border-color: var(--line); background: var(--bg); }
+.scenarios-tab td.current, .scenarios-tab th.scenario.current { background: var(--active-tint); }
+/* a column per scenario: its name, ✕ and Show together at the top; the
+   inputs' paths stay in view on the left while the table scrolls */
+.scenarios-tab th.scenario { vertical-align: top; padding-bottom: 4px; }
+.scenarios-tab .scenario-head { display: flex; align-items: center; gap: 2px; }
+.scenarios-tab th.scenario .showing, .scenarios-tab th.scenario button.show { display: inline-block; margin: 2px 0 0 3px; }
+.scenarios-tab th.input { position: sticky; left: 0; z-index: 1; background: var(--panel); padding-right: 8px; }
+.scenarios-tab th.input.corner { vertical-align: bottom; }
+.scenarios-tab .showing { color: var(--good); font-size: 11.5px; font-weight: 400; white-space: nowrap; }
+.scenarios-tab button.remove { padding: 0 3px; border-color: transparent; background: transparent; color: var(--muted); }
+.scenarios-tab button.remove:hover { color: var(--text); border-color: var(--line); }
+.scenarios-tab ul.scenario-broken { color: var(--warn); font-size: 12px; margin: 0 0 8px; padding-left: 18px; }
+
+/* an error next to the button or field that caused it (panels/message-pop) */
+.message-pop { position: fixed; z-index: 32; max-width: 360px; padding: 6px 10px; font-size: 12.5px;
+  line-height: 1.4; color: var(--err); background: var(--panel); border: 1px solid var(--err);
+  border-left-width: 5px; border-radius: 5px; box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
+  cursor: pointer; animation: message-pop .35s ease-out; }
+.message-pop::before { content: "⚠ "; }
+/* a note on what a control just did (P220), not an error */
+.message-pop.note { color: var(--text); border-color: var(--muted); animation: none; }
+.message-pop.note::before { content: "ⓘ "; }
+@keyframes message-pop {
+  0% { opacity: 0; transform: translateY(-4px); }
+  40% { opacity: 1; transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  80% { transform: translateX(-2px); }
+  100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .message-pop { animation: none; } }
+/* errors an edit has just made (P197, ui/alerts): the status bar's count
+   flashes, and a toast beside the cell edited names the first */
+.status-bar .error-flash { display: contents; }
+.status-bar .error-flash.on .flag.error-count { animation: error-flash .5s ease-in-out 5; }
+@keyframes error-flash {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 0 3px var(--err); background: var(--err); color: var(--panel); } }
+.error-toast { position: fixed; z-index: 31; width: 420px; max-width: calc(100vw - 16px); padding: 8px 10px;
+  font-size: 12.5px; line-height: 1.4; color: var(--text); background: var(--panel);
+  border: 1px solid var(--err); border-left-width: 5px; border-radius: 5px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .28); animation: message-pop .35s ease-out; }
+.error-toast.corner { left: 8px; bottom: 34px; }
+.error-toast .toast-head { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.error-toast .toast-title { color: var(--err); font-weight: 600; }
+.error-toast .toast-head a { font-family: var(--mono, monospace); font-weight: 600; }
+.error-toast .toast-buttons { margin-left: auto; display: flex; gap: 2px; }
+.error-toast .toast-buttons button { padding: 0 5px; border-color: transparent; background: transparent; cursor: pointer; }
+.error-toast .toast-buttons button:hover { border-color: var(--line); }
+.error-toast .toast-msg { margin-top: 3px; }
+.error-toast .toast-more { margin-top: 3px; font-size: 11.5px; }
+@media (prefers-reduced-motion: reduce) { .error-toast { animation: none; } }
+/* The gallery's refine mode: rows of variations on the chosen renderer */
+.render-gallery .g-refine-head { display: flex; gap: 10px; align-items: baseline; font-size: 12px; margin-bottom: 6px; }
+.render-gallery .g-back { font-size: 12px; padding: 1px 8px; }
+.render-gallery .g-refine-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 4px; }
+.render-gallery .g-refine-hint { font-size: 11.5px; max-width: 220px; }
+.render-gallery .g-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px; align-items: start;
+  padding: 6px 0; border-top: 1px solid var(--line); }
+.render-gallery .g-row-label { font-size: 12px; color: var(--muted); padding-top: 4px; }
+.render-gallery .g-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+.render-gallery .g-control { font: inherit; font-size: 12px; }
+.render-gallery input.g-control[type="text"] { width: 220px; }
+.render-gallery input.g-control[type="number"] { width: 90px; }
+.render-gallery .g-number { display: inline-flex; gap: 8px; align-items: center; }
+.render-gallery .g-range { width: 160px; }
+.render-gallery .g-tile.small .g-src { font-family: inherit; font-size: 11px; }
+.render-gallery .g-tile.small.tall .g-clip { max-height: 120px; }
+.render-gallery .g-tile.small.tall td.cell { --row-h: 110px; }
+.render-gallery .g-custom { font-size: 12px; }
+.render-gallery .r-series { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.render-gallery .r-series input[type=color] { width: 28px; height: 20px; padding: 0; border: 1px solid var(--line); vertical-align: middle; }
+.render-gallery .g-choices { display: flex; flex-direction: column; gap: 6px; }
+.render-gallery .g-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.render-gallery .g-chip { font-size: 12px; padding: 2px 9px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--bg); color: inherit; cursor: pointer; }
+.render-gallery .g-chip:hover { border-color: var(--accent); }
+.render-gallery .g-chip.current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.render-gallery input.g-control[type="number"] { width: 170px; }
+.render-gallery .g-group { border-top: 1px solid var(--line); }
+.g-more { margin-top: 6px; font-size: 12px; text-align: left; white-space: normal; }
+.render-gallery .g-group-head { display: block; width: 100%; text-align: left; font: inherit; font-size: 12px; font-weight: 600;
+  padding: 6px 0; background: none; border: 0; color: inherit; cursor: pointer; }
+.render-gallery .g-group-head:hover { color: var(--accent); }
+.render-gallery .g-group.open { padding-bottom: 4px; }
+.render-gallery .g-group .g-row { padding-left: 12px; }
+.render-gallery .r-series label { display: inline-flex; gap: 3px; align-items: center; white-space: nowrap; }
+.render-gallery table.r-series-table { border-collapse: collapse; font-size: 12px; }
+.render-gallery table.r-series-table th { font-weight: 500; color: var(--muted); text-align: left; padding: 0 8px 2px 0; }
+.render-gallery table.r-series-table td { padding: 1px 8px 1px 0; }
+/* Placing a chart dropped on a selection: the block it will span */
+td.cell.place { --tint: inset 0 0 0 9999px var(--range-tint); outline: 1px dashed var(--accent); outline-offset: -1px; }
+td.cell.place.place-bad { --tint: inset 0 0 0 9999px var(--err-bg); outline-color: var(--err); }
+/* A span's handle being dragged: the block it would cover (§4) */
+td.cell.span-drag { --tint: inset 0 0 0 9999px var(--range-tint); outline: 1px dashed var(--accent); outline-offset: -1px; }
+td.cell.span-drag.span-drag-bad { --tint: inset 0 0 0 9999px var(--err-bg); outline-color: var(--err); }
+.place-banner { position: absolute; top: 100%; left: 10px; z-index: 40; font-size: 12px; padding: 4px 10px;
+  background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; display: flex; gap: 6px; align-items: center; }
+.place-banner button { font-size: 11px; padding: 0 6px; }
+/* a placing refused (P124): said in the banner, where one's looking */
+.place-banner .place-refused { color: var(--bad); font-weight: 600; }
+
+/* The number format field and its gallery (§10): under the field, on the
+   left; the renderer gallery's tiles and rows */
+.numfmt-field { position: relative; display: inline-flex; }
+.format-bar input.numfmt { width: 150px; height: 24px; font-family: var(--mono); font-size: 12px;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: inherit; padding: 0 6px; }
+.render-gallery.format-gallery { position: fixed; top: 80px; right: 8px; left: auto; width: min(600px, 80vw);
+  max-height: calc(100vh - 100px); }
+.format-gallery .g-tile.small .g-face td.cell { min-width: 70px; height: 20px; padding: 0 6px; font-size: 12px; }
+.format-gallery .g-face td.cell .num { white-space: nowrap; }
+.format-gallery .g-refine-head code { font-size: 12px; }
+.render-gallery .g-panel { border-collapse: collapse; font-size: 11px; width: 100%; }
+.render-gallery .g-panel td { border: 1px solid var(--line); padding: 1px 3px; vertical-align: top; overflow: hidden; }
+.render-gallery .g-panel td .cell-button, .render-gallery .g-panel td select { font-size: 10.5px; }
+.render-gallery .g-search { width: 100%; box-sizing: border-box; font: inherit; font-size: 12px; padding: 3px 8px; margin: 2px 0 4px; }
+/* a grid's display area (what shows in its cell), marked on its headers when zoomed in */
+table.grid th.col-head.shown { box-shadow: inset 0 -3px 0 var(--accent); }
+table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
+.inspector .comment-field { display: flex; gap: 4px; align-items: flex-start; }
+.inspector .comment-field textarea { flex: 1; min-width: 0; box-sizing: border-box; resize: vertical; max-height: 16em; overflow-y: auto;
+  font: inherit; font-size: 12.5px; line-height: 1.35; padding: 3px 5px;
+  border: 1px solid var(--line); border-left: 3px solid var(--comment); border-radius: 3px;
+  background: var(--bg); color: var(--text); }
+.inspector .comment-field textarea:placeholder-shown { border-left-color: var(--line); }
+.inspector .comment-field button { font-size: 11px; padding: 0 6px; }
+/* what shows in a grid's cell: one of three, the current one marked */
+.inspector .display-choice { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.inspector .display-choice button { font-size: 11px; padding: 0 6px; }
+.inspector .display-choice button.on { background: var(--sel-bg); border-color: var(--accent); font-weight: 600; cursor: default; }
+.inspector .display-row > .muted { margin-top: 2px; }
+/* The Shelf tab: the selection as a new cell (views, charts, templates) */
+.shelf-tab { display: flex; flex-direction: column; gap: 6px; }
+.shelf-tab .shelf-search { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 4px 8px; }
+.shelf-tab .shelf-for { font-size: 12px; margin: 0; }
+/* placed inline, a template's working cells come too (P124) */
+/* a library's copies of standard code (P126) */
+.library .lib-copies { font-size: 12px; margin: 6px 0; padding: 3px 0 3px 8px; border-left: 3px solid var(--line); }
+.library .lib-copies.old { border-left-color: var(--warn); }
+.shelf-tab .shelf-refused { font-size: 12px; margin: 4px 0; padding: 2px 0 2px 8px; border-left: 3px solid var(--bad); }
+/* P146: the repeat's references, each moving along the line or staying */
+.shelf-repeat-refs { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 2px 0 4px; font-size: 12px; }
+.shelf-repeat-ref select { font-size: 11.5px; }
+.shelf-tab .shelf-warn { font-size: 12px; margin: 4px 0; padding: 2px 0 2px 8px; border-left: 3px solid var(--warn); }
+/* a template's inputs, wired on its card */
+.shelf-tab .shelf-wiring { display: flex; flex-direction: column; gap: 3px; margin: 4px 0; }
+.shelf-tab .shelf-wire { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.shelf-tab .shelf-wire .text-field { flex: 1; min-width: 0; font: inherit; font-family: var(--mono); font-size: 12px; padding: 2px 6px; }
+.shelf-tab .g-section h4 { margin: 10px 0 4px; font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .04em; }
+.shelf-tab .g-count { text-transform: none; font-weight: 400; }
+.shelf-tab .g-tiles { display: flex; flex-wrap: wrap; gap: 6px; }
+.shelf-tab .g-tile { display: flex; flex-direction: column; gap: 3px; padding: 4px; text-align: left;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; font: inherit;
+  color: inherit; max-width: 250px; }
+.shelf-tab .g-tile:hover { border-color: var(--accent); }
+.shelf-tab .g-face { border-collapse: collapse; table-layout: fixed; pointer-events: none; background: var(--panel); }
+.shelf-tab .g-face td.cell { border: 1px solid var(--line); overflow: hidden; vertical-align: top; }
+.shelf-tab .g-clip { max-height: 120px; overflow: hidden; }
+.shelf-tab .g-tile.tall .g-clip { max-height: 190px; }
+.shelf-tab .g-src { font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.shelf-tab .g-panel { border-collapse: collapse; font-size: 11px; width: 100%; }
+.shelf-tab .g-panel td { border: 1px solid var(--line); padding: 1px 3px; vertical-align: top; overflow: hidden; }
+.shelf-tab .g-template { display: flex; flex-direction: column; gap: 3px; font-size: 11px; }
+.shelf-tab .g-wiring { display: flex; flex-wrap: wrap; gap: 2px 8px; color: var(--muted); font-size: 10.5px; }
+.shelf-tab .g-wiring .wired { color: var(--accent); }
+.shelf-tab .shelf-put { align-self: flex-start; margin: 2px 0 4px; }
+.shelf-tab .shelf-templates { display: flex; flex-direction: column; gap: 0; }
+/* a muted line between items, the title of each at its top */
+.shelf-tab .shelf-template { padding: 8px 0; }
+.shelf-tab .shelf-template + .shelf-template { border-top: 1px solid var(--line); }
+.shelf-tab .shelf-template { display: flex; flex-direction: column; gap: 3px; }
+.shelf-tab .shelf-template-bar { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.shelf-tab .shelf-template-info { flex: 1; min-width: 0; }
+.shelf-tab .shelf-template-bar button { font-size: 11px; padding: 0 6px; }
+.shelf-tab .shelf-remove:hover { color: var(--neg); border-color: var(--neg); }
+.shelf-tab .g-face-grid { table-layout: fixed; }
+.shelf-tab .g-face-grid td { white-space: nowrap; text-overflow: ellipsis; }
+/* a presented grid drawn in its cell: clean, no spill frames or marks for names
+   and checks (headings aren't drawn); zoomed in, all of them show */
+.grid-window.clean { position: relative; border-color: transparent; background: transparent; }
+/* no frame either: only the lines between its cells (the cell holding it
+   is framed by the outer grid's own lines) */
+.grid-window.clean > table.grid.inline { background: transparent; }
+.grid-window.clean > table.grid.inline > tbody > tr > td.cell:last-child { border-right-color: transparent; }
+.grid-window.clean > table.grid.inline > tbody > tr:last-child > td.cell { border-bottom-color: transparent; }
+.grid-window.clean td.cell { --arr-t: 0 0 transparent !important; --arr-l: 0 0 transparent !important;
+  --arr-b: 0 0 transparent !important; --arr-r: 0 0 transparent !important;
+  --mk-name: none !important; --mk-lint: none !important; --mk-bound: none !important; }
+.grid-window.clean > .grid-handle { position: absolute; top: 0; left: 0; z-index: 3; display: none;
+  font-size: 10px; line-height: 1; padding: 1px 3px; border: 1px solid var(--line); border-radius: 0 0 3px 0;
+  background: var(--panel); color: var(--muted); cursor: pointer; }
+.grid-window.clean:hover > .grid-handle { display: block; }
+.grid-window.clean > .grid-handle:hover { color: var(--accent); border-color: var(--accent); }
+.shelf-tab .g-as-one.summaries .g-tile { min-width: 70px; }
+.shelf-tab .g-summary td { text-align: right; min-width: 40px; }
+.shelf-tab .g-dirs { display: flex; gap: 4px; margin: 0 0 6px; }
+.shelf-tab .g-dirs button { font-size: 11px; padding: 1px 8px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--bg); color: var(--muted); cursor: pointer; }
+.shelf-tab .g-dirs button.on { border-color: var(--accent); color: var(--accent); }
+/* the toolbar's Library ▾ (the library file) */
+.lib-file-menu { position: relative; display: inline-block; }
+.menu-back { position: fixed; inset: 0; z-index: 40; }
+.lib-file-pop { position: absolute; top: 100%; left: 0; z-index: 41; min-width: 260px; margin-top: 2px; padding: 6px;
+  display: flex; flex-direction: column; gap: 4px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+.lib-file-pop p { margin: 0 0 2px; font-size: 11.5px; }
+.lib-file-pop button, .lib-file-pop .button { text-align: left; }
+/* Examples ▾ (§46): an example per line, its title over what it is */
+.examples-pop { width: 340px; }
+.examples-pop button.example { display: flex; flex-direction: column; gap: 2px; white-space: normal; }
+.examples-pop button.example .muted { font-size: 11.5px; }
+/* a dialog over everything: opening a library file */
+.modal-back { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.25); display: flex;
+  align-items: flex-start; justify-content: center; padding-top: 12vh; }
+.modal { background: var(--panel); color: var(--fg, inherit); border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 14px 18px; max-width: 460px; font-size: 13px; }
+.modal h3 { margin: 0 0 8px; font-size: 14px; }
+.modal ul { margin: 0 0 8px; padding-left: 18px; }
+.modal .modal-choice { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
+.modal .modal-buttons { display: flex; gap: 6px; justify-content: flex-end; margin-top: 10px; }
+.modal button.primary { border-color: var(--accent); color: var(--accent); }
+/* the Solver dialog (§39) */
+.modal.solver { width: min(560px, calc(100vw - 32px)); max-width: none; }
+.modal.solver .solver-row { display: flex; flex-direction: column; gap: 3px; margin: 8px 0 0; }
+.modal.solver .solver-inputs, .modal.solver .solver-constraints { width: 100%; box-sizing: border-box; font-family: var(--mono, monospace); }
+.modal.solver .solver-error { color: var(--err); margin: 8px 0 0; }
+.modal.solver .solver-result { margin-top: 10px; max-height: 40vh; overflow: auto; }
+.modal.solver .solver-result p { margin: 0 0 6px; }
+.modal.solver table { border-collapse: collapse; width: 100%; }
+.modal.solver th, .modal.solver td { text-align: left; padding: 2px 8px 2px 0; border-bottom: 1px solid var(--line); }
+.modal.solver tr.miss td { color: var(--err); }
+/* the unit popover (§25), under the unit field */
+.unit-field { position: relative; }
+.unit-field .unit-pick { padding: 0 5px; margin-left: 1px; }
+.unit-gallery { position: absolute; top: 100%; left: 0; z-index: 45; margin-top: 3px; width: 520px; max-height: 70vh;
+  overflow: auto; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
+  box-shadow: 0 6px 22px rgba(0,0,0,.2); font-size: 12px; text-align: left; }
+.unit-gallery .u-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.unit-gallery .u-close { border: none; background: none; color: var(--muted); cursor: pointer; }
+.unit-gallery .u-search { width: 100%; box-sizing: border-box; font: inherit; padding: 3px 8px; margin-bottom: 4px; }
+.unit-gallery .u-section h4 { margin: 8px 0 4px; font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .04em; }
+.unit-gallery .u-section h4 .muted { text-transform: none; font-weight: 400; letter-spacing: 0; }
+.unit-gallery .u-tiles { display: flex; flex-wrap: wrap; gap: 4px; }
+.unit-gallery .u-tile { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 3px 7px;
+  min-width: 54px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: inherit;
+  font: inherit; cursor: pointer; text-align: left; }
+.unit-gallery .u-tile:hover { border-color: var(--accent); }
+.unit-gallery .u-tile.current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.unit-gallery .u-name { font-family: var(--mono); font-weight: 600; }
+.unit-gallery .u-desc { color: var(--muted); font-size: 10.5px; }
+.unit-gallery .u-value { color: var(--accent); font-size: 11px; }
+.unit-gallery .u-own { display: inline-flex; align-items: stretch; gap: 2px; }
+.unit-gallery .u-own > button.u-edit, .unit-gallery .u-own > button.u-remove { font-size: 10.5px; padding: 0 5px; }
+.unit-gallery .u-new { margin-top: 5px; }
+.unit-gallery .u-form { display: flex; flex-direction: column; gap: 6px; }
+.unit-gallery .u-form h4 { margin: 4px 0 0; font-size: 12px; }
+.unit-gallery .u-field { display: flex; gap: 6px; align-items: center; }
+.unit-gallery .u-field > span { width: 80px; color: var(--muted); }
+.unit-gallery .u-kind, .unit-gallery .u-where { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.unit-gallery .u-as { width: 110px; }
+.unit-gallery .u-form-buttons { display: flex; gap: 6px; }
+.unit-gallery button.primary { border-color: var(--accent); color: var(--accent); }
+.format-gallery .g-unit-shown { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px; margin: 2px 0 6px;
+  padding: 4px 6px; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+/* The Data tab (P76): database files and their tables */
+.data-tab .data-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.data-tab > .data-actions { margin: 6px 0 10px; }
+.data-tab button.link { padding: 0; border: none; background: none; color: var(--accent); cursor: pointer; font: inherit; }
+.data-tab button.link:hover { text-decoration: underline; }
+.data-tab ul { list-style: none; margin: 0; padding: 0; }
+.data-sources > li { border-top: 1px solid var(--line); padding: 6px 0; }
+.data-source-head { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.data-source-head .data-source-name { font-weight: 600; }
+.data-source-head .data-actions { margin-left: auto; }
+.data-status { font-size: 12px; color: var(--muted); margin: 2px 0 4px; }
+.data-status.warn { color: var(--warn); }
+.data-csv-opts { margin-top: 3px; font-size: 11.5px; color: var(--muted); }
+.data-csv-opts select { font-size: 11.5px; }
+.data-tables { margin: 2px 0 0 12px !important; font-size: 12.5px; }
+.data-tables > li { padding: 1px 0; }
+.data-columns { border-collapse: collapse; margin: 2px 0 6px 16px; font-size: 12px; }
+.data-columns td { padding: 1px 8px 1px 0; vertical-align: baseline; }
+.data-columns .key { color: var(--accent); }
+
+/* The Data tab's grid (P76 stage 2): a table read in blocks (recdep.ui.datagrid) */
+.data-tab { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.data-tab.showing .data-sources-pane { flex: none; max-height: 35%; overflow: auto; }
+.data-tab.wide.showing { flex-direction: row; gap: 12px; }
+.data-tab.wide.showing .data-sources-pane { width: 300px; max-height: none; }
+.data-table .fold { width: 1em; }
+.data-table.shown .data-table-name { font-weight: 600; }
+.data-view { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.data-view-head { display: flex; gap: 4px; align-items: baseline; padding: 6px 0 4px; flex-wrap: wrap; }
+.data-tab .dg-close { margin-left: auto; font-size: 16px; line-height: 1; }
+.dg { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.dg-scroll { flex: 1; min-height: 160px; overflow: auto; outline: none; border: 1px solid var(--line); }
+.dg-view { position: sticky; top: 0; }
+.dg-clip { overflow-y: clip; }
+.dg table.grid { table-layout: fixed; }
+.dg th.row-head { position: sticky; left: 0; z-index: 2; font-weight: 400; }
+.dg-head th.col-head { position: relative; text-align: left; padding: 0 6px; height: 26px; box-sizing: border-box;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); font-size: 12px; }
+.dg-head th.corner { position: sticky; left: 0; z-index: 3; }
+.dg .dg-type { color: var(--muted); font-size: 10px; font-weight: 400; }
+.dg .key { color: var(--accent); }
+.dg-resize { position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; }
+.dg-strip-row th { height: 22px; box-sizing: border-box; padding: 0 6px; font-weight: 400; text-align: left; }
+.dg-strip { cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dg-strip:hover, .dg-strip.open { color: var(--text); }
+.dg-rogue, .dg .warn { color: var(--warn); }
+.dg-body tr { height: 25px; }
+.dg-body td.cell { height: 25px; box-sizing: border-box; padding: 0 5px; overflow: hidden; cursor: default; }
+.dg-body tr.dg-loading td.cell { background: var(--head); }
+.dg sup.big { font-size: 9px; color: var(--muted); margin-left: 2px; }
+.dg-foot { font-size: 11px; padding: 3px 2px 0; }
+/* every column's details, under its header (Details + data): a row each, so they line up */
+.dg-head th.col-head { cursor: default; }
+/* what the grid shows (P117): its corner's drop-down */
+.dg-mode { width: 100%; font-size: 11px; padding: 0 1px; height: 20px; box-sizing: border-box; }
+/* the correlation matrix: a row per column, under the grid's header (sticky) */
+.dg-corr thead th { position: sticky; top: 0; z-index: 2; }
+.dg-corr thead th.corner { z-index: 4; }
+.dg-corr th.dg-corr-name { text-align: left; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 25px; }
+.dg-corr td.dg-corr-cell { height: 25px; box-sizing: border-box; padding: 0 6px; text-align: right;
+  font-variant-numeric: tabular-nums; cursor: default; overflow: hidden; }
+/* heat colours are fixed (black, green, red: the user's), not the theme's */
+.dg-corr td.dg-corr-self { opacity: .55; }
+.dg-corr td.dg-corr-cell.dg-found { box-shadow: inset 0 0 0 2px var(--accent); opacity: 1; }
+.dg-corr-bar { padding: 4px 2px 0; font-size: 12px; line-height: 1.7; }
+.dg-corr-method { font-size: 12px; }
+.dg-corr-legend { white-space: nowrap; font-size: 11px; }
+.dg-corr-scale { display: inline-block; width: 70px; height: 10px; vertical-align: middle; border: 1px solid var(--line);
+  background: linear-gradient(to right, rgb(239, 68, 68), rgb(0, 0, 0), rgb(34, 197, 94)); }
+.dg-corr-scale.any { background: linear-gradient(to right, rgb(0, 0, 0), rgb(34, 197, 94)); }
+.dg-corr-chip { display: inline-block; padding: 0 4px; border-radius: 3px; font-size: 11px; font-variant-numeric: tabular-nums; }
+.dg-detail-row th { font-weight: 400; font-size: 11.5px; text-align: left; vertical-align: top; white-space: normal;
+  overflow-wrap: anywhere; padding: 3px 6px; color: var(--text); background: var(--panel); }
+.dg-detail-row th.dg-detail-label { color: var(--muted); font-size: 11px; background: var(--head); white-space: nowrap; }
+.dg-detail-row:last-child th { border-bottom: 2px solid var(--line); }
+.dg-detail-row th.dg-narrow { text-align: center; vertical-align: middle; border-bottom: 2px solid var(--line); }
+.dg-narrow button.link { font-size: 16px; }
+/* a narrow column's details, in its own cells, spilling over its neighbours */
+.dg-detail-row th.dg-spill-cell { z-index: 3; overflow: visible; }
+.dg-spill-sizer { visibility: hidden; }
+.dg-spill { position: absolute; top: 0; bottom: 0; left: 0; box-sizing: border-box; padding: 3px 6px;
+  background: var(--head); border: 1px solid var(--accent); border-top: none; border-bottom: none;
+  box-shadow: 4px 0 8px rgba(0, 0, 0, .12); overflow: hidden; }
+.dg-detail-row:first-of-type .dg-spill { border-top: 1px solid var(--accent); }
+.dg-detail-row:last-child .dg-spill { border-bottom: 1px solid var(--accent); }
+.dg-spill-close { position: absolute; top: 1px; right: 4px; font-size: 14px; line-height: 1; }
+/* the summary line is a control only for a narrow column */
+.dg-head th.dg-strip-cell { cursor: default; }
+.dg-strip.clickable { cursor: pointer; color: var(--accent); }
+/* rows folded to a line (a click on the row's name) */
+.dg-detail-row th.dg-detail-label.foldable { cursor: pointer; }
+.dg-detail-row th.dg-detail-label.foldable:hover { color: var(--text); }
+.dg-fold { font-size: 9px; }
+.dg-detail-row.folded th.dg-detail { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dg-detail-row.folded .dg-spill { white-space: nowrap; text-overflow: ellipsis; }
+/* (a folded row clips its cells to a line, but the spill still spills) */
+.dg-detail-row.folded th.dg-spill-cell { overflow: visible; }
+/* numbers: the histogram, and outliers (◆) in the details and tinted in the grid */
+.dg-out { color: var(--warn); }
+.dg-hist { display: block; }
+.dg-hist .dg-hist-bar { fill: var(--accent); opacity: .75; }
+.dg-hist .dg-hist-bar:hover, .dg-hist .dg-hist-out:hover { opacity: 1; }
+.dg-hist .dg-hist-out { fill: var(--warn); }
+.dg-date-hist .dg-hist-bar.clickable { cursor: pointer; }
+.recipe-values .recipe-value-hidden { font-style: italic; }
+.recipe-pattern { width: 14em; font-family: var(--mono, monospace); }
+.recipe-undo { margin-left: 8px; }
+.data-view:focus { outline: none; }
+.recipe-saved-row { display: flex; align-items: center; }
+.dg-menu-sep { border-top: 1px solid var(--border, #ddd); margin: 4px 0; }
+.recipe-saved-row .dg-menu-item { flex: 1; }
+.recipe-saved-row .recipe-forget-steps { flex: none; width: 24px; height: 24px; margin: 0 8px 0 4px; padding: 0;
+  border: 1px solid transparent; border-radius: 4px; background: none; color: var(--muted, #888);
+  font-size: 17px; line-height: 1; cursor: pointer; }
+.recipe-saved-row .recipe-forget-steps:hover { border-color: var(--line); background: var(--sel-bg); color: var(--err); }
+.recipe-saved-all { font-weight: 600; }
+/* Saved steps… (P102) */
+.modal.saved-steps { width: min(720px, calc(100vw - 32px)); max-width: none; max-height: 76vh; display: flex; flex-direction: column; }
+.saved-steps-head { display: flex; align-items: center; justify-content: space-between; }
+.saved-steps-head h3 { margin: 0; }
+.saved-steps-close { width: 28px; height: 28px; border: 1px solid transparent; border-radius: 4px; background: none;
+  font-size: 19px; line-height: 1; color: var(--muted, #888); cursor: pointer; }
+.saved-steps-close:hover { border-color: var(--line); background: var(--sel-bg); color: var(--text); }
+.saved-steps-tools { display: flex; gap: 10px; align-items: center; margin: 10px 0 8px; flex-wrap: wrap; }
+.saved-steps-search { flex: 1; min-width: 200px; padding: 4px 8px; font: inherit; }
+.saved-steps-list { overflow-y: auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 60px; }
+.saved-steps-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 4px; border-top: 1px solid var(--line); }
+.saved-steps-row:first-child { border-top: 0; }
+.saved-steps-row > input[type=checkbox] { margin-top: 3px; }
+.saved-steps-main { flex: 1; min-width: 0; }
+.saved-steps-name { font-weight: 600; text-align: left; }
+.saved-steps-rename { font: inherit; font-weight: 600; width: 100%; max-width: 320px; }
+.saved-steps-meta { font-size: 11.5px; margin-top: 2px; overflow-wrap: anywhere; }
+.saved-steps-fit { font-size: 12px; margin-top: 3px; }
+.saved-steps-fit .ok { color: var(--lint); }
+.saved-steps-fit .warn { color: var(--err); }
+.saved-steps-steps { margin: 6px 0 0; padding-left: 20px; font-size: 12px; }
+.saved-steps-actions { display: flex; gap: 4px; flex: none; }
+.saved-steps-foot { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+.saved-steps-lib { flex: 1; font-size: 11.5px; }
+@media (max-width: 560px) {
+  .saved-steps-row { flex-wrap: wrap; }
+  .saved-steps-actions { width: 100%; justify-content: flex-end; }
+  .saved-steps-foot { flex-wrap: wrap; }
+}
+.recipe-undo button { min-width: 26px; }
+.dg-body td.cell.dg-outlier { background: color-mix(in srgb, var(--warn) 18%, var(--panel)); }
+
+/* The recipe: the steps that shape a table in the Data tab (P76 stage 3, recdep.ui.recipe) */
+.recipe-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 2px 0 6px; font-size: 12px; }
+.recipe-chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 12px;
+  padding: 1px 9px; background: var(--panel); font: inherit; line-height: 18px; }
+button.recipe-chip { cursor: pointer; }
+.recipe-chip button.link { font: inherit; }
+.recipe-chip.on { border-color: var(--accent); background: var(--sel-bg); }
+.recipe-chip.on > button.link:first-child, button.recipe-chip.on { font-weight: 600; }
+.recipe-chip.after { opacity: .55; }
+.recipe-chip.failed { border-color: var(--err); background: var(--err-bg); }
+.recipe-chip .recipe-edit, .recipe-chip .recipe-remove { color: var(--muted); font-size: 11px; }
+.recipe-chip .recipe-edit:hover, .recipe-chip .recipe-remove:hover { color: var(--text); }
+.recipe-arrow { color: var(--muted); font-size: 10px; }
+/* a steps formula's steps in the Inspector (the table verbs, recdep.ui.stepsgadget) */
+.steps-gadget .recipe-bar { margin: 0 0 4px; }
+.steps-gadget .steps-add { font-size: 11.5px; }
+.steps-gadget input.steps-expr { width: 100%; font-family: var(--mono); }
+.steps-gadget .recipe-chip button.link { border: none; background: none; padding: 0; min-width: 0; box-shadow: none; }
+/* a chip selected: the cell shows the table after that step, in the sheet (recdep.ui.stepsview) */
+td.cell.steps-shown-cell { position: relative; overflow: visible; z-index: 30; }
+/* drawn over the cell and its neighbours while shown, as big as the table needs (a long one scrolls) */
+.steps-shown { position: absolute; top: 0; left: 0; min-width: 100%; width: max-content; max-width: 70vw;
+  max-height: 22em; overflow: auto; font-size: 12px; background: var(--panel); text-align: left;
+  border: 2px dashed var(--accent); box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+.steps-shown-head { position: sticky; top: 0; z-index: 1; padding: 1px 6px; background: var(--sel-bg); color: var(--text);
+  border-bottom: 1px solid var(--accent); white-space: nowrap; }
+.steps-shown table { border-collapse: collapse; }
+.steps-shown th, .steps-shown td { border: 1px solid var(--line); padding: 1px 6px; text-align: left; white-space: nowrap; }
+.steps-shown td.steps-num { text-align: right; font-variant-numeric: tabular-nums; }
+.recipe-add { display: inline-flex; gap: 4px; margin-left: 6px; }
+.recipe-add button.fmt { font-size: 11.5px; padding: 1px 8px; }
+.data-tab .recipe-sql-toggle { margin-left: auto; font-size: 12px; }
+.recipe-editor { border: 1px solid var(--accent); border-radius: 4px; padding: 6px 8px; margin: 0 0 6px;
+  background: var(--panel); font-size: 12px; }
+.recipe-editor-head { margin-bottom: 2px; }
+.recipe-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin: 4px 0; }
+.recipe-checks { display: flex; flex-wrap: wrap; gap: 2px 14px; max-height: 120px; overflow: auto; }
+.recipe-checks label { white-space: nowrap; }
+.recipe-value { width: 10em; }
+/* P79: the columns editor (order, names), a value list, a column's menu */
+.recipe-cols { border-collapse: collapse; font-size: 12px; }
+.recipe-cols td { padding: 1px 4px; }
+.recipe-cols td.recipe-col-name { white-space: nowrap; }
+.recipe-cols tr.recipe-col-off td { opacity: .55; }
+.recipe-cols .recipe-value { width: 12em; }
+.recipe-columns { max-height: 240px; overflow: auto; }
+.recipe-values .recipe-value-checks { max-height: 180px; max-width: 420px; flex-direction: column; flex-wrap: nowrap; }
+.recipe-values .recipe-value-checks label { display: flex; gap: 6px; }
+.recipe-values .recipe-value-checks .muted { margin-left: auto; padding-left: 12px; }
+.recipe-add-more { position: relative; }
+.dg-menu.recipe-add-menu { position: absolute; left: 0; top: calc(100% + 2px); min-width: 300px; overflow-y: auto; }
+.recipe-add-menu .dg-menu-item .muted { font-size: 11px; }
+.dg-head .dg-name.has-menu { cursor: pointer; }
+.dg-head .dg-name.has-menu:hover { color: var(--accent); }
+.dg-menu { position: fixed; z-index: 50; background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18); padding: 3px 0; min-width: 210px; font-size: 12px; }
+.dg-menu-head { display: flex; justify-content: space-between; gap: 8px; padding: 2px 10px 4px; font-weight: 600;
+  border-bottom: 1px solid var(--line); margin-bottom: 2px; }
+.dg-menu-item { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 4px 10px;
+  font: inherit; color: var(--text); cursor: pointer; }
+.dg-menu-item:hover { background: var(--sel-bg); }
+.recipe-join-stats { margin: 6px 0 2px; font-size: 12px; }
+.recipe-join-stats .warn { color: var(--warn); }
+.recipe-join-stats { margin: 6px 0 2px; font-size: 12px; }
+.recipe-join-stats .warn { color: var(--warn); }
+.recipe-sql { width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 12px; }
+.recipe-error { color: var(--err); background: var(--err-bg); border-radius: 4px; padding: 4px 8px; margin: 0 0 6px; font-size: 12px; }
+.recipe-error .muted { color: var(--muted); }
+.recipe-caret { font-family: var(--mono); font-size: 12px; margin: 4px 0; color: var(--text); }
+.recipe-sql-view { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; margin: 0 0 6px; font-size: 11.5px;
+  max-height: 160px; overflow: auto; }
+.recipe-sql-view pre { margin: 0 0 4px; white-space: pre-wrap; font-family: var(--mono); }
+
+/* Promote / Update in the Data tab's head; a promoted grid in the Inspector (P76 stage 4) */
+.data-view-head .promote-actions { display: inline-flex; gap: 4px; margin-left: auto; }
+.data-view-head .promote-actions + .dg-close { margin-left: 8px; }
+.promote-actions button.fmt { font-size: 12px; padding: 1px 10px; }
+.promote-actions button.fmt:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.inspector .promoted button { margin-left: 4px; }
+/* the grid bar, while the grid shown came from the Data tab */
+.crumbs .promoted-bar { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 1px 6px;
+  border: 1px solid var(--line); border-radius: 10px; font-size: 12px; white-space: nowrap; }
+.crumbs .promoted-bar button.fmt { font-size: 11.5px; padding: 0 6px; }
+/* P82: a count or a value in a column's details goes to its rows; the bar steps through them */
+.dg-find-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 2px; padding: 0; }
+.dg-find-link:hover { color: var(--accent); text-decoration-style: solid; }
+.dg-find-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 12px; padding: 4px 6px;
+  border: 1px solid var(--line); border-top: 0; background: var(--panel); }
+.dg-find-bar .dg-find-close { margin-left: auto; }
+.dg-body td.cell.dg-found { outline: 2px solid var(--accent); outline-offset: -2px; }
+.data-csv-skip { width: 3.5em; }
+.recipe-names { width: 28em; max-width: 100%; }
+.recipe-value.recipe-skip, .recipe-value.recipe-keep { width: 6em; }
+.recipe-kind-checks label { margin-right: 10px; }
+/* P83: columns dragged into place (a grip, or the name); big enough arrows; a filter inverted from its chip */
+.recipe-cols .recipe-grip, .recipe-cols .recipe-col-name.draggable { cursor: grab; user-select: none; }
+.recipe-cols .recipe-grip { color: var(--muted); font-size: 15px; padding: 0 6px; }
+.recipe-cols tr.dragging { background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
+.recipe-cols tr.dragging td { cursor: grabbing; }
+.recipe-cols .recipe-move button { min-width: 30px; height: 26px; margin-right: 3px; font-size: 14px; line-height: 1;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--text); cursor: pointer; }
+.recipe-cols .recipe-move button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.recipe-cols .recipe-move button:disabled { opacity: 0.35; cursor: default; }
+
+/* P84: the mean (solid) and the median (dashed) on a column's histogram */
+.dg-hist line.dg-hist-mean { stroke: var(--text); stroke-width: 1.5; }
+.dg-hist line.dg-hist-median { stroke: var(--text); stroke-width: 1.5; stroke-dasharray: 3 2; opacity: .7; }
+
+/* Sheet tabs (P111): the strip under the grid */
+.grid-col { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.grid-col > .grid-scroll { min-height: 0; }
+.sheet-tabs { flex: none; display: flex; align-items: stretch; gap: 2px; padding: 0 6px;
+  border-top: 1px solid var(--line); background: var(--head); font-size: 12px; min-height: 26px; }
+.sheet-tabs .tab-list { display: flex; gap: 1px; overflow-x: auto; min-width: 0; scrollbar-width: none; }
+.sheet-tabs .tab-list::-webkit-scrollbar { display: none; }
+.sheet-tabs button { border: none; border-radius: 0; background: transparent; color: var(--muted);
+  padding: 3px 12px; white-space: nowrap; }
+.sheet-tabs button:hover { color: var(--text); background: var(--sel-bg); }
+.sheet-tabs button.tab { font-family: var(--mono); border-right: 1px solid var(--line); }
+.sheet-tabs button.tab.on { background: var(--panel); color: var(--text); font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent); }
+.sheet-tabs .tab-nav { padding: 3px 6px; }
+.sheet-tabs .tab-add { font-weight: 600; padding: 3px 10px; }
+.sheet-tabs .tab-edit { font: inherit; font-family: var(--mono); margin: 2px 0; padding: 0 6px;
+  border: 1px solid var(--accent); background: var(--panel); color: var(--text); }
+.tab-menu { max-height: 60vh; overflow-y: auto; }
+.tab-menu .menu-item.on { font-weight: 600; }
+
+/* The Tests tab's cases, as the Scenarios tab's table (P112): a column per
+   case, a row per input and expected value */
+.tests-tab .tests-scoped { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 4px; }
+.tests-tab .tests-scoped h3 { font-size: 13px; margin: 6px 0 4px; font-family: var(--mono); }
+.tests-tab .tests-grid-row { margin: 4px 0 6px; font-size: 12px; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.tests-tab .case-table { overflow-x: auto; margin: 0 0 8px; }
+.tests-tab .case-table table { border-collapse: collapse; font-size: 12px; }
+.tests-tab .case-table th, .tests-tab .case-table td { border-bottom: 1px solid var(--line); padding: 2px 4px;
+  text-align: left; vertical-align: middle; }
+.tests-tab .case-table th { font-weight: 600; color: var(--muted); white-space: nowrap; }
+.tests-tab .case-table th.key, .tests-tab .case-table th.corner, .tests-tab .case-table tr.add-row th {
+  position: sticky; left: 0; z-index: 1; background: var(--panel); padding-right: 8px; }
+.tests-tab .case-table th.key.broken { color: var(--warn); }
+.tests-tab .case-table tr.part th { color: var(--text); padding-top: 8px; position: static; }
+.tests-tab .case-table .key-head, .tests-tab .case-table .add-row { display: inline-flex; gap: 4px; align-items: center; }
+.tests-tab .case-table th.case { vertical-align: top; padding-bottom: 4px; }
+.tests-tab .case-table .case-head { display: flex; align-items: center; gap: 2px; }
+.tests-tab .case-table th.case .icon { font-weight: 700; width: 1.1em; text-align: center; }
+.tests-tab .case-table th.case.pass .icon { color: var(--good); }
+.tests-tab .case-table th.case.fail .icon { color: var(--test-fail); }
+.tests-tab .case-table th.case.error .icon { color: var(--warn); }
+.tests-tab .case-table th.case button.accept { display: block; margin: 2px 0 0 3px; font-size: 11px; }
+.tests-tab .case-table .case-error { color: var(--warn); font-weight: 400; white-space: normal; max-width: 16em; font-size: 11.5px; }
+.tests-tab .case-table input { font-family: var(--mono); font-size: 11.5px; color: var(--text); background: transparent;
+  border: 1px solid transparent; border-radius: 3px; padding: 1px 3px; width: 7.5em; box-sizing: border-box; }
+.tests-tab .case-table input.case-name { font-family: inherit; font-weight: 600; }
+.tests-tab .case-table input.key-path { width: 8em; border-color: var(--line); background: var(--bg); }
+.tests-tab .case-table input:hover, .tests-tab .case-table input:focus { border-color: var(--line); background: var(--bg); }
+.tests-tab .case-table td.differs { background: var(--test-fail-tint); }
+.tests-tab .case-table .got { color: var(--test-fail); font-family: var(--mono); font-size: 11px; padding: 0 3px; }
+.tests-tab .case-table button.remove { padding: 0 3px; border-color: transparent; background: transparent; color: var(--muted); }
+.tests-tab .case-table button.remove:hover { color: var(--text); border-color: var(--line); }
+.tests-tab .case-table a.cell-link { font-family: var(--mono); }
+
+/* A status-bar count in two halves (P29): everywhere | here */
+.flag-pair { display: inline-flex; align-items: stretch; white-space: nowrap; }
+.flag-pair > a.flag:first-child:not(:last-child) { border-radius: 4px 0 0 4px; }
+.flag-pair > :nth-child(2) { border-radius: 0 4px 4px 0; margin-left: -1px; }
+.flag-pair > a.flag.here { font-weight: 500; }
+.flag-pair > .flag-here-none { color: var(--muted); font-size: 11.5px; line-height: 17px; padding: 0 6px;
+  box-shadow: inset 0 0 0 1px var(--line); }
+
+/* REPL tab (§37) */
+.repl { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; }
+.repl-foot { display: flex; gap: 8px; justify-content: space-between; align-items: baseline; }
+.repl-defs { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; max-height: 40%;
+  overflow: auto; flex: none; font-size: 12.5px; }
+.repl-defs ul { list-style: none; margin: 4px 0 0; padding: 0; }
+.repl-defs li { padding: 2px 0; }
+.repl-defs-head { display: flex; gap: 6px; align-items: baseline; }
+.repl-defs-buttons { margin-left: auto; display: flex; gap: 6px; }
+.repl-def-actions { margin-left: 8px; }
+.repl-def-actions .link { margin-right: 6px; }
+.repl .tag { font-size: 10.5px; padding: 0 5px; border-radius: 7px; border: 1px solid var(--line); color: var(--muted); }
+.repl .tag.new, .repl .tag.changed { color: var(--accent); border-color: var(--accent); }
+.repl .tag.err { color: var(--err); border-color: var(--err); }
+.repl-publish { margin-top: 6px; padding: 6px 8px; border-top: 1px solid var(--line); }
+.repl-publish ul { margin: 4px 0; }
+.repl-publish select { font: inherit; margin-left: 4px; }
+.repl-transcript { flex: 1; min-height: 80px; overflow: auto; font-size: 12.5px; }
+.repl-entry { padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.repl-transcript pre { margin: 2px 0; white-space: pre-wrap; word-break: break-word; font-family: var(--mono, monospace); }
+pre.repl-in { cursor: pointer; color: var(--muted); }
+pre.repl-in::before { content: "› "; }
+pre.repl-in:hover { color: var(--text); }
+pre.repl-out { color: var(--muted); font-style: italic; }
+pre.repl-error { color: var(--err); }
+.repl-defined { color: var(--muted); }
+.repl-drawn { padding: 4px; border: 1px solid var(--line); border-radius: 4px; display: inline-block; }
+.repl-input { flex: none; }
+.repl-editor { min-height: 44px; max-height: 240px; overflow: auto; border: 1px solid var(--line); border-radius: 4px; }
+.repl-editor .cm-editor { max-height: none; }
+.repl .small { font-size: 11.5px; }
+
+/* the cross-plot of a pair in the correlation matrix (P122) */
+.dg-corr td.dg-corr-cell { cursor: pointer; }
+.dg-corr-plot { border: 1px solid var(--line); border-top: 0; padding: 4px 8px 6px; font-size: 12px; }
+.dg-corr-plot-head { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; margin-bottom: 2px; }
+.dg-corr-plot-head .dg-plot-close { margin-left: auto; font-size: 15px; line-height: 1; }
+.dg-corr-ranks { margin-left: 10px; font-size: 11px; color: var(--muted); cursor: pointer; }
+/* drawn by the sheet's chart view (Vega-Lite): its box sizes it */
+.dg-corr-chart .r-vega { height: 260px; }
+
+
+/* a repeat sketched on its Shelf tile (P146): the line, not its values */
+.g-repeat { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 4px 2px;
+  font-family: var(--mono); font-size: 11px; }
+.g-repeat.across { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.g-repeat-item { display: inline-flex; align-items: center; gap: 4px; }
+.g-repeat-cell { border: 1px solid var(--line); border-radius: 2px; padding: 0 5px; min-width: 38px; text-align: center; }
+.g-repeat-cell.formula { border-color: var(--accent); }
+.g-repeat-cell.result { border-style: dashed; color: var(--muted); }
+.g-repeat-ref { color: var(--accent); }
+.g-repeat-arrow, .g-repeat-gap { color: var(--muted); }
+.g-repeat-gap { padding-left: 2px; }
+.g-repeat-n { color: var(--muted); font-family: var(--sans, inherit); margin-top: 2px; }
+.g-repeat.across .g-repeat-n { margin: 0 0 0 6px; }
+
+/* The Shelf in two parts (P172): for this selection, and the shelf */
+.shelf-tab .shelf-part { margin: 12px 0 0; padding-top: 6px; border-top: 1px solid var(--line); font-size: 12.5px; font-weight: 600; }
+.shelf-tab .shelf-part:first-of-type { border-top: none; margin-top: 4px; padding-top: 0; }
+.shelf-tab .shelf-rows { display: flex; flex-direction: column; gap: 2px; margin: 4px 0; }
+.shelf-tab .shelf-row { display: block; text-align: left; font-size: 12px; padding: 3px 6px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; background: none; cursor: pointer; }
+.shelf-tab .shelf-row:hover { border-color: var(--accent); }
+.shelf-tab .shelf-row.picked { border-color: var(--accent); }
+.shelf-tab .shelf-template.picked { border: 1px solid var(--accent); border-radius: 4px; padding: 6px 8px; margin: 4px 0; }
+.shelf-tab .shelf-misses { font-size: 12px; margin: 2px 0 4px; }
+.shelf-tab .shelf-misses summary { cursor: pointer; }
+.shelf-tab .shelf-misses ul { margin: 2px 0 0; padding-left: 18px; }
+/* a template's face, at its own values, over its line on the shelf (P177) */
+.shelf-tab .shelf-row-wrap { position: relative; }
+.shelf-tab .shelf-face-pop { position: absolute; left: 12px; top: 100%; z-index: 30; padding: 4px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); pointer-events: none; }
+/* picking from what a cell's validation allows (P219): the ▾ on the active
+   cell, and its popover */
+.pick-arrow { float: right; margin: -1px -3px 0 4px; padding: 0 3px; border: 1px solid var(--line);
+  border-radius: 3px; background: var(--panel); color: var(--muted); font-size: 10px; line-height: 16px;
+  cursor: pointer; }
+.pick-arrow:hover { color: var(--text); border-color: var(--muted); }
+.pick-backdrop { position: fixed; inset: 0; z-index: 20; }
+.pick-pop { position: fixed; z-index: 21; width: 220px; max-height: 50vh; padding: 6px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.pick-head { font-size: 11px; color: var(--muted); }
+.pick-filter { width: 100%; box-sizing: border-box; }
+.pick-list { overflow: auto; display: flex; flex-direction: column; min-height: 0; }
+.pick-option { text-align: left; border: 0; background: none; padding: 2px 4px; cursor: pointer; color: inherit; font: inherit; }
+.pick-option:hover, .pick-tick:hover { background: var(--sel-bg); }
+.pick-option.current { font-weight: 600; }
+.pick-tick { display: flex; gap: 6px; align-items: center; padding: 1px 4px; cursor: pointer; }
+.pick-none, .pick-odd { color: var(--muted); font-size: 11px; }
+.pick-foot { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
+.pick-done { margin-left: auto; }
+/* an option with its row's description beside it (P231): a lookup of IDs */
+.pick-pop.described { width: 360px; }
+.pick-option:has(.pick-key) { display: flex; gap: 8px; }
+.pick-key { flex: none; min-width: 2.5em; font-variant-numeric: tabular-nums; }
+.pick-desc { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a table column's kind on its heading (P194) */
+td.cell.table-head[data-kind]::after { content: attr(data-kind); float: right; margin-left: 4px;
+  font-size: 9.5px; font-weight: 400; color: var(--muted); font-family: var(--mono); }
+
+/* Frozen rows and columns (P191): kept in view while the rest scrolls. A frozen
+   row sticks at its own offset (--frz-top, measured); a frozen column at the
+   headings plus the frozen columns before it (--frz-l-N). Above them the
+   headings, so they stack: headings, then frozen rows, then frozen columns. */
+table.grid tr.frz-r > td.cell { position: sticky; top: var(--frz-top); z-index: 3; }
+table.grid tr.frz-r > th.row-head { position: sticky; top: var(--frz-top); z-index: 6; }
+table.grid:not(.inline) > thead th.col-head, .grid-window.windowed > table.grid.inline > thead th.col-head { z-index: 7; }
+table.grid:not(.inline) > thead th.corner, .grid-window.windowed > table.grid.inline > thead th.corner { z-index: 9; }
+table.grid tr.frz-r > td.cell { box-shadow: inset 0 -1px 0 var(--line); }
+table.grid.frz-c1 > tbody > tr > td.cell:nth-of-type(-n+1) { position: sticky; z-index: 2; }
+table.grid.frz-c1 > tbody > tr.frz-r > td.cell:nth-of-type(-n+1) { z-index: 4; }
+table.grid.frz-c1 > thead th.col-head:nth-of-type(-n+2) { position: sticky; z-index: 8; }
+table.grid.frz-c2 > tbody > tr > td.cell:nth-of-type(-n+2) { position: sticky; z-index: 2; }
+table.grid.frz-c2 > tbody > tr.frz-r > td.cell:nth-of-type(-n+2) { z-index: 4; }
+table.grid.frz-c2 > thead th.col-head:nth-of-type(-n+3) { position: sticky; z-index: 8; }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(-n+3) { position: sticky; z-index: 2; }
+table.grid.frz-c3 > tbody > tr.frz-r > td.cell:nth-of-type(-n+3) { z-index: 4; }
+table.grid.frz-c3 > thead th.col-head:nth-of-type(-n+4) { position: sticky; z-index: 8; }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(-n+4) { position: sticky; z-index: 2; }
+table.grid.frz-c4 > tbody > tr.frz-r > td.cell:nth-of-type(-n+4) { z-index: 4; }
+table.grid.frz-c4 > thead th.col-head:nth-of-type(-n+5) { position: sticky; z-index: 8; }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(-n+5) { position: sticky; z-index: 2; }
+table.grid.frz-c5 > tbody > tr.frz-r > td.cell:nth-of-type(-n+5) { z-index: 4; }
+table.grid.frz-c5 > thead th.col-head:nth-of-type(-n+6) { position: sticky; z-index: 8; }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(-n+6) { position: sticky; z-index: 2; }
+table.grid.frz-c6 > tbody > tr.frz-r > td.cell:nth-of-type(-n+6) { z-index: 4; }
+table.grid.frz-c6 > thead th.col-head:nth-of-type(-n+7) { position: sticky; z-index: 8; }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(-n+7) { position: sticky; z-index: 2; }
+table.grid.frz-c7 > tbody > tr.frz-r > td.cell:nth-of-type(-n+7) { z-index: 4; }
+table.grid.frz-c7 > thead th.col-head:nth-of-type(-n+8) { position: sticky; z-index: 8; }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(-n+8) { position: sticky; z-index: 2; }
+table.grid.frz-c8 > tbody > tr.frz-r > td.cell:nth-of-type(-n+8) { z-index: 4; }
+table.grid.frz-c8 > thead th.col-head:nth-of-type(-n+9) { position: sticky; z-index: 8; }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(-n+9) { position: sticky; z-index: 2; }
+table.grid.frz-c9 > tbody > tr.frz-r > td.cell:nth-of-type(-n+9) { z-index: 4; }
+table.grid.frz-c9 > thead th.col-head:nth-of-type(-n+10) { position: sticky; z-index: 8; }
+table.grid.frz-c1 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c1 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c2 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c2 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c2 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c2 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c3 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c3 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c3 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c3 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c4 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c4 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c4 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c4 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c4 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c5 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c5 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c5 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c5 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c5 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c5 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c6 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c6 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c6 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c6 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c6 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c6 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c6 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c7 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c7 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c7 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c7 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c7 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c7 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c7 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c7 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c8 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c8 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c8 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c8 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c8 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c8 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c8 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
+table.grid.frz-c8 > tbody > tr > td.cell:nth-of-type(8), table.grid.frz-c8 > thead th.col-head:nth-of-type(9) { left: var(--frz-l-7); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(1), table.grid.frz-c9 > thead th.col-head:nth-of-type(2) { left: var(--frz-l-0); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(2), table.grid.frz-c9 > thead th.col-head:nth-of-type(3) { left: var(--frz-l-1); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(3), table.grid.frz-c9 > thead th.col-head:nth-of-type(4) { left: var(--frz-l-2); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(4), table.grid.frz-c9 > thead th.col-head:nth-of-type(5) { left: var(--frz-l-3); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(5), table.grid.frz-c9 > thead th.col-head:nth-of-type(6) { left: var(--frz-l-4); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c9 > thead th.col-head:nth-of-type(7) { left: var(--frz-l-5); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c9 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(8), table.grid.frz-c9 > thead th.col-head:nth-of-type(9) { left: var(--frz-l-7); }
+table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(9), table.grid.frz-c9 > thead th.col-head:nth-of-type(10) { left: var(--frz-l-8); }
+/* the toolbar's lock (P193): protection off is worth seeing */
+.toolbar button.lock.off { background: var(--warn-bg, #fff1c2); }
+/* a flat list of values shown in a cell (P196): on one line, each in the cell's format */
+td.cell .r-list-inline, td.cell .r-list-inline .num { display: inline; }
+td.cell .r-list-inline { display: block; text-align: right; }
+td.cell .r-list-inline.text { text-align: left; }
+/* a menu item folding a few choices into a submenu, beside it (fixed: the
+   menu itself scrolls, which would clip it) */
+.menu.submenu { z-index: 22; min-width: 180px; }
+.menu-item.has-sub.open { background: var(--sel-bg); }
+/* a view's cell that writes back to its table (P198): typing here changes
+   the table's cell; marked so it isn't taken for a formula's result */
+td.cell.writes-through { box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* the place right of a table's last column, where typing adds one (P207) */
+th.col-head.next-col { color: var(--muted, #888); font-weight: normal; opacity: .6; }
+td.cell.next-col { background: transparent; border-left: 1px dashed var(--line); }
+/* + Step… of a steps formula just placed from the Shelf (P211) */
+select.steps-add.ready { outline: 2px solid var(--accent); outline-offset: 1px; animation: steps-ready 0.8s ease-in-out 3; }
+@keyframes steps-ready { 50% { outline-color: transparent; } }
+@media (prefers-reduced-motion: reduce) { select.steps-add.ready { animation: none; } }
+/* the Shelf's Start steps line (P211) */
+.shelf-steps-start { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 10px; padding: 6px 8px;
+  border: 1px solid var(--line); border-radius: 5px; font-size: 12.5px; }
+.shelf-steps-start select { max-width: 220px; }
+/* a long error kept in the status bar: one line, the whole in its title (P208) */
+.status-bar .message { max-width: 55vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
