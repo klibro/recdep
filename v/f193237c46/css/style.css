@@ -213,6 +213,8 @@ td.cell.sel { outline: 2px solid var(--muted); outline-offset: -2px; background:
 td.cell.has-error { background: var(--err-bg); }
 /* not settled yet (P16): the old value, dimmed until it's calculated */
 td.cell.stale:not(.has-grid) > * { opacity: .4; }
+/* P199: a blank cell of a column with a default shows what the table's rows read there, faintly */
+td.cell.default-shown { color: var(--muted); font-style: italic; }
 .stale-value { opacity: .5; }
 td.cell .num { display: block; text-align: right; font-variant-numeric: tabular-nums; }
 td.cell .code, td.cell .kw { font-family: var(--mono); font-size: 11.5px; }
@@ -413,6 +415,7 @@ button.cp-button.r-color .cp-patch { flex: 1; border-radius: 2px; }
 .tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
 .tab-body { flex: 1; overflow: auto; padding: 10px 12px; min-height: 0; }
 .inspector h3, .help h3 { margin: 0 0 8px; font-size: 14px; }
+.inspector h3 .h3-addr { font-weight: 400; font-family: var(--mono); font-size: 12px; }
 .help h3 { margin-top: 14px; }
 .inspector dl { margin: 0; display: grid; grid-template-columns: 90px 1fr; gap: 6px 8px; }
 .inspector dt { color: var(--muted); }
@@ -562,11 +565,12 @@ td.cell {
   --arr-b: 0 0 transparent; --arr-r: 0 0 transparent;
   --open-t: 0 0 transparent; --open-l: 0 0 transparent;
   --open-b: 0 0 transparent; --open-r: 0 0 transparent;
+  --writes: 0 0 transparent;
   --bad-shadow: 0 0 transparent; --heat-tint: 0 0 transparent;
   --row-h: initial;   /* a set row height is the row's own, not its inner grids' */
   --ink: initial;     /* a text colour drawing the renderer (P34): the cell's own */
   box-shadow: var(--ref-outline), var(--arr-t), var(--arr-l), var(--arr-b), var(--arr-r),
-              var(--open-t), var(--open-l), var(--open-b), var(--open-r), var(--bad-shadow), var(--tint),
+              var(--open-t), var(--open-l), var(--open-b), var(--open-r), var(--writes), var(--bad-shadow), var(--tint),
               var(--heat-tint); }
 /* the Profile tab's overlay (§23): a tint as hot as --heat (0..1, set
    inline), and the time or step as a tag, bottom right. The cell is
@@ -607,6 +611,21 @@ td.cell.open-t { --open-t: inset 0 2px 0 var(--open-edge); }
 td.cell.open-l { --open-l: inset 2px 0 0 var(--open-edge); }
 td.cell.open-b { --open-b: inset 0 -2px 0 var(--open-edge); }
 td.cell.open-r { --open-r: inset -2px 0 0 var(--open-edge); }
+/* (P315) a cell drawing a grid (or a span): what it draws covers its own
+   outline and inset shadows, so its selection's frame and its open frame
+   (t l b r) are drawn by an element last in it (in the span's box for a
+   span). The cell is a layer of its own (z-index 0, under the sheet's
+   sticky headers), and the element is over everything in it: the grid's
+   own sticky headers (z-index 1 to 6) reach its edges in Mesh mode. */
+td.cell.has-over { position: relative; z-index: 0; }
+.cell-over { position: absolute; inset: 0; pointer-events: none; box-sizing: border-box; z-index: 7;
+  border: 0 solid var(--open-edge); }
+.cell-over.t { border-top-width: 2px; }
+.cell-over.l { border-left-width: 2px; }
+.cell-over.b { border-bottom-width: 2px; }
+.cell-over.r { border-right-width: 2px; }
+td.cell.sel > .cell-over, td.cell.sel > .span-box > .cell-over { outline: 2px solid var(--muted); outline-offset: -2px; }
+.grid-scroll:focus td.cell.sel > .cell-over, .grid-scroll:focus td.cell.sel > .span-box > .cell-over { outline-color: var(--accent); }
 td.cell.precedent:not(.sel) { outline: 1px dashed var(--accent); outline-offset: -3px; }
 /* Corner marks, as background layers (a background image, not a positioned
    ::before: a positioned cell would paint over text spilling into it). Each
@@ -718,6 +737,41 @@ button.ref-mode { font-size: 11px; padding: 1px 4px; color: var(--muted); font-f
 .name-field button { font-size: 11px; padding: 0 6px; }
 .help ul { padding-left: 18px; margin: 4px 0; }
 .help li { margin: 3px 0; }
+/* the Help tab's search, guide and manual sections (P271) */
+.help-search-row { position: sticky; top: -10px; z-index: 2; background: var(--panel); margin: -10px -12px 6px; padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--line); }
+.help-search { width: 100%; box-sizing: border-box; padding: 4px 8px; font-size: 13px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; }
+.help-search:focus { outline: none; border-color: var(--accent); }
+.help h2.help-part { font-size: 15px; margin: 6px 0 6px; }
+.help h2.help-part + .help-guide { margin-top: 0; }
+.help-guide { margin: 2px 0; border-radius: 4px; }
+button.help-guide-q { display: block; width: 100%; text-align: left; border: none; background: none; padding: 3px 4px;
+  font-size: 13px; color: var(--text); border-radius: 4px; }
+button.help-guide-q:hover, button.help-guide-q:focus-visible { background: var(--sel-bg); }
+.help-caret { display: inline-block; width: 1.1em; color: var(--muted); }
+.help-guide-a { padding: 0 4px 6px 1.4em; }
+.help-guide-a p { margin: 2px 0 4px; }
+.help-guide-links { font-size: 12px; color: var(--muted); }
+button.help-link { border: none; background: none; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-align: left; }
+button.help-link:hover { text-decoration: underline; }
+.help-contents { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.help-note { color: var(--muted); margin: 4px 0 8px; }
+.help-count { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
+.help-result { padding: 5px 6px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
+.help-result:hover { border-color: var(--line); }
+.help-result.sel { background: var(--sel-bg); border-color: var(--accent); }
+.help-where { font-size: 11px; color: var(--muted); }
+.help-title { font-weight: 600; }
+.help-snip { font-size: 12px; color: var(--text); opacity: .85; margin-top: 1px; }
+.help-result mark { background: rgba(255, 196, 0, .35); color: inherit; border-radius: 2px; }
+.help-manual .help-back { margin-bottom: 6px; }
+.help-md { font-size: 13px; }
+.help-md h2 { margin-top: 4px; }
+.help-md .r-md-pre { white-space: pre; overflow-x: auto; }
+.help-flash { animation: help-flash 1.6s ease-out; border-radius: 3px; }
+@keyframes help-flash { from { background: rgba(255, 196, 0, .4); } to { background: transparent; } }
+::highlight(help-hit) { background-color: rgba(255, 196, 0, .45); }
 
 /* ---- Status bar ------------------------------------------------------------ */
 .status-bar { display: flex; gap: 16px; align-items: center; min-height: 24px; padding: 3px 10px; border-top: 1px solid var(--line);
@@ -744,12 +798,15 @@ td.cell.copied { outline: 2px dashed #1a6; outline-offset: -2px; }
 .menu-item:hover { background: var(--sel-bg); }
 .menu-item .keys { color: var(--muted); font-size: 12px; }
 .menu-sep { height: 1px; background: var(--line); margin: 4px 0; }
+.menu-note { padding: 5px 12px; color: var(--muted); max-width: 340px; cursor: default; }
 
 /* ---- Grids in cells ---------------------------------------------------------- */
 td.cell.has-grid > .cell-out { white-space: normal; }
 td.cell.has-grid { vertical-align: top; padding: 2px; }
 /* the header row of a grid with headers (DESIGN.md §19) */
 td.cell.table-head { font-weight: 600; background-color: var(--head); box-shadow: inset 0 -2px 0 var(--accent); }
+/* a table's totals row (P260): not a record, drawn apart from them */
+td.cell.table-totals { font-weight: 600; background-color: var(--head); box-shadow: inset 0 2px 0 var(--accent); }
 .grid-controls .headers-toggle { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; }
 table.grid.inline { border: 1px solid var(--line); border-radius: 3px; margin: 0;
   background: var(--panel); font-size: 11.5px; }
@@ -838,6 +895,9 @@ table.grid.inline svg.chart { height: 24px; }
 .crumbs a { color: var(--accent); font-family: var(--mono); text-decoration: none; }
 .crumbs a:hover { text-decoration: underline; }
 .crumbs .here { color: var(--text); font-family: var(--mono); font-weight: 600; }
+/* the grid in view's own step: a click selects it as a whole, as its corner does */
+.crumbs a.here { color: var(--text); }
+.crumbs a.here.on { color: var(--accent); background: var(--sel-bg); border-radius: 3px; padding: 0 3px; }
 .crumbs button { font-size: 11px; padding: 0 8px; }
 .crumbs .hint { margin-left: auto; }
 
@@ -855,6 +915,8 @@ table.grid.inline svg.chart { height: 24px; }
 .param-value:hover, .param-value:focus, .param-add:focus { border-color: var(--line); background: var(--bg); outline: none; }
 .param-value.bound { color: var(--accent); font-weight: 600; }
 .param-value.has-error { color: var(--err); }
+.param-value.locked { cursor: not-allowed; }
+.param-value.locked:hover, .param-value.locked:focus { border-color: transparent; background: transparent; }
 .param-add { width: 17ch; border-color: var(--line); border-style: dashed; }
 .param-remove { border: none; background: none; color: var(--muted); padding: 0 4px; cursor: pointer; }
 /* a formula check on the parameter (§26): the checks' colour, as a cell's corner */
@@ -882,6 +944,10 @@ input.text-field:focus { outline: 2px solid var(--accent); outline-offset: -1px;
   border: 1px solid var(--line); border-radius: 3px; }
 table.grid.inline th.corner { cursor: pointer; color: var(--muted); font-size: 9px; line-height: 1; }
 table.grid.inline th.corner:hover { color: var(--accent); }
+/* zoomed in, the corner selects the grid itself (double-click zooms out); on while it is */
+table.grid th.view-corner { cursor: pointer; color: var(--muted); font-size: 11px; line-height: 1; }
+table.grid th.view-corner:hover { color: var(--accent); }
+table.grid th.view-corner.on { color: var(--accent); background: var(--sel-bg); box-shadow: inset 0 0 0 2px var(--accent); }
 
 /* ---- Grid links and windows -------------------------------------------------- */
 button.grid-link { padding: 0 8px; font-size: 12px; border-radius: 10px; color: var(--accent);
@@ -932,6 +998,34 @@ table.grid.inline > tbody > tr[data-r] > th.row-head {
 .formats .rule-buttons { margin-left: 6px; white-space: nowrap; }
 .formats .rule-buttons button { padding: 0 5px; margin-left: 2px; }
 .formats-editor { min-height: 120px; }
+/* P248: the Rules tab */
+.rules-tab { display: flex; flex-direction: column; gap: 8px; }
+.rules-tab h3 { margin: 0; font-size: 14px; }
+.rules-tab .rule-adds { display: flex; flex-wrap: wrap; gap: 4px; }
+.rules-tab .rules-group { font-weight: 600; font-size: 12px; margin-top: 4px; }
+.rules-tab ol.rules-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.rules-tab li.rule { border: 1px solid transparent; border-radius: 4px; }
+.rules-tab li.rule.open { border-color: var(--accent); }
+.rules-tab .rule-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 3px 4px; cursor: pointer; border-radius: 4px; }
+.rules-tab .rule-line:hover { background: var(--sel-bg); }
+.rules-tab li.rule.dragging { opacity: .45; }
+.rules-tab li.rule.drop-before { box-shadow: 0 -2px 0 var(--accent); }
+.rules-tab li.rule.drop-after { box-shadow: 0 2px 0 var(--accent); }
+.rules-tab .rule-line { user-select: none; }
+.rules-tab .rule-type { font-size: 11px; padding: 0 6px; border-radius: 8px; border: 1px solid var(--muted); color: var(--muted); }
+.rules-tab .rule-where { font-weight: 600; }
+.rules-tab .rule-what { flex: 1 1 12em; }
+.rules-tab .rule-buttons { margin-left: auto; white-space: nowrap; }
+.rules-tab .rule-buttons button { padding: 0 5px; margin-left: 2px; }
+.rules-tab .rule-why { color: var(--bad, #c0392b); font-size: 12px; padding: 0 4px 2px; }
+.rule-editor { display: flex; flex-direction: column; gap: 6px; padding: 6px 8px 8px; border-top: 1px solid var(--line); }
+.rule-editor-head { font-weight: 600; }
+.rule-editor .rule-field { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rule-editor .rule-field > span:first-child { min-width: 7.5em; color: var(--muted); }
+.rule-editor .rule-field input:not([type]) { flex: 1 1 10em; min-width: 6em; }
+.rule-editor .rule-row-fields { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; }
+.rule-editor .rule-row-fields .rule-field:not(:first-child) > span:first-child { min-width: 0; }
+.rule-editor .rule-editor-buttons { display: flex; gap: 6px; }
 
 /* ---- Finding your way around: outline and its search, find, trace arrows ---- */
 .outline-head { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
@@ -1215,6 +1309,11 @@ a.live.paused { color: var(--accent); }
 /* a note on what a control just did (P220), not an error */
 .message-pop.note { color: var(--text); border-color: var(--muted); animation: none; }
 .message-pop.note::before { content: "ⓘ "; }
+/* the ways out a refusal offers (P250) */
+.message-pop .message-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.message-pop .message-actions button { color: var(--text); }
+/* (P272) a refused entry's fix, which Enter takes */
+.message-pop .message-actions button.fix { font-weight: 600; }
 @keyframes message-pop {
   0% { opacity: 0; transform: translateY(-4px); }
   40% { opacity: 1; transform: translateX(-4px); }
@@ -1241,7 +1340,8 @@ a.live.paused { color: var(--accent); }
 .error-toast .toast-buttons button { padding: 0 5px; border-color: transparent; background: transparent; cursor: pointer; }
 .error-toast .toast-buttons button:hover { border-color: var(--line); }
 .error-toast .toast-msg { margin-top: 3px; }
-.error-toast .toast-more { margin-top: 3px; font-size: 11.5px; }
+.error-toast .toast-more, .error-toast .toast-ends { margin-top: 3px; font-size: 11.5px; }
+.error-toast .toast-ends a { font-family: var(--mono, monospace); }
 @media (prefers-reduced-motion: reduce) { .error-toast { animation: none; } }
 /* The gallery's refine mode: rows of variations on the chosen renderer */
 .render-gallery .g-refine-head { display: flex; gap: 10px; align-items: baseline; font-size: 12px; margin-bottom: 6px; }
@@ -1649,6 +1749,9 @@ button.steps-item:hover { border-color: var(--accent); background: color-mix(in 
 button.steps-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 button.steps-item.on { border-color: var(--accent); background: var(--sel-bg); box-shadow: inset 3px 0 0 var(--accent); }
 button.steps-item.failed { border-color: var(--err); background: var(--err-bg); }
+/* a step that warns (P244: a join's keys matching several rows) */
+button.steps-item.warned { border-color: var(--warn); }
+.steps-item .steps-warn-mark { flex: none; color: var(--warn); font-weight: 700; }
 button.steps-item.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .steps-item .steps-num { flex: none; min-width: 1.4em; text-align: right; color: var(--muted);
   font-variant-numeric: tabular-nums; font-weight: 600; }
@@ -1661,6 +1764,7 @@ ol.steps-list .recipe-editor { margin: 0; border-top-left-radius: 0; border-top-
   padding-top: 6px; border-top: 1px solid var(--line); }
 .steps-form-tools .muted { font-size: 11.5px; }
 .steps-why input { flex: 1; min-width: 10em; }
+.steps-reads { margin: 4px 2px; }
 .steps-locked-tools { color: var(--muted); font-size: 11.5px; }
 /* a chip selected: the cell shows the table after that step, in the sheet (recdep.ui.stepsview) */
 td.cell.steps-shown-cell { position: relative; overflow: visible; z-index: 30; }
@@ -1767,6 +1871,7 @@ td.cell.steps-shown-cell { position: relative; overflow: visible; z-index: 30; }
   box-shadow: inset 0 -2px 0 var(--accent); }
 .sheet-tabs .tab-nav { padding: 3px 6px; }
 .sheet-tabs .tab-add { font-weight: 600; padding: 3px 10px; }
+.sheet-tabs .tab-facade { color: var(--accent); font-size: 0.85em; }
 .sheet-tabs .tab-edit { font: inherit; font-family: var(--mono); margin: 2px 0; padding: 0 6px;
   border: 1px solid var(--accent); background: var(--panel); color: var(--text); }
 .tab-menu { max-height: 60vh; overflow-y: auto; }
@@ -1912,9 +2017,15 @@ pre.repl-error { color: var(--err); }
 .pick-option:has(.pick-key) { display: flex; gap: 8px; }
 .pick-key { flex: none; min-width: 2.5em; font-variant-numeric: tabular-nums; }
 .pick-desc { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* (P309) a cell holding IDs of another table: each with its description, the ID muted */
+span.described { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.described-id { color: var(--muted); font-variant-numeric: tabular-nums; }
 /* a table column's kind on its heading (P194) */
 td.cell.table-head[data-kind]::after { content: attr(data-kind); float: right; margin-left: 4px;
-  font-size: 9.5px; font-weight: 400; color: var(--muted); font-family: var(--mono); }
+  font-size: 9.5px; font-weight: 400; color: var(--muted); font-family: var(--mono);
+  /* (P283: the kind and the role, in a narrow column cut short, never over
+     its neighbour: the hover says it whole) */
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Frozen rows and columns (P191): kept in view while the rest scrolls. A frozen
    row sticks at its own offset (--frz-top, measured); a frozen column at the
@@ -1999,6 +2110,8 @@ table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(8), table.grid.frz-c9 > the
 table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(9), table.grid.frz-c9 > thead th.col-head:nth-of-type(10) { left: var(--frz-l-8); }
 /* the toolbar's lock (P193): protection off is worth seeing */
 .toolbar button.lock.off { background: var(--warn-bg, #fff1c2); }
+/* (P319) every sheet shown, the model's too */
+.toolbar button.advanced.on { background: var(--sel-bg); border-color: var(--accent); }
 /* a flat list of values shown in a cell (P196): on one line, each in the cell's format */
 td.cell .r-list-inline, td.cell .r-list-inline .num { display: inline; }
 td.cell .r-list-inline { display: block; text-align: right; }
@@ -2008,8 +2121,13 @@ td.cell .r-list-inline.text { text-align: left; }
 .menu.submenu { z-index: 22; min-width: 180px; }
 .menu-item.has-sub.open { background: var(--sel-bg); }
 /* a view's cell that writes back to its table (P198): typing here changes
-   the table's cell; marked so it isn't taken for a formula's result */
-td.cell.writes-through { box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+   the table's cell; marked so it isn't taken for a formula's result. One
+   layer of the cell's composed shadow (--writes), not a box-shadow of its
+   own, which would drop the open frame and the selection tint (a facade's
+   links showed no green frame); beside an open frame's left edge it is
+   drawn just inside it, so both show */
+td.cell.writes-through { --writes: inset 2px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+td.cell.writes-through.open-l { --writes: inset 4px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
 
 /* the place right of a table's last column, where typing adds one (P207) */
 th.col-head.next-col { color: var(--muted, #888); font-weight: normal; opacity: .6; }
@@ -2024,3 +2142,39 @@ select.steps-add.ready { outline: 2px solid var(--accent); outline-offset: 1px; 
 .shelf-steps-start select { max-width: 220px; }
 /* a long error kept in the status bar: one line, the whole in its title (P208) */
 .status-bar .message { max-width: 55vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the Shelf's This table holds (P278): a button per shape it is or nearly is */
+.shelf-holds { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.shelf-starters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* what a formula's table is (P278): said, nothing to click */
+.shelf-holds .shelf-holds-is { padding: 3px 8px; border: 1px dashed var(--line); border-radius: 5px; font-size: 12.5px; }
+/* a block's own data in an instance (P285): the template's table, its rows the instance's */
+.instance-state-table { border-collapse: collapse; font-size: 12px; }
+.instance-state-table th { font-weight: 600; text-align: left; padding: 1px 4px; border-bottom: 2px solid var(--accent); background: var(--head); }
+.instance-state-table td { padding: 0 2px; border: 1px solid var(--line); min-width: 60px; }
+.instance-state-note { font-size: 11.5px; margin: 2px 0; }
+.input-matches .warn { color: var(--warn); }
+/* (P294) a parameter's wiring in the strip */
+.param-takes { font-size: 11px; color: var(--muted); border: 1px solid var(--border, #ccc); border-radius: 8px; padding: 0 5px; margin-left: 4px; }
+.param-from { color: var(--muted); margin: 0 3px 0 6px; }
+/* (P300) what a parameter takes: muted until said; refused, why, beside it */
+.param-takes-choice { font-size: 11px; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 0 2px; margin-left: 4px; max-width: 14em; }
+.param-takes-choice.set { color: var(--text); border-color: var(--accent); }
+.param-refused { color: var(--err); font-size: 11px; margin-left: 6px; max-width: 40em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.param-binding { font-family: var(--mono, monospace); font-size: 12px; }
+.param .input-matches { margin-left: 6px; }
+.param .input-matches .warn { color: var(--warn); }
+.param .grant { margin-left: 6px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.param .grant input { vertical-align: middle; margin: 0 3px 0 0; }
+
+/* (P302) the Outline while a field takes a pick (a parameter's binding being typed) */
+.outline-pick { margin: 4px 0 6px; padding: 4px 8px; font-size: 12px; border: 1px dashed var(--accent); border-radius: 4px; background: var(--sel-bg); }
+.outline a.pick { text-decoration: underline dotted; cursor: copy; }
+/* (P302) the shapes a table is, beside it in the Outline: a filled slate
+   chip, quiet but set apart from the names (blue) and the sizes (grey
+   text), in a hue no flag uses */
+:root { --shape-chip-bg: #e3e7ee; --shape-chip-text: #4f5b6b; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --shape-chip-bg: #343c48; --shape-chip-text: #b9c2cf; }
+}
+:root[data-theme="dark"] { --shape-chip-bg: #343c48; --shape-chip-text: #b9c2cf; }
+.outline-shapes { margin-left: 6px; font-size: 11px; color: var(--shape-chip-text); background: var(--shape-chip-bg); border-radius: 8px; padding: 1px 7px; }
