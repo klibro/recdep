@@ -1,4 +1,4 @@
 {:examples
  [{:file "project-plan.recdep.edn"
    :title "Project plan"
-   :about "Resources and tasks in; a schedule out that keeps to the links and to what each resource can do; a Gantt chart, a baseline, tracking with earned value, weekly loading, and a second project planned into what the first leaves."}]}
+   :about "Resources, roles and tasks in, and a plan out, built from blocks: a working calendar, a timesheet, a scheduler, named baselines to compare two at a time, tracking with earned value, a Gantt and two loading views, each saying what it takes and gives. Tasks ask for named people, for any one of a role's people, or for whoever got another task. It opens on its facade, the plan as its team sees it; Advanced, in the toolbar, shows the workings."}]}
