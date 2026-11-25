@@ -1,4 +1,10 @@
 {:examples
  [{:file "project-plan.recdep.edn"
    :title "Project plan"
-   :about "Resources, roles and tasks in, and a plan out, built from blocks: a working calendar, a timesheet, a scheduler, named baselines to compare two at a time, tracking with earned value, a Gantt and two loading views, each saying what it takes and gives. Tasks ask for named people, for any one of a role's people, or for whoever got another task. It opens on its facade, the plan as its team sees it; Advanced, in the toolbar, shows the workings."}]}
+   :about "Resources, roles and tasks in, and a plan out, built from blocks: a working calendar, a timesheet, a scheduler, named baselines to compare two at a time, tracking with earned value, a Gantt, two loading views and how sure its finish is (Schedule risk: the plan worked out 300 times, each task's work drawn between its least and most), each saying what it takes and gives. Tasks ask for named people, for any one of a role's people, or for whoever got another task. It opens on its facade, the plan as its team sees it; Advanced, in the toolbar, shows the workings."}
+  {:file "order-book.recdep.db"
+   :title "Order book"
+   :about "A wholesaler's customers, products and orders, kept in the sheet's own database (400 customers, 3,000 orders), with sheets that are forms onto it: find customers or orders, open one, type over its details to change them, add and remove an order's lines, and follow links from an order to its customer and back. Its shapes say what each table holds."}
+  {:file "share-portfolio.recdep.edn"
+   :title "Share portfolio"
+   :about "Shares bought and sold, valued at live prices in pounds: prices from a web service you choose (Finnhub, Twelve Data, or Yahoo through a relay of your own), asked every quarter hour of New York's trading day, exchange rates every hour, the history as a chart, and a sheet for one share: its company, a candlestick chart and its news as linked text. Each answer is made a table by steps, not code. Until you give the service's free key, it shows prices recorded when it was built, dimmed."}]}

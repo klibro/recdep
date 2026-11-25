@@ -104,9 +104,16 @@ used wherever a cell step can: `subtotal`, `subtotal:tax-rate`,
     the rename is refused, naming the cell.
   - Taking a name away (clearing it) rewrites nothing: formulas that
     used it become `#NAME` errors.
+* **Another grid's names.** A path's first name is looked up in the
+  grid the formula is in: from inside a sheet, another sheet's cells
+  are `$>lists>cities` (or `..>lists>…`). Written without it, the
+  error offers the path that reaches it (*lists is a cell of $, the top
+  grid: write $>lists>cities>city*).
 * **Clearing names in bulk.** The cell menu's *Clear names* takes the
-  names off every named cell in the selection, in one undo step; Delete
-  (*Clear all*) takes them with the contents and formatting. The status
+  names off every named cell in the selection, in one undo step; *Clear
+  ▸ Clear all* takes them with the contents and formatting. Delete keeps
+  them: it empties the cells, so a form's named input, a search box with
+  a drop-down, is blank and still an input. The status
   bar says how many went and how many formulas outside the selection used
   them (they now show `#NAME`). An input bound from outside keeps its name,
   as it keeps its formula: the binding names it (§6).
@@ -199,7 +206,7 @@ and `column` flatten them for Clojure's own.
   the formula, the formula bar underlines that part in red, and the hover
   and the Inspector's *At* row name it (`at (nth xs n)`; a misspelt name
   is the name itself). When it happened inside a library function, they
-  say which, and where: `in third-item (the library of E2, line 2)` (the
+  say which, and where: `in third-item, line 2 of the library of picks (E2)` (the
   Inspector's *In* row): the library function the line belongs to, even
   when the error happened in a core function it called (`into`, `vec`,
   a `for`) or in an anonymous `fn` inside it. Some errors have no part: one in a core function
@@ -300,6 +307,26 @@ and `column` flatten them for Clojure's own.
     next tick while the sheet is calculating.
   - On a small sheet it's all over before the page redraws, and nothing
     is dimmed.
+* **Automatic or Manual.** The status bar's **Auto ▾** chooses how the
+  sheet calculates, saved with the sheet. *Automatic* calculates every
+  change, as above. *Manual* is for a heavy sheet, when you have several
+  things to change and only want the answer once they're all in:
+  - a change works out only the cells changed: what you type shows as
+    typed, and a formula you type shows its value (with any waiting
+    cells it reads worked out first). Everything that reads them waits,
+    showing its old value, dimmed, and the status bar says **Manual ▾
+    4,672 cells to calculate · F9**;
+  - **F9**, or a click on that count, calculates everything waiting,
+    with the page answering meanwhile (*Calculating…*); choosing
+    *Automatic* again does too. F9 also asks the sheet's queries and web
+    requests again, as it always does, and what reads them is calculated
+    when their answers come in;
+  - cells that update on their own (a tick, a schedule, a web answer
+    arriving) wait for F9 as well;
+  - operations that need values (copying, sorting, goal seek…) still
+    calculate what they read first;
+  - opening a sheet saved in Manual calculates it, as any sheet is, and
+    Manual applies to your changes from then on.
 * **Loading and preparing.** Opening a sheet, changing a library (or My
   library, or whether cycles iterate), inserting, deleting or moving
   rows, columns and cells, and renaming a cell that many formulas use
@@ -1146,12 +1173,12 @@ written bare, makers called with options, though either spelling works):
 
 | kind | renderers |
 |------|-----------|
-| numbers and text | `plain` (in the cell's number format and unit), `(compact)`, `file-size`, `duration`, `(truncate n)`, `code`, `html` (value *is* hiccup), `markdown`, `note` (markdown set close, for notes), `link`, `(image)`, `check`, `swatch`, `(badge)` |
+| numbers and text | `plain` (in the cell's number format and unit), `(compact)`, `file-size`, `duration`, `(truncate n)`, `code`, `html` (value *is* hiccup), `markdown` (`(markdown "template")` for a record or a table's rows, §56), `note` (markdown set close, for notes), `link`, `(image)`, `check`, `swatch`, `(badge)` |
 | combining | `(render-if pred then else)`, `(tooltip text)` |
 | indicators | `(progress)`, `(data-bar hi)`, `(heat lo hi)`, `(trend)`, `(traffic-light lo hi)`, `(stars)`, `(kpi label)`, `(gauge lo hi)` |
 | collections | `table` (a 2-D value as a read-only grid; a table of row maps with a header row, §19), `(table-of inner)`, `size` (a range as "3×2 range", kept in its cell), `heatmap`, `bullets`, `numbered`, `key-values` (a map as keys and values; a grid's values as its named cells, labelled by the text to their left and in their own formats, or laid out as in the grid when it has no names) |
 | charts | `bars`, `sparkline`, `bar-list`, `pie`, `donut` (SVG; `(pie colors)` for your own colours) |
-| controls | `(button f)`, `(counter-button ref step)`, `(slider lo hi)`, `(stepper)`, `toggle`, `text-input`, `number-input`, `date-input`, `color-input`, `(dropdown opts)`, `(radio opts)`, `(checklist opts)` (ticks: the cell's value a vector of those ticked) (bare `dropdown`, `radio`, `checklist`, `(slider)`: from the cell's validation, §16) |
+| controls | `(button f)`, `(counter-button ref step)`, `(slider lo hi)`, `(stepper)`, `toggle`, `text-input`, `number-input`, `date-input`, `color-input`, `key-input` (a web key's field, §56), `(dropdown opts)`, `(radio opts)`, `(checklist opts)` (ticks: the cell's value a vector of those ticked) (bare `dropdown`, `radio`, `checklist`, `(slider)`: from the cell's validation, §16) |
 | grids | `grid-link`, `(grid-view)`, `(grid-view rows cols)`, `instance-view`, `(instance-view :clean)` (§21) |
 
 `default-render` picks `grid-link` for grid cells, `instance-view` for a
@@ -1298,14 +1325,16 @@ Renderers use the variables, so they follow too; charts redraw.
   nothing is overwritten. Type a value, Fill down from the cell menu, and
   the column fills. An empty one takes the row above / column left of it,
   as in Excel (a spilled value there isn't a cell to copy).
-* **Number format, renderer and style** edits apply to the whole selection;
-  Delete (*Clear all* in the cell menu) clears the cells outright:
-  contents, formatting, comments and names, in one undo step (formulas
-  elsewhere that used the names show `#NAME`; bound inputs keep theirs,
-  §2 Names). The menu also clears one part at a time: *Clear contents*
-  keeps the formatting, *Clear names* only takes the names away, *Clear
-  style* removes the style (keeping the number format and renderer),
-  *Clear formats* all three.
+* **Number format, renderer and style** edits apply to the whole selection.
+  Delete (and Backspace) clears the cells' contents, as Excel's does:
+  values, formulas and grids go; names, renderers (a drop-down, a
+  toggle), formats and comments stay. On cells holding nothing it says
+  so, and what stayed. The cell menu has *Clear contents* (Delete's) and,
+  under *Clear ▸*, *Clear all* (contents, formatting, comments and names
+  at once, in one undo step: formulas elsewhere that used the names show
+  `#NAME`; bound inputs keep theirs, §2 Names), *Clear names* (only the
+  names), *Clear style* (keeping the number format and renderer) and
+  *Clear formats* (all three).
 * **Point mode.** While writing a formula, after `(`, `[`, `{`, a space or a
   comma, clicking or dragging over cells inserts a ref instead of selecting.
   The formula bar's `refs:` toggle cycles between `B2:B5` (or the cell's
@@ -1814,35 +1843,37 @@ formulas, renderers, styles and names.
   inside it, not the whole path again. A path typed there is read from
   the grid you're in first (`hike>A2`), then from the top grid
   (`basics>A1`); `$>` starts at the top always.
-* **Paths by name.** A grid cell with a name is shown by it in paths:
-  the breadcrumb, the Inspector and messages write
-  `basics>A1`, not `B6>A1`, when B6 is named basics, and so does the
-  name box from the grid you're in (`hike>A2`) (the last step stays
-  an address there; the breadcrumb's hover gives the address; the
-  Inspector names the last step too, below). The Inspector writes
-  ranges the same way: *Depends on* and *References* show
-  `basics>A1:B3`, not `B6>A1:B3`. Where it names a grid (a parameter's
-  grid, *Bound*, *Instance of*), the grid's own step is its name too:
-  `loan (parameter of instances)`. It's how a
-  formula may write the path, and the name box reads it back, as well as
-  addresses (`B6>A1`) and ranges (`basics>A1:B3`). The URL hash and
+* **A name, and its address beside it.** Wherever RecDep names a cell,
+  a grid or a range for you to read (the Inspector, messages and
+  refusals, tooltips, the breadcrumb, sheet tabs, the Outline, Find,
+  the Map, Profile, the Tests tab, an error's box, an error a cell
+  shows), it writes the names on its path and then its address in
+  brackets: `order-card (B5)`, `settings>calendar (B6>B9)`,
+  `tasks>A1 (B20>A1)`, `resources>rate (B19>D2:D8)` for a table's whole
+  column by its heading. So the address the sheet shows (the row and
+  column headers, the name box) is always in what's said, and the name
+  too. A place with no name anywhere on its path is its address alone
+  (`B6>B9`), with nothing in brackets. A step into a parameter's grid
+  is the parameter's name, `⚙loan`, in the brackets too (parameters have no address on the sheet). Inside a grid, a list of that
+  grid's own cells writes them from it: `calendar (B9)` in Settings.
+  An error that names a cell says it again when that cell is renamed.
+* **Paths you type.** The name box reads a path by names or by
+  addresses, as a formula may write it (`basics>A1`, `B6>A1`,
+  `basics>A1:B3`), and shows the active cell from the grid you're in
+  (`hike>A2`). What you type, and formulas, keep the form you wrote:
+  RecDep never rewrites a name into an address there. The URL hash and
   files keep addresses.
-* **Names wherever there are names.** A cell with a name is named by it
-  wherever the Inspector, the Tests tab, an error's box or a message
-  names it: *Depends on* lists `tasks settings>start settings>calendar`,
-  not `B20 settings>B1 settings>B9`, and so do *Used by*, *Starts at*
-  and the Inspector's heading (`plan · B21`: the address beside it). A
-  table's whole column is named by its heading, as a formula writes it:
-  `resources>rate`, not `resources>D2:D8`. *References* says what each
-  reference resolves to: one written by name shows the address
-  (`settings>calendar → settings>B9`), one written as an address the name
-  (`B20 → tasks`). Every one is a link, and its hover gives the address.
+* **Every one a link.** In the Inspector (*Depends on*, *Used by*,
+  *Starts at*, *References*, the heading), the Tests tab and an error's
+  box, each cell named is a link to it. *References* says what each
+  reference in the formula resolves to: `settings>calendar →
+  settings>calendar (B6>B9)`.
 * **Lists as you'd type them.** A cell holding a list shows it in the
   Inspector's *Value* as you'd type it, `Ana, Ben, Dee`, not
   `["Ana" "Ben" "Dee"]`; so do the steps' previews. A list that typing
   wouldn't read back (an item with a comma in it) is shown as written in
   a formula.
-* **Editing.** "▦ Grid" (or the Inspector) puts a grid in the active cell,
+* **Editing.** The Inspector's *Make grid* puts a grid in the active cell,
   replacing its formula; the Inspector resizes or removes it. A grid cell
   can't take a formula. Delete removes a grid with everything inside it
   (undoable). Shrinking a grid (the Inspector's Resize, or the rows and
@@ -1868,8 +1899,10 @@ other values: see §7.
 
 * **Save** saves the whole sheet, with the values it has calculated, so
   that Open shows them at once (§3, *Opening a sheet shows its values at
-  once*; the file's `:values`, §9). Zoomed into a grid, it becomes **Save
-  grid** and saves just that grid as a sheet of its own, without values:
+  once*; the file's `:values`, §9), wherever you are zoomed in.
+  **Save grid**, in the bar above the grid just before *Export CSV…*,
+  saves just the grid in view as a sheet of its own, without values
+  (at `$`, the whole sheet, it's greyed out: that's Save's):
   the grid becomes the file's top grid, with its
   nested grids, names, sizes and libraries: its own library, with the
   libraries of the grids around it put first, becomes the file's top
@@ -1947,7 +1980,7 @@ nothing inside it mentions what's around it.
   tables in it that fit (`working-calendar>calendar`). Then anything
   else it's given, bound from outside, by an
   instance's formula, or as its own default or sample, is refused: the
-  parameter is an error saying why (*pts takes a route: row 2's x is
+  parameter is an error saying why (*shapes>trip>⚙pts (B25>B8>⚙pts) takes a route: row 2's x is
   "abc": a route's x holds numbers*), shown beside it in the strip, and
   nothing in the grid computes with it. Strict: a table needs the
   shape's needed columns, and every value in a column the shape gives a
@@ -2277,7 +2310,7 @@ linked.
   every copy calls the same template.
 * `call` works in cell formulas, not in renderers.
 * When the template fails for these inputs, the error names the inner
-  cell where it started, and its name: `call: E2>A3 (pick): No item 5 in
+  cell where it started, by its name and address: `call: E2>pick (E2>A3): No item 5 in
   vector of length 2`, even when the output is a cell that only reads
   `pick`. `what-if`, `goal-seek` and `instance` say the same. A time
   limit reached inside the template is the calling cell's `#TIME`.
@@ -2291,10 +2324,18 @@ evaluation with an error.
 * A formula that runs too long shows **`#TIME`** (a renderer, **`#RENDER`**);
   hover it, or see the Inspector, for the message. Cells that use it show
   `#UP`. Fix the formula and everything recovers.
-* The limit is **`time-limit-ms`** (default 1000, from the standard
-  library). Redefine it in the top grid's library, `(def time-limit-ms
-  5000)`, to raise it for formulas that are slow but finite, or lower it to
-  catch mistakes sooner. Library changes apply after Apply.
+* **Every cell's time** is 1 second, unless you set another: the status
+  bar's **Auto ▾** menu, *Time for one cell: 1 s…*, asks for any number
+  of seconds. It's kept as `(def time-limit-ms 3000)` in the top grid's
+  library, so you can write it there too. Raise it for formulas that are
+  slow but finite, or lower it to catch mistakes sooner.
+* **One cell's own time.** A heavy cell (a simulation of many runs) may
+  need longer while every other cell should still stop after a second.
+  On a cell stopped with `#TIME`, its menu and the Inspector's *Time* row
+  offer **Allow this cell more time…**, which asks for any number of
+  seconds (twice what it has now, suggested). It's kept on the cell,
+  saved with it, and the Inspector says *may run 3 s, its own*; *Change…*
+  there changes it, and a blank gives it every cell's time again.
 * Typical causes: `(range)`, `(iterate …)`, `(repeat x)` or `(cycle …)`
   consumed whole (`count`, `reduce`, `last`, or just returned as a value);
   `loop`/`recur` or `while` that never ends; a function that never stops
@@ -3305,7 +3346,10 @@ across — that runs to the edge of the grid without anyone counting rows.
   number, and every renderer writes it in that format (`(kpi "Due")`
   on a cell with `dddd, mmmm d, yyyy` shows the weekday).
   `date-input`, `time-input` and `date-time-input` are pickers; they read
-  the serial number and write what they pick as if typed.
+  the serial number and write what they pick as if typed. A day picked
+  from the calendar is written at once; a date typed into the box is
+  written when you press Enter or leave the box (Escape puts it back),
+  so a date half typed is never written.
 * **Weeks.** `(week-start d)` is the Monday of date d's week (`(week-start
   d :sunday)`, weeks from Sunday; any day of the week by name): what a
   column of days is grouped by to count weeks, as in a table step's
@@ -3348,7 +3392,7 @@ across — that runs to the edge of the grid without anyone counting rows.
   `{:row 3 :col 2 :rows 30 :cols 10 :address "B3"}` (counted from 1) —
   and `rows-to-end` / `cols-to-end` count the cells left to the edge,
   its own included.
-* **Not the Fill buttons.** Fill ↓ / Fill → (Ctrl-D / Ctrl-R) copy the
+* **Not the Fill buttons.** Fill down / Fill right (Ctrl-D / Ctrl-R) copy the
   active cell over a selection, shifting references (§5). `down` and
   `across` are formulas: one cell holds the whole fill and it stays live.
   That's why they aren't called `fill-down`.
@@ -3878,8 +3922,11 @@ spec, a table of column specs, a row per column:
   whole numbers, dates, TRUE/FALSE, IDs, lists, days of the week; with
   *at least 0*, *at most 1*, *between 0 and 1*, or *on or after* another
   column; or *one of* / *one or more of* a column (`people>name`, or
-  *the Name column*). Blank: anything. Anything else is refused, saying
-  what it may be.
+  *the Name column*; naming its table, `customers>id` or *customers'
+  id*, so a database's tables, each with an id, are told apart); or
+  *one of* values listed (*one of open, shipped, invoiced or
+  cancelled*, their case kept). Blank: anything. Anything else is
+  refused, saying what it may be.
 * **Needed** is *yes*, blank (optional), or a group's name: the columns
   sharing a group need any one of them, as a calendar's Capacity, Takes
   and Uses do; a table of the shape starts once per member of a group.
@@ -3916,6 +3963,21 @@ are …*. A library function can take a built-in shape the same way:
 `{:takes {:cal :calendar}}`. The tour's *Shapes of your own* section
 works one through, a route of x, y and z, from its spec to a function
 taking it; its Working calendars section has a timesheet.
+
+**A table's shape.** In a sheet with a database (§53), `(table-shape
+"customers")` is the shape a table of it is, read from the table
+itself: a column per column, holding what its type and its rules say
+(a foreign key *one of customers' id*, a `check (… in (…))` *one of*
+its values, `check (x >= 0)` *at least 0*), its NOT NULL columns
+without a default needed (but a key the database numbers), its key
+said. Named, it is a shape in scope as a spec's is, and it follows the
+table: there is one place to say what a customer is. What its columns
+mean is said beside it, `(table-shape "customers" customer-notes)`: a
+table of Column and any of Means, Also known as and Example, a row per
+column (a shape spec without Holds and Needed, which are the table's
+to say; giving them is refused). The other way, a
+table a shape of yours is copied into the database (§53) takes the
+shape's rules as the table's.
 
 ### What a column is for: This column is ▸
 
@@ -4022,6 +4084,15 @@ Numbers, whole numbers and dates can have bounds, on the same menu:
   heading, so moving or inserting columns doesn't change what it
   compares with, and retyping the heading (*From* to *Start*) keeps the
   rule on it.
+* **numbers at least, or at most, another column** of the same row: the
+  menu offers the table's nearest columns of numbers by their headings
+  (*numbers at most Work*, *numbers at least Work*); the Rules tab's
+  *At least its* and *At most its* take any. A three-point estimate's
+  Low above its row's Work is flagged, *is above its row's Work (6):
+  correct this one, or Work*, and with *Refuse a failing value* ticked
+  it's refused where it's typed. A blank Work isn't compared. It goes
+  with a bound of its own (*numbers at least 0, at most Work*), and the
+  column is found by its heading, as for dates.
 * Choosing the kind itself (*numbers*, *dates*) takes the bounds off.
 
 ### IDs, lists and lookups
@@ -4084,8 +4155,8 @@ For the last two:
   A column the formula works out afresh holds whatever it makes.
 * **A value that isn't there is refused** when it's typed, pasted,
   filled or written by a control, naming it, what the cells hold and
-  what to do: *"Zed" isn't one of resources' Resource (not entered): add
-  it to resources' Resource first, or pick one with the ▾*. A task can't
+  what to do: *"Zed" isn't one of resources (B19)'s Resource (not entered):
+  add it to resources (B19)'s Resource first, or pick one with the ▾*. A task can't
   name a resource before it's on Resources. One already there that
   stops being there (taken off Resources) is flagged instead, as is a
   column given a lookup with values already in it. The Rules tab's kind
@@ -4193,7 +4264,7 @@ sum of the last column of numbers, as Excel's *Total Row* starts.
   above it. Untick *Totals row* to take the row away (Undo brings it
   back); deleting the row does too.
 
-**Fill ↓** (Ctrl-D) from one cell of a table fills down to its last
+**Fill down** (Ctrl-D) from one cell of a table fills down to its last
 record, not to the bottom of the grid; on the last record, or below it,
 there's nothing to fill, and it says so. Select the rows to fill a
 range as before.
@@ -4221,11 +4292,6 @@ Ctrl-T does). In one undo step:
   and formulas inside it reading cells outside reach them with `..>`.
   A formula whose range has cells both in and out of the selection is
   named, and nothing changes: select all the cells it reads, or none.
-
-**▦ Grid** never replaces what a cell holds. On an empty cell it puts an
-empty 3 × 3 grid there, as before; on a cell holding something, or with
-several cells selected that hold something, it asks whether to make the
-cells (the selection, or the block around the cell) a table instead.
 
 ### A heading retyped
 
@@ -5687,19 +5753,32 @@ sheet with other inputs; this does the same with drawn ones.
 * **Reading the runs.** `(stats runs)` is `{:n :mean :sd :min :p5 :p25
   :p50 :p75 :p95 :max}`; `(chance-of pred runs)` the share of runs for
   which `pred` holds; Excel's `AVERAGE`, `MEDIAN`, `STDEV.S`,
-  `PERCENTILE.INC` take them as they are. `chance-of`'s cell gets the
+  `PERCENTILE.INC` take them as they are. A percentile of whole days
+  (finish dates) is interpolated between two days, as in Excel, and a
+  date shows its day: for *80% sure by*, round it up,
+  `(ROUNDUP (PERCENTILE.INC runs 0.8) 0)`, or it shows the day before.
+  `chance-of`'s cell gets the
   format `0%`; a simulation gets its first reference's format, as any
   formula does, so a simulation of dollars labels its chart in dollars.
 * **Drawing them.** The default renderer draws a simulation as a
   `histogram`: 24 bins, the outer 5% at each end paler, a dashed line at
-  the mean, the figures on hover. `band` is a percentile band: a line
+  the mean, the least and greatest run written under its ends (in the
+  cell's number format, so a simulation of dates shows dates), the
+  figures on hover. It fills the cell's height: give the row a height
+  for a taller chart. `band` is a percentile band: a line
   from the 5th to the 95th percentile, a box from the 25th to the 75th, a
   tick at the median, a dot at the mean, the 5th and 95th written at the
   ends. Both draw any list or range of numbers.
 * Distribution parameters, `simulate`'s runs and `chance-of`'s question
   aren't flagged as constants to name (§26): estimates are typed where
   they're used. The tour's Uncertain inputs section is a small profit
-  model.
+  model; the Project plan example's *Schedule risk* (§46) runs a whole
+  plan through its scheduler.
+* **A table made by steps.** A simulation can read a column of a table
+  a steps formula makes, `(simulate (MAX plan>finish) 300)`: each run
+  works the steps out again, with its draws, without drawing the table
+  on the sheet, so the steps stay a cell of their own, with their list
+  in the Inspector.
 
 ## 30. Iterative calculation
 
@@ -5976,8 +6055,8 @@ three.
   deleting rows and columns, cut and paste, and Paste (Ctrl-V) of a copy
   carry it; Paste values, formulas or formats don't, and a fill (Ctrl-D,
   Ctrl-R) doesn't copy it either: a comment is about its own cell.
-  Delete removes it with the cell's contents, formats and name; *Clear
-  contents* keeps it. Comments are saved with the sheet, and with a
+  Delete and *Clear contents* keep it; *Clear ▸ Clear all* removes it
+  with the cell's contents, formats and name. Comments are saved with the sheet, and with a
   grid saved on its own.
 
 Not supported: replies or threads, who wrote it and when, formatted text, and
@@ -6011,6 +6090,14 @@ this way.
     is read again by itself, or, when the browser wants to ask again,
     after one click on *Reconnect*. Elsewhere (Firefox, Safari), pick it
     again after a reload: the tab says so.
+  * **A file on the web**: *Open a URL…* and its address
+    (`https://…/sales.csv`). It's fetched whole and read as a picked file
+    is. It is remembered in this browser by its address, and read again
+    after a reload. *Refresh* asks its server whether it changed, and
+    fetches it again only when it has. The file's server must let other
+    pages read it (CORS). GitHub's raw files do, as does S3 with a CORS
+    rule; when it doesn't, the tab says so: download the file and *Open
+    file…* instead.
   * A SQLite database another program has open may keep its latest
     changes in a `-wal` file beside it. The tab says *WAL mode, no -wal
     file given*: *Add -wal file…* (under *All files* in the dialog), or
@@ -6656,7 +6743,7 @@ these grids.
   through that sheet, the Outline, the name box or a link. Nothing
   about the tabs is saved: they are the grids of `$`. So an Excel
   workbook's sheets (§17) are tabs as soon as it's opened, and a grid
-  put in `$` with ▦ Grid becomes one.
+  put in `$` (the Inspector's *Make grid*) becomes one.
 * **Which tab is lit:** the one holding the grid in view, however deep
   you've zoomed into it (the breadcrumb says how deep). `$` is lit while
   you're in `$`, or in a grid drawn in place there.
@@ -6806,7 +6893,7 @@ template doesn't have to be as wide as the widest data it will see.
 * **Its own size.** The size a grid was given is its *own size*, the
   least it ever is: it can't shrink itself away. It's what is saved and
   copied (a copy, Save grid, a template from the shelf), what the
-  Inspector's boxes and the toolbar's rows and columns show and Resize
+  Inspector's boxes and the format bar's rows and columns show and Resize
   sets, and what `down` and `across` fill to (so a fill can't feed its
   own growth). The Inspector says *grown to 3 × 7 by its results*
   beside it; the breadcrumb shows the size now.
@@ -6968,7 +7055,7 @@ sheet (no renderer) still runs into its neighbours, as in Excel.
 
 Grids drawn in cells make room for themselves (§40), but each stretches
 its columns to fill its cell its own way, so grids stacked in a column,
-or side by side, don't line up. Press **▦ Mesh** in the toolbar and they
+or side by side, don't line up. Press **Mesh** (the lattice) in the format bar and they
 do: every column and every row, in every grid at every depth, is a whole
 number of tracks, so every line falls on one lattice.
 
@@ -7248,6 +7335,11 @@ rolling forecast's window.
   rate table *Reads resources>resource, resources>rate*. A step reading
   no cell has none; the columns it picks are those of the table coming
   in, which the step above it shows.
+* **Which row a worked-out column refused.** A formula of the row that
+  fails on one row says which: *step 1, worked-out column drawn, the row
+  with ID 13 (Testing and fixes): pert: needs lo ≤ most likely ≤ hi, got
+  9, 6, 15*: the row's ID, with its task or name when it has one, else
+  its place (*row 2*).
 * **A name the sheet doesn't know.** A name in a step's formula that is
   neither a column, a cell's or a function's is said with the step it's
   in, as a missing column is: *step 9, worked-out column vat: there's no
@@ -7490,9 +7582,56 @@ table can be read, not zoomed into or typed in. A value that
 should start with `=` as text is typed in quotes (`"=x"`).
 
 
+### Web answers: opening what's nested
+
+A web service's answer (§56) is data: records inside lists inside
+records. Steps take it as it is, and open it a step at a time, as Power
+Query's *Expand* does.
+
+* **Any data is a table.** `(steps (web url) [])` shows the answer as a
+  table:
+  * a record is one row, its fields its columns;
+  * a list of records is a row each;
+  * a list of values is a row each, in a column `value`.
+* **⤢ on a heading opens a column.** Click the steps' *0* in the
+  Inspector (or a step) to see the table there. A column holding lists
+  or records is summed up, *{ 5 fields }* or *[ 63 records ]*, with ⤢ in
+  its heading. Click ⤢ to add the step:
+  * **a list of records:** a row for each record, its fields as columns,
+    the row's other columns repeated;
+  * **a list of values:** a row for each value;
+  * **a record:** its fields as columns in its place;
+  * **lists side by side,** as long as each other in every row
+    (timestamps beside prices, as many services send them): opened
+    together, a row for each position.
+
+  The table after the new step is shown, so you go on clicking. On a
+  web cell whose formula isn't steps yet, the Inspector's Web row offers
+  *⤢ Shape the answer by steps*, which wraps it and opens the table.
+* **A record keyed by names,** `{"AAPL" {…} "MSFT" {…}}`, is a row with
+  a column per name. *⤢ A row for each column* (an unpivot of every
+  column) makes a row per name, its record in `value`, for ⤢ to open.
+* **The steps as written** (each a chip in the Inspector, changed by
+  its form):
+  * `{:op :unnest :column :news}`;
+  * `{:op :unnest :column :chart :path [:result 0]}`, reaching in first;
+  * `{:op :unnest :column :quote :keep [:close :datetime]}`, only those
+    fields;
+  * `{:op :unnest :column :quote :prefix "quote"}`, naming them
+    `quote-close`… (a field with the name of a column already there is
+    refused until it has a prefix);
+  * `{:op :unnest :column [:timestamp :open :close]}`, lists side by
+    side;
+  * `{:op :unpivot :columns :all :name :symbol :value :quote}`.
+* **Values as they should be.** `{:op :type :column [:open :close] :to
+  :number}` changes several columns at once: numbers sent as text become
+  numbers. `{:op :type :column :t :to :date :from :unix}` reads Unix
+  times (seconds since 1970; `:unix-ms` for milliseconds) as a date and
+  time where you are. In a formula, `(from-unix t)` does the same.
+
 ## 44. Repeat: a cell as one formula
 
-Fill ↓ (Ctrl-D) copies a formula into each cell: copies that drift apart
+Fill down (Ctrl-D) copies a formula into each cell: copies that drift apart
 once one is edited. *Repeat* writes one formula in the cell that holds
 them all, so an edit to it reaches every cell.
 
@@ -7584,7 +7723,7 @@ to use as they are, or as a start. They're ordinary saved sheets, kept
 where the app is served, and any sheet saved on a web server can be
 opened the same way.
 
-* **Examples ▾** (toolbar) lists them, each with a line saying what it
+* **Examples ▾** (the light bulb at the toolbar's far right) lists them, each with a line saying what it
   is: first the **Guided tour**, the sheet RecDep opens with the first
   time (it's built into the app, so it's there offline too), then the
   others. Click one and it opens in place of your sheet, as
@@ -7593,7 +7732,18 @@ opened the same way.
   and roles in, a schedule out that keeps to the links between tasks
   and to what each resource can do, named baselines compared two at a
   time, tracking against the latest with earned value, a Gantt chart,
-  and weekly loading, built from blocks.
+  weekly loading, and how sure its finish is (Schedule risk), built
+  from blocks. The second is **Order book**:
+  a wholesaler's customers, products and orders kept in the sheet's own
+  database (§53), with sheets that are forms onto it. *Find customers*
+  and *Find orders* search as you fill in their boxes (leave one blank
+  for any); a customer's or an order's number opens it on *A customer*
+  or *An order*, where typing over a detail changes it in the database
+  and Undo changes it back; an order's lines can be added and removed;
+  browser Back returns to the search. *Shapes* says what each table
+  holds. A green frame shows where to type: the boxes, and the columns
+  of the database grids you can type over. It's a `.recdep.db`, so Save
+  keeps the database with it.
 * **Open from a web address…** (at the bottom of Examples ▾) opens a
   sheet (`.recdep.edn`) or an Excel workbook from any address, such as
   a file in a GitHub repository (`https://raw.githubusercontent.com/…`)
@@ -7628,8 +7778,10 @@ insides.
   (ticked, a resource does one task at a time).
 * **Resources**: each one's name, *units* (1 full time, 0.5 half) and
   day rate. A machine is a resource too: the device lab.
-* **Tasks**: an ID, the task, its phase, its *work* in days, who does
-  it, what it waits for (*After*: IDs, `3, 4`; a lag in working days,
+* **Tasks**: an ID, the task, its phase, its *work* in days (the most
+  likely), its *Low* and *High* (the least and the most it could take,
+  for Schedule risk: a Low above Work, or a High below it, is refused
+  where it's typed), who does it, what it waits for (*After*: IDs, `3, 4`; a lag in working days,
   `12-2d`), a *Not before* date, a *Priority*, and, as work happens,
   *Started*, *Finished* and *Done*. Who does it is asked for in three
   ways: *Resource* names people or things, *Role* asks for any one of
@@ -7693,6 +7845,22 @@ insides.
 * **Next project** (a block): a second project's tasks, scheduled into
   what the relaunch leaves its people, and beside it on the calendar
   alone.
+* **Schedule risk** (a block): how sure the finish is. It takes what
+  the Scheduler takes and works the plan out again *Runs* times (300),
+  each time with the work of every task that has a Low and a High drawn
+  afresh between them, most often its Work (a part day leaving the rest
+  of the day free). *Drawn plan*
+  is one run's plan, by steps: the work drawn, then the Scheduler's
+  steps (select it to read or change them); on the sheet each draw
+  shows its mean, so it shows the plan at the means. *Finishes*
+  draws the runs' last days as a histogram; *Likely by*, *80% sure by*
+  and *95% sure by* are the dates half, four in five and nineteen in
+  twenty of the runs finish by; type the date the launch was promised
+  for in *Promised by*, and *Chance of that* says how many runs make it.
+  A task without Low and High, or finished, keeps its Work, so with none
+  every run is the plan. The facade shows *80% sure by* under the
+  forecast. More runs are steadier and slower: every change to the
+  tasks works them all out again (300 take about half a second).
 * The summary: forecast and baseline finish, the slip, work done,
   schedule and cost performance (SPI, CPI), late tasks, the critical
   path, the days someone is booked twice, the weeks overbooked, and the
@@ -7732,12 +7900,17 @@ it off.
 * **Protect part of a grid**: a rule `{:area "1:1" :protect true}` on the
   Rules tab protects that area of a grid that isn't protected as a
   whole: a table's heading row, say, so its column names stay.
-* **You can see where typing goes**: in a grid with protection, each
-  block of cells left open has a soft green frame round it, so the places to
-  type stand out. A view's cells writing open cells of a protected table
-  are framed too. A grid without protection shows no frames, and nor
-  does any grid while the lock is open, since every cell then takes
-  edits.
+* **You can see where typing goes**: every input has a soft green frame
+  round it (one round each block of them), so the places to type stand
+  out, whether or not anything is protected and whether the lock is open
+  or closed. An input is a cell the sheet reads that you can type into:
+  a value or a blank box a formula or a button uses (a search box, an
+  order's number, a quantity to add), the cells of a table a formula
+  reads (not its headings), a cell of a view or a query that writes back
+  to its table or the sheet's database (§48, §53), and a cell left open
+  in a protected grid. Labels nothing reads and formulas aren't framed,
+  nor is what's worked out (an order's total); typing into a cell that
+  can't take it says why at the first key.
 * **The lock** 🔒 *Protected* appears in the toolbar once anything is
   protected. Click it to turn protection off while you work on the sheet
   (*🔓 Editing all*), and again to turn it back on. It isn't saved: a sheet
@@ -7771,6 +7944,21 @@ and typed it: the view and everything else follow.
   they can't be typed into, and why, as soon as you start. A value that
   matches the table's only by name isn't taken for it: it must be the
   same value.
+* **New records**: a table shown as it is (a reference to it, `=tasks`
+  or `$>tasks`, drawn as a grid) shows the table's empty row after its
+  records too, as the last row of its grid. Type a record there and the
+  table takes it, keeping an empty row after it as it does when typed
+  into directly (§19), and the view follows: Enter goes on to its new
+  empty row. A sorted or filtered view has no such row (a record typed
+  there could land anywhere, or not show), nor does a view protected
+  outright, or one of a table whose last row already holds a record:
+  type into the table itself once to give it its empty row. Pasting
+  several records past the end isn't done yet: paste into the empty row
+  one record at a time, or into the table. Inserting a row inside the
+  table is done in the table itself.
+* **A column's default** (§19) shown in a view (a new task's work, 0
+  until given) is typed over as in the table: the table's cell takes
+  the value.
 * **Controls too**: a renderer that writes its cell (a date picker,
   `date-input`; a drop-down; a slider) over such a value writes the
   table's cell, so a form of pickers edits the table.
@@ -8011,6 +8199,14 @@ sessions with their rooms and crews.
 * **A resource does** one row at a time, or several, each row taking
   its share of the day from a column (0.5: half): two half-day rows fit
   on one day, and a row at half a day takes twice its work in days.
+* **Part days.** Work needn't be whole days. A row of 2.5 days holds
+  its third day for half of it, and the rest of that day is free: its
+  resource's next row starts there, and a row waiting for it (finish to
+  start, no lag) starts that afternoon, with the half day that's left.
+  So 5.3 + 5.3 + 5.3 days in a row take 15.9 working days, not 18. Its
+  bookings and its cost count the part it takes; a milestone after it
+  passes the half day on. Dates are still days: the row's finish is the
+  day its work ends, part-way through or not.
 * **A row** waits until all its days are free, or **splits** its work
   round days already taken.
 * **Shared work:** each resource does all of it (a day's work for Ana
@@ -8519,7 +8715,7 @@ label (*Set the baseline*).
   the same day replaces that day's copy (one version a day), and the
   button says so.
 * `:name` — the copy's name, a cell of text typed by whoever presses
-  (`{:into 'kept :name B1}`; by its address, so Delete on it, which
+  (`{:into 'kept :name B1}`; by its address, so *Clear all* on it, which
   takes a cell's name off too, leaves the button saying it needs one). Named
   copies are kept side by side: each row is stamped `:version` with the
   name (first) and `:taken` with the date (last), several a day if you
@@ -8591,7 +8787,79 @@ changed, and a sheet without a database is given one first (it asks).
   as the step shown leaves them, without going through the sheet's
   cells: the way to bring in more rows than a sheet wants to hold.
 
-Each asks the new table's name; a name already there is refused. Tables
+**What the table says.** What the grid's columns say goes with them:
+
+| In the grid | In the table |
+|---|---|
+| the column's kind (*Column holds ▸*) | its type: text TEXT, number REAL, whole number INTEGER, date DATE, TRUE/FALSE BOOLEAN |
+| an IDs column | the table's key; without one, a column `id` is added, last, numbered by the database (said), so the table's rows can be written |
+| another IDs column, or *each value once* | UNIQUE |
+| what a blank reads as (a kind's default) | DEFAULT; a blank copied is that value |
+| a date *on or after* another column | a CHECK (`until >= day`) |
+| values listed, bounds | CHECKs |
+| a lookup of another table's keys (`{:kind :one-of :of-table "customers"}`, or of a query's key column) | REFERENCES that table, indexed |
+
+A table that is a shape of yours (§19, *What a whole table holds*: its
+columns hold the shape's kinds) also takes the shape's rules: a needed
+column is NOT NULL, and *one of customers' id*, where no grid of the
+sheet is customers, is a lookup of the sheet's database's customers
+table (a box of its keys by name, as above), so its REFERENCES too. A
+row breaking a rule is refused, naming the column.
+
+So a table is made from scratch in three steps: a headed grid, its
+headings the column names; each column's kind (*Column holds ▸*, with
+a default if blanks mean one, or a shape adopted, *Start a table ▸*);
+then right-click a heading → *Copy* (or *Move*) *into the sheet's
+database…*. Copy a table referred to first (customers before orders),
+so the lookup of its keys has a table to name.
+
+Each asks the new table's name; a name already there is refused.
+
+**Changing tables.** Two changes are made in RecDep, each one undo
+step (Undo takes it out of the database, Redo puts it back):
+* **A column added**: on a query showing every column of one table
+  (`select * from products`, or steps that keep its columns), Tab on its
+  last heading asks for the new column's name and what it holds (*barcode
+  text*, *due date*, *weight number*, *pallets whole number*, *fragile
+  TRUE/FALSE*); it's added to the table, and the query shows it once
+  asked again. A name already there is refused.
+* **A view saved**: in the Data tab, on the sheet's own database, *Save
+  as a view…* (in place of *Copy into the database…*, beside Promote)
+  saves what the step shown gives as a view: its query, which follows
+  the tables as they change, read as any table (`(query "leeds_customers"
+  [])`).
+Views written in SQL are made the same way: a SQL step in the Data
+tab (`select c.id, c.name, (select count(*) from orders o where
+o.customer_id = c.id) as orders from prev c`), then *Save as a view…*;
+its columns that come from a table are typed into as that table's.
+**Its schema, in the Data tab.** Unfold a table of *This sheet's
+database* (▸ beside its name): under its columns (each marked *indexed*
+when an index starts with it, and *on delete cascade* where a reference
+says so) are
+* **its definition**, the table's CREATE TABLE. *Edit…* opens it as
+  text: add what the sheet has no words for (a CHECK across columns,
+  `check (shipped is null or shipped >= placed)`; `on delete cascade`
+  on a reference, so a line goes with its order; NOT NULL, UNIQUE,
+  DEFAULT), and *Apply*: the table is made again from it, its rows
+  copied by the columns both have, its indexes and triggers kept. A
+  definition its rows break is refused in words, and nothing changes;
+* **its indexes**: each with the columns it's by (× drops one; those
+  its definition makes, its key's and a UNIQUE's, are changed there).
+  Tick columns, in the order wanted, and *each once* for a unique one,
+  then *Add an index*;
+* **its triggers**: each with its SQL (× drops one). *+ Trigger…*
+  writes one (`create trigger … begin … end`), for a value filled in or
+  a change refused (`select raise(abort, 'what to say')`), which the
+  sheet then says in those words;
+* **Drop table…** (or *Drop view…*): it asks first, naming the cells
+  whose queries read it, and is refused while another table refers to
+  it, naming that table.
+Each is one undo step. Undo brings a dropped table back with its rows,
+indexes and triggers, and a definition back as it was, rows and all;
+what was set aside for that stays out of the file you save. A column
+renamed or dropped is a definition edited too.
+
+Tables
 can also be added with another SQLite program (DB Browser for SQLite,
 the `sqlite3` command): open the `.recdep.db` there, add them, close
 it, and open the file here again.
@@ -8605,8 +8873,33 @@ it, and open the file here again.
 The rows are laid out as a grid of their own in the cell, headed by the
 columns' names, and read like any grid: `(SUM A1>hours)`,
 `(count A1)`. Each `?` takes the next value after the SQL (a cell, or
-any value). A date is a number in a cell but text in the database, so
-pass it as `(TEXT B1 "yyyy-mm-dd")`.
+any value). A cell shown as a date (by its kind or its number format)
+goes in as the database's text for it, `2027-01-04`, so `(query "…
+where placed >= ?" from-date)` works as it reads (for its day number
+instead, pass a sum, `(+ from-date 0)`). A value that isn't a
+number, text, a date or TRUE/FALSE (a function, a list) is refused,
+naming it: `TRUE` written in a cell's formula is Excel's function; the
+value is `true`. A column the database gives no type (a value worked
+out, `max(placed)`) takes the kind its values have: ISO dates are
+dates, whole numbers whole numbers.
+* **Cells named in the SQL.** Instead of `?`, name the cell, as a
+  formula would, after a colon:
+
+  ```clojure
+  (query "select * from orders where customer_id = :customer-id and placed >= :from-date")
+  ```
+
+  A name, a path (`:$>lists>cutoff`) or an address (`:B2`). It is a
+  reference like any other: the query asks again when the cell changes,
+  renaming the cell rewrites it, copying the formula moves an address
+  as it moves any, and the formula bar colours it. Its value is bound,
+  never written into the text, and a date cell goes in as a date. A
+  name inside quotes (`':x'`) or a comment isn't one. Write spaces
+  around an operator after a name (`:a > 5`, not `:a>5`, which reads as
+  the path `a>5`).
+* **Typing SQL**: inside a query's SQL in the formula bar, the
+  database's tables, views and columns are offered as you type a word
+  (Ctrl-Space shows them all), and after a colon the sheet's names.
 * While the database is asked, the cell shows **#WAIT**, and what reads
   it waits too. That isn't an error: the status bar doesn't count it.
 * SQLite's refusal shows as **#SQL**, with its reason: an unknown table
@@ -8622,6 +8915,32 @@ pass it as `(TEXT B1 "yyyy-mm-dd")`.
   "customer" :test := :value B2} {:op :sort :by [["day" :desc]]}])`,
   the Data tab's steps run in the database, a step's value a cell. In
   the Data tab, on the sheet's database, *Promote live ▸* writes one.
+  **A search form** is a query by steps: a filter whose value is blank
+  is no condition, so each criterion is a box, left blank for any,
+  with no SQL. **A record's key** is the other way round: a filter
+  given `:if-blank :none` matches no row while its cell is blank, so a
+  form showing one customer by `(query "customers" [{:op :filter
+  :column "id" :test := :value customer-id :if-blank :none}])` shows
+  none when its key is emptied, not every customer. A search over orders with their customers' names and
+  totals searches a view the database has (`create view order_summary
+  as …`): a view's columns that come from a table are typed into as
+  that table's.
+* **Its steps in the Inspector.** Select a query's cell written by
+  steps, `(query "orders" [step …])`, and the Inspector lists them as
+  it lists a `steps` formula's: click one and the sheet shows the table
+  after it in the cell (the database is asked for it), with its form
+  below, the Data tab's, to change it; *+ Step* adds one (the Data
+  tab's kinds of step, a SQL step among them, which may name cells as
+  above). A filter on a cell has *When it's blank: any row* (a search
+  box) *or no row* (a record's key). Each change rewrites that step in
+  the formula, the others as written.
+* **How many it found.** A search ending in `{:op :limit :n 100}`
+  shows its first 100 rows, and `(count found)` counts those;
+  `(count-found found)` counts every row its other steps found, so a
+  form can say *100 of 1,234*. The grid's cell says it too when you
+  point at it. A total of every row found is a second query, its last
+  step a `:group` (`{:op :group :by [] :aggs [{:fn :sum :column
+  "total" :as "total"}]}`).
 * While a query is asked again its rows are drawn dimmed.
 * A query giving more than 200,000 cells shows the first rows, and its
   cell says so; a formula reading all of it (a whole column, or the
@@ -8634,7 +8953,44 @@ formula, but:
 * **by typing into a query's grid**, in a column that comes from a
   table whose key the query also selects (`select id, task, hours from
   tasks`: task and hours can be typed into; a worked-out column such as
-  `hours * 2` can't, and says so);
+  `hours * 2` can't, and says so). The formula bar says what typing
+  there writes (*typing here writes hours in the row of tasks with id
+  2*), and Enter on its last row stays there, the write said;
+* **by typing a new row below a query's grid**: a query of one table's
+  rows, its key selected (`select * from products`), has an empty row
+  after its last. What's typed there is held, drawn in italics, and the
+  cells the table can't do without (NOT NULL, with no default) say
+  *needed* until they have values; the status bar says what it still
+  needs. The moment they all have values the row is added to the
+  table, as one undo step: Undo takes the row out of the database, and
+  the empty row holds again what it held before the last value. So
+  type the columns it can do without first, or type them into the
+  record once it's added (a sorted query may show it elsewhere); what's
+  typed into the empty row after that starts another. A row the
+  database refuses (a code that's there already) stays held, its cells
+  saying why: change one and it's tried again. Delete over its cells,
+  or right-click it → *Delete ▸ rows*, lets it go; Delete, paste or
+  fill over a column that runs through it writes the records and
+  leaves it as it is. A column the table needs that the query doesn't
+  show but fixes with an `=` filter of its steps (an order's lines,
+  `{:op :filter :column "order_id" :test := :value order-id}`) is given
+  that value: a line is typed as a product and a quantity, and joins
+  the order shown. A query that doesn't
+  show any other column the table needs, or whose rows are two tables', has no
+  such row (an `insert-button` adds rows there). A row added that the
+  query's conditions or order leave out is said, not left to vanish.
+  What's held isn't a cell's value: nothing reads it, and a column read
+  by its heading (`(count found>placed)`) ends above the row. *Convert
+  to a plain grid* keeps what it holds, as the table's last row;
+* **by typing into a view of a query**: `(record-view (query "select *
+  from customers where id = ?" B1))` is a record laid out as a form, a
+  field a row, and typing over a field writes the customer's row, as
+  typing into the query's own grid does. So does a `record-view` or
+  `filter-view` of a query's cell read by its name (`(record-view
+  details)`), or of its rows picked (`picked`). A field shows a date
+  as a date. A record view of one row (a query by its key) has no
+  *1 of 1 ◀ ▶* or search box: it is a record as a form. A value the formula changed before showing it (`(assoc
+  row :name "…")`) isn't the table's, and can't be typed over;
 * **from a button or another control**, or the REPL:
   `(insert-row! ctx "tasks" {:task "Review" :hours 4})`,
   `(update-row! ctx "tasks" {:id 3} {:hours 6})`,
@@ -8643,8 +8999,119 @@ formula, but:
 
 Delete, Ctrl-Enter, paste and fill down over a query's grid write those
 cells' rows too, as one step (cells that aren't a table's column are
-skipped). Delete blanks the cells; it doesn't delete the rows.
-A date picker or another control in a query's cell writes its row.
+skipped). Delete blanks the cells; to delete rows, right-click them →
+*Delete ▸ rows*: they go from their table (a row of a query joining two
+tables is refused, saying so). A date picker or another control in a
+query's cell, or in a view's field, writes its row.
+
+**Checked before it's written.** What is typed, pasted or picked into a
+query's cell, or a view's field, is checked first, as typing into any
+cell is: against its column's type, and against the rules of the grid
+it is in (a lookup that refuses what isn't there, values listed,
+bounds), so *9999 isn't one of customers' id* is said before the
+database is asked. The database's own rules hold too, and its refusals
+say what broke: *customer_id 99999 isn't the id of a row of customers*;
+deleting a customer who has orders, *11 rows of orders name this row of
+customers (by their customer_id): delete them, or change their
+customer_id first*.
+
+**What the table says, the grid knows.** A query's columns take what
+their table's own rules say: a `check (status in ('open', 'shipped'))`
+gives the status cells a ▾ of those values, and anything else typed is
+refused; a `check (qty > 0)` makes them whole numbers at least 1. A
+column that refers to another table (`customer_id integer references
+customers(id)`) is one of that table's keys: its ▾ lists them with
+their names (*273 Acorn Kitchen Ltd*, found by typing *acorn*), the
+cell shows the key with its name, and a key that isn't there is
+refused. The name is the other table's column called name, title,
+description or label; a table with none is named by the row it refers
+to and its first date (an order: *Acorn Kitchen · 2026-11-20*); else
+its first column of text. A table of more than 2,000 rows gives no ▾
+(the database still checks). A record view of the query does the same
+field by field. A rule written on the grid itself (*Column holds ▸*)
+comes first.
+
+**A box for a record's key.** A form's key, the box that says which
+customer or order it shows, is one of a table's keys: give it the rule
+`{:kind :one-of :of-table "customers" :refuse true}` (in the grid's
+rules, as any kind). Its ▾ lists the table's rows by name, found by
+typing part of one, the box shows the key with its name, and a key
+that isn't there is refused in words (*isn't one of orders' id*), so
+the form never shows an empty record for a number mistyped. No list
+of the keys is kept in the sheet: the database is asked, and asked
+again when the table changes. `:where` chooses the rows, as a query's
+steps do: `:where [{:op :filter :column "discontinued" :test := :value
+0}]` for the products on sale. Up to 10,000 rows; past that, the box
+checks nothing (its ▾ shows the first 10,000). Copied into the
+database, a column with such a rule refers to the table (REFERENCES).
+
+**Where a table's records open.** Say it once, on the table's shape:
+
+```clojure
+(table-shape "customers" notes {:opens "$>customer-card>customer-id"})
+```
+
+Then every key of customers the sheet shows (a search's id column, an
+order's customer_id shown by name, a customer's id among their orders)
+is drawn as a link: a click writes the key into that cell and goes
+there, as `(opens …)` does, and Back returns. A cell's own renderer
+still wins; the form the key belongs to (the card's own key box, its
+record's id) isn't a link to itself; a table whose shape says nothing
+has no links. The ▾ of a key that is a link is still there when the
+cell is selected.
+
+**Forms without code.** The standard library has renderers for the
+usual form actions, each a button labelled with its cell's value:
+* `(opens "$>customer-card>customer-id")`, over a column of keys (where
+  no table shape says where the table's records open, or to open them
+  elsewhere):
+  each id drawn as a link that writes it into that cell (a form's key)
+  and goes there. Back returns to the search.
+* `(insert-button "customers" new-customer {:opens
+  "$>customer-card>customer-id"})` adds a row. Its values are a map
+  (`{:customer_id customer-id :placed (TODAY)}`), or a form: a small
+  grid with headers named as the table's columns (*Credit limit* is
+  `credit_limit`: case, spaces and dashes don't matter) and one row
+  typed in. Once the row is in, the form's typed cells are emptied (a
+  formula in it, such as `(TODAY)`, stays), and with `:opens` the new
+  row's key, the number the database gave it, goes into that cell, so
+  *New order* opens the order it made. The form knows its table: the
+  cells of its first row the table can't do without (NOT NULL, no
+  default) say *needed* until typed into, its columns take the table's
+  rules as a query's do (a CHECK's values as a ▾, its bounds, a
+  reference as a ▾ by name; a rule written on the form comes first),
+  and a heading that is none of the table's columns is flagged, saying
+  which there are, before Add is pressed.
+* `(update-button "orders" {:id order-id} {:status "shipped" :shipped
+  (TODAY)})` changes the row the key finds.
+* `(delete-button "customers" {:id customer-id} {:empties
+  'customer-id})` deletes it; with `:empties`, that cell (the form's
+  key) is emptied once the row is gone, so the form shows no record
+  rather than one that isn't there.
+* A button whose key is blank (no record shown) is drawn as refused,
+  dashed: pointing at it says why (*Nothing to change: id is blank, so
+  no row of orders is shown*), and so does pressing it.
+* What the database refuses is said in its terms: a NOT NULL, a
+  UNIQUE, a reference, a CHECK by its rule, and a trigger's own words
+  (`raise(abort, 'that product is discontinued: pick one on sale')`).
+  Rules the database keeps itself, a trigger filling a line's price
+  from the product's or refusing a discontinued product, are the
+  sheet's rules too: nothing in the sheet repeats them.
+A drop-down with no options of its own (`(dropdown)`, offering its
+cell's kind) has a blank first choice, which empties the cell: a
+search's criterion goes back to *any*. A lookup's ▾ over a list of a
+query (a list of keys and names, `one of lists>staff>id`) shows each key with its name
+(the list's column of text), as a task's ID shows its name. A cell
+holding a shape says what it is: *a shape of customers: id, name, …
+(9 columns, 3 needed)*. An input that a button's values read is read:
+it isn't flagged as read by nothing.
+
+Each says what it wrote, and each write is one undo step, with what
+followed it (a key written into the form, a form emptied): one Undo
+takes both back. For anything else, write a button's
+handler: `insert-row!` takes a function given the new row's key,
+`(insert-row! ctx "orders" {…} (fn [k] …))`, and `go-to!` goes to a
+cell, `(go-to! ctx "$>order-card>A1")`.
 
 Each write is one undo step: Undo takes it back out of the database,
 Redo puts it in again. The queries reading the table ask again. A table
@@ -8749,6 +9216,14 @@ the new results.
     the model's chart (and whatever reads it, a detail of the task,
     follows), its ◀ − + move the model's window, a filter's choices
     change the model's filter.
+  * A link to a query's cell, or a record view's field, of the sheet's
+    database (§53) writes that row, as typing into the query does: text
+    too, since a database's column holds text as data. So a facade lays
+    a record out by links.
+  * Type into the facade's own inputs: a cell of the facade itself,
+    named, holding a value or nothing, that a formula reads (a search
+    box: `find-name`, read by the query beside it). It takes typing,
+    text too, with no model cell, link or *Leave open*.
   * Nothing else: a link to a result (a formula in the model) says it's
     worked out from other figures and can't be typed over; labels, text
     and the facade's layout say they're part of the facade. Only a
@@ -8770,6 +9245,466 @@ the new results.
   range or a formula using model cells shows its value but takes no
   typing. A grid or table linked and drawn as a grid (`(grid-view)`)
   takes typing in its cells, which goes to the model's cells (checked
-  there, refused where they're results), but can't grow rows from the
-  facade. An error in the model shows on the
+  there, refused where they're results). A table linked as it is takes
+  new records too, typed into its empty last row (§48); a sorted or
+  filtered one doesn't. An error in the model shows on the
   facade as anywhere, naming the model's cell.
+
+## 55. The toolbars
+
+Two rows of buttons sit above the formula bar. They show icons, not
+words; hold the pointer over one and its tooltip says what it does,
+starting with the name this manual uses for it.
+
+**The top toolbar** is about the sheet as a whole, left to right:
+
+* **New** (a page with +): a blank sheet in place of this one, asked
+  first.
+* **Save** (a floppy disk): the whole sheet, wherever you are zoomed
+  in. **Save as…** (a floppy with a pencil) appears beside it once the
+  sheet has a file, to save to another. To save only the grid you're
+  in, use **Save grid** in the bar above the grid (§6, *Saving grids
+  and inserting files*).
+* **Open** (a folder): a saved sheet or an Excel workbook in place of
+  this one.
+* **Insert** (an arrow into a tray): a saved sheet's grid, a CSV file
+  or an Excel workbook into the selected cell, as a grid.
+* **Library ▾** (books): the library file (§14).
+* **Undo** and **Redo** (curved arrows).
+* **Advanced** (stacked layers), on a sheet with a facade (§54), and
+  the lock (**Protected**, or **Editing all** when open), on a sheet
+  with something protected (§47). They're there only when they apply.
+* **Light / Dark / Auto**, a drop-down (§4, *Light and dark*).
+* **Examples ▾** (a light bulb), at the far right: the guided tour and
+  the example sheets (§46).
+
+**The format bar**, the second row, is about the selection and the grid
+in view:
+
+* **Bold**, **Italic**, text colour (A), fill colour, and align left,
+  centre and right.
+* The **number format** field (*General* when it has none, §10) and
+  the **unit** field with its ▾ (§25). Both are framed as fields to type
+  in; clicking either opens its popover. The popover's heading names
+  the selection: a cell with a name by its name, its address after it
+  in grey (*Number format for* **price** (B2)); otherwise by address.
+  The renderer popover, opened from the formula bar's second line, does
+  the same.
+* **AutoSum** (Σ), **Fill down** and **Fill right** (arrows to a line;
+  Ctrl-D and Ctrl-R, §15).
+* The grid's size: **rows** and **columns** of the grid in view (§6),
+  and **Mesh** (a lattice, §41), whose track sizes and *show lines*
+  appear beside it while it's on.
+
+A grid goes into a cell from the Inspector (*Make grid*), or from cells
+already filled with right-click → *Make this a table* (§19).
+
+## 56. Web requests and schedules
+
+A formula can read what a web address answers: prices from a market
+data service, exchange rates, anything a REST API gives as JSON. It is
+asked again on a schedule, by F9, or when a cell you choose changes.
+The example *Examples ▾ → Share portfolio* values shares at live prices
+this way, and the tour's *Web requests and schedules* asks for exchange
+rates.
+
+* **`(web url)`, `(web url {:query {…}})`** reads `url` with GET. It
+  shows `#WAIT` until the site answers.
+  * A JSON answer becomes data: maps with keyword keys, and lists as
+    vectors. Read it with `get-in`: `(get-in r [:rates :GBP])`. A list
+    of maps is a table, so steps, views and charts take it. Any other
+    answer is text. `{:as :json}` or `{:as :text}` says which, whatever
+    the site says.
+  * `:query` holds the parameters, each a value or a cell:
+    `{:query {:symbol B2 :range "5d"}}`. They're never written into the
+    URL text, so a cell's value can't break it, and a URL with `?…`
+    written in is refused, saying so. A list is joined with commas:
+    `{:symbols ["AAPL" "MSFT"]}` sends `AAPL,MSFT`.
+  * **GET only.** A formula runs again whenever RecDep needs its value,
+    so it never changes anything on a site.
+  * Several requests in one formula are asked at once:
+    `(for [s symbols] (web url {:query {:symbol s}}))`. The cell waits
+    until all are answered.
+* **When it's asked again.**
+  * Without `:fresh`: once, then by F9. F9 (or ↻ F9) asks every request
+    again, and the cells show their last answers, dimmed, until the new
+    ones come.
+  * **`:fresh x`**: the answer is good while `x` is what it was asked
+    with. When `x` changes, the request is asked again, the last answer
+    dimmed meanwhile. `x` can be any value: a schedule, or a
+    `counter-button`'s cell to ask again at a click.
+* **`(every schedule)`** is a schedule as a value: the date and time of
+  its latest slot. The cell runs again when the next comes.
+  * `"15m"`, `"1h"`, `"30s"` and `"1d"` are slots on the clock: 10:00,
+    10:15… for `"15m"`; midnight for `"1d"`.
+  * Cron's five fields, minute hour day month weekday:
+    `"*/15 9-16 * * 1-5"` is every quarter hour from 9:00 to 16:45,
+    Monday to Friday. Lists, ranges, steps and names (`MON-FRI`, `JAN`)
+    are taken.
+  * `{:zone "America/New_York"}` reads the schedule in that zone (the
+    browser's otherwise), so a London sheet follows New York's market
+    hours.
+  * `(web url {:fresh (every "15m")})` asks every quarter hour. One
+    `every` cell can be the schedule of a whole sheet.
+  * **A page isn't a server.** Nothing runs while it's closed, and a
+    hidden tab waits. Opening the sheet, or coming back to the tab, asks
+    once for the slot that has come round. Slots missed meanwhile aren't
+    made up.
+* **Keys.** A service that wants a key is given `(secret "name")`:
+  `{:query {:token (secret "finnhub")}}`.
+  * The key itself is kept in this browser, never in the sheet, its
+    file, a value or a message.
+  * **Where it's given.** A sheet that uses keys gives each a field:
+    a cell holding the key's name, `"finnhub"`, drawn as `key-input`.
+    Paste the key there and press *Keep* (or Enter); the field then
+    says *✓ kept in this browser*, with *Change* and *Forget*. The share
+    portfolio's are in its Settings, under the provider.
+  * **🔑 in the status bar** counts the places a key is wanted, as the
+    error and comment counts do (*🔑 1 of 3 keys needed*, and how many
+    are in the grid in view):
+    * every key field whose key isn't kept in this browser yet,
+      wherever it is;
+    * for a key that requests wait for and no field names, the cell
+      asking (its Inspector **Web** row takes the key too, and opens on
+      arriving).
+
+    Click it to go to the next, Shift-click the previous. A cell
+    showing an old answer while it waits says which key in its tooltip.
+    Once a key is given, the requests waiting for it are asked.
+  * A key is sent only to the site it was given for. A request taking
+    it elsewhere is refused, saying where it was given.
+  * **Change** and **Forget**, in the field or the Web row, replace or
+    drop a key.
+* **The Inspector's Web row** lists a cell's requests: the address,
+  its parameters (a key by its name, «finnhub»), and how each stands:
+  answered at 14:02, asking, waiting its turn, waiting for a key or for
+  a site that said it was asked too often, or refused (with the site's
+  words).
+* **Answers are kept in this browser.**
+  * A sheet opened again shows its last answers at once, dimmed, while
+    it asks.
+  * A request whose `:fresh` value hasn't changed since (the same slot
+    of a schedule) isn't asked again, which spares a service's daily
+    allowance.
+  * A sheet file can carry answers to start from (the example's prices,
+    recorded when it was built). They're shown dimmed until its own
+    requests are answered.
+* **When a site doesn't answer**, the cell is `#WEB`, in RecDep's words:
+  * *answered 401 …*, with the start of what the site said;
+  * *answered a web page (HTML), not JSON*, often a check that a person
+    is asking;
+  * *took more than 30 s*;
+  * *Couldn't read …: the site doesn't let web pages read it, or it
+    can't be reached*.
+
+  A site that says it was asked too often (429) is waited for, as long
+  as it asks or from 5 s doubling, the cell saying until when. At most
+  two requests go to one site at a time.
+* **Sites a page can't read.** A web page may only read another site's
+  answers if that site allows it (CORS). Market data services meant for
+  apps (Finnhub, Twelve Data, Alpha Vantage) and Frankfurter's
+  exchange rates do. Yahoo Finance doesn't. Such a site is read through
+  a **relay** of your own, a small program on a server that asks the
+  site and answers with the header that allows the page. Help's *Web
+  requests* has one to copy (a Cloudflare Worker: free, one file). The
+  share portfolio's Settings take its address.
+* **In the share portfolio,** every share's symbol is a link,
+  `(opens "$>share>ticker")` on its column: a click picks that share on
+  the share sheet and goes there (Back returns).
+* **A request for each item.** `(web url {:query {:symbol symbols} :each
+  :symbol})` asks once for each value of `:symbol` (a list, or a
+  one-column range such as `(UNIQUE (SORT trades>symbol))`). Its value
+  is a table, a row per answer, `symbol` first, then the answer's
+  fields. All are asked at once, and the cell waits for all of them.
+* **A parameter in the address.** `(web "https://…/chart/{symbol}"
+  {:query {:symbol "AAPL" :range "5d"}})` puts the symbol in the path,
+  so APIs that take it there work with `:each` too.
+* **A list parameter** may be a one-column range or a table's column:
+  its values are joined with commas.
+* **Answers that move with the date.** A request whose parameters
+  differ only in dates written as text (news from a week ago to today)
+  shows its last answer, dimmed, while the new day's is asked.
+* **Answers as text: `(markdown "template")`.** The `markdown` renderer,
+  given a template, draws a record, or each row of a table, through it,
+  and the cell keeps the data:
+
+  ```
+  (markdown {:template "#### [{headline}]({url})
+  *{source} · {datetime:d mmm, hh:mm}*
+
+  {summary}" :between "---"})
+  ```
+
+  * `{field}` is the field's value; `{field:format}` is it in a number
+    format.
+  * Values are escaped (brackets and stars show as written), except as a
+    link's or image's address.
+  * A line whose fields are all blank is left out.
+  * An image or link with no address is taken out, with a `·`, `|` or
+    `–` it leaves dangling.
+  * `:between` sets Markdown between rows (`---` is a rule); `(markdown
+    "…")` is the same without it.
+  * An image's size goes after a bar in its text: `![{name}|56]({logo})`
+    is 56 pixels wide, `|56x40` both ways. Without one, an image in
+    Markdown is kept to a few lines' height, so a large one (a service's
+    1000-pixel logo) shows whole.
+
+  `(fill-markdown template data)` gives the text itself, for a formula.
+* `web` and `every` must be written in the cell's own formula, not in a
+  library function a cell calls, as `query` and `tick` are.
+
+## 57. Server databases
+
+A sheet can read a database that lives on a server: Postgres, or a
+SQLite file on that machine.
+RecDep itself still needs nothing installed. Beside the database runs
+**recdep-proxy**, a small program that RecDep talks to over the web.
+It can also run on your own machine, to reach a database there, or one
+your machine can reach. The database's password stays with the proxy;
+RecDep only ever holds the proxy's token.
+
+**Running the proxy.** It needs Node 22 or later. Build it once from
+RecDep's source with `npx shadow-cljs release proxy`, which writes
+`out/recdep-proxy.js`. Then write its settings in a file,
+`recdep-proxy.edn`:
+
+```clojure
+{:listen {:host "127.0.0.1" :port 8787}
+ :origins ["https://klibro.github.io"]        ; the pages it answers
+ :databases {"shop" {:dbms :postgres :url {:env "SHOP_DATABASE_URL"}}}}
+```
+
+`:url` is the database's address, `postgres://user:password@host/db`,
+here read from the environment variable `SHOP_DATABASE_URL` so the
+password isn't in the file. Start it:
+
+```bash
+node out/recdep-proxy.js serve recdep-proxy.edn
+```
+
+It prints its **token**: RecDep asks for it once. `node
+out/recdep-proxy.js token` prints it again, and `node
+out/recdep-proxy.js check recdep-proxy.edn` says whether each database
+can be reached, and what it is. Give the database login the proxy uses
+the right to read, and to write only the tables it may write (below),
+and nothing more.
+
+**In the sheet.** Put the database's address in a cell, and name the
+cell (say `shop`):
+
+```clojure
+(connection "http://127.0.0.1:8787/shop")
+```
+
+It shows as *shop (recdep-proxy at http://127.0.0.1:8787)*. Then read
+from it with `query`, the connection first:
+
+```clojure
+(query shop "select id, name, city from customers where city = $1 order by name" B2)
+```
+
+`$1`, `$2` … are the values after the SQL, in order: cells or any
+values, never written into the text. A cell showing a date goes in as
+a date. The rows are laid out as a grid in the cell, read as any grid
+(`(SUM A1>credit_limit)`), exactly as a query of the sheet's own
+database (§53). The first query asks for the proxy's token. RecDep
+keeps it in this browser, not in the sheet, so a sheet you pass on
+carries no password and no token. Cancel, and the query says it wasn't
+read; F9 asks again.
+
+**What comes back.** Each column holds what its Postgres type says:
+* whole numbers and numbers (exact decimals become numbers);
+* text, and an enum's values;
+* TRUE/FALSE;
+* dates;
+* a time with a zone in your browser's time zone;
+* JSON and arrays as their text.
+
+At most 200,000 cells come back. A formula reading more than that is
+refused, as for the sheet's own database.
+
+**When the database changes.** A change made through RecDep, in any
+browser, shows at once in every other sheet reading the same tables.
+A change made by another program is noticed within about half a
+minute while the page is open, and the queries reading those tables
+ask again (their old rows show dimmed meanwhile). F9 asks every query
+again at once.
+
+To have other programs' changes show at once too, the database's
+administrator runs the triggers the proxy prints, once:
+
+```bash
+node out/recdep-proxy.js triggers shop recdep-proxy.edn
+```
+
+Then mark the database `:changes :notify` in the proxy's file. A table
+added later needs them printed and run again.
+
+**When it goes wrong.** A cell shows `#SQL` saying why:
+* the database's own words for a mistake in the SQL;
+* *queries only read* for anything that would write;
+* that RecDep can't reach the proxy (is it running, with this page
+  among its `:origins`?);
+* that the proxy refused the token (F9 asks for it again).
+
+`#WAIT` while the database is asked isn't an error.
+
+**Writing.** Give the proxy the right to write, and the tables it may
+write:
+
+```clojure
+{"shop" {:dbms :postgres :url {:env "SHOP_DATABASE_URL"}
+         :mode :write :writable ["customers" "orders" "order_lines"]}}
+```
+
+Then a server database's query grids are written to exactly as the
+sheet's own database's are (§53):
+* typing into a cell writes its row (the query must select the table's
+  key, such as `id`);
+* Delete, paste and fill write the cells' rows;
+* a row typed below the grid is added once its needed columns have
+  values;
+* right-click → *Delete ▸ rows* deletes them.
+
+A column's rules come from the database: an enum's or a CHECK's values
+give a ▾, and a column naming another table's rows offers them by name.
+In buttons and the REPL, a table of a server database is written with
+its connection: `(insert-button [shop "customers"] new-customer)`,
+`(update-row! ctx [shop "orders"] {:id 3} {:status "shipped"})`.
+
+Each write is one Undo step. Undo asks the database to put the rows
+back, and puts the sheet back once it has. When someone else has
+changed the row since, Undo says so and leaves both as they are, so
+nobody's change is lost. Deleting a row the database deletes others
+with (an order's lines) takes them too, and Undo brings them all back.
+What the database refuses is said in words: a name already there, a
+column left blank, a customer that eleven orders name.
+
+Writes go to the database at once: there's nothing to save. A table
+the proxy isn't given to write can't be typed into, and says why.
+
+**Queries by steps.** The Data tab's steps work on a server database
+too, given the connection first:
+
+```clojure
+(query shop "customers" [{:op :filter :column "city" :test := :value city}
+                         {:op :filter :column "name" :test :contains :value search}
+                         {:op :sort :by [["name" :asc]]} {:op :limit :n 20}])
+```
+
+They run in the database, live, as a search form wants: a blank
+criterion is no condition, a date cell goes in as a date, and typing
+into a row of the result writes it. Every step works there but three,
+which say so:
+* a filter by kind;
+* an append;
+* a join to a table of another source.
+
+**In the Data tab.** *Open a URL…* and the database's address
+(`http://127.0.0.1:8787/shop`). It's listed with its tables, as a file
+is, and everything the Data tab does works on it:
+* scroll through a table;
+* *Details + data* for each column's counts, range, spread and
+  histogram;
+* *Correlations*, with all three measures, and a pair's cross-plot
+  when you click a cell;
+* steps to filter and clean;
+* *Promote*, *Promote live* and *Copy into the database…*.
+
+None of it is copied. Postgres works out each step, each column's
+details and each screenful of rows, and only what you see is sent, so
+the Data tab and your queries always agree, however large the table.
+The steps only shape what you look at; the database is never changed
+by them. Correlations are worked out by recdep-proxy, beside the
+database, and only the matrix comes back. As with a file, past 200,000
+rows they are worked out from an even sample of about 100,000, and the
+note under the matrix says so. A cross-plot draws at most 5,000 points.
+
+**A SQLite file behind the proxy.** A SQLite database on the proxy's
+machine is served the same way, named by its file:
+
+```clojure
+{"notes" {:dbms :sqlite :file "/srv/data/notes.db" :mode :read}}
+```
+
+A path that doesn't start at `/` is from the settings file's folder.
+It needs Node 22.13 or later. Everything above works on it as on
+Postgres:
+* queries, written in SQLite's own SQL, with `?` for each value;
+* steps;
+* writing, with Undo and Redo;
+* the Data tab's tables, rows and steps.
+
+Where they differ:
+* a column read through a view is written back to the view's table;
+* a change made by another program is noticed by asking (it can't be
+  told), so `:changes :notify` isn't for SQLite;
+* in the Data tab, a column's details and *Correlations* say, under
+  the grid, that they aren't worked out for SQLite there. Open the file
+  itself in the Data tab for them, or promote the rows into the sheet.
+  A filter's list of values and the step builder's previews work.
+
+A query that runs past the proxy's time limit (`:limits {:time-ms
+10000}`) is stopped, and the next one is answered as usual.
+
+**Serving others.** Run beside a server database, the proxy serves
+everyone who should reach it, each with a token of their own and the
+databases they may use. Three things change in its file:
+
+```clojure
+{:listen {:host "0.0.0.0" :port 8787 :tls {:cert "fullchain.pem" :key "privkey.pem"}}
+ :origins ["https://klibro.github.io"]
+ :auth {:mode :users}
+ :databases {"shop" {:dbms :postgres :url {:env "SHOP_DATABASE_URL"}
+                     :mode :write :writable ["customers" "orders" "order_lines"]}
+             "notes" {:dbms :sqlite :file "/srv/data/notes.db"}}}
+```
+
+* **HTTPS.** `:tls` names the certificate and its key (from Let's
+  Encrypt, say). Off this machine the proxy won't listen without it,
+  since its tokens and your data would cross the network unencrypted,
+  and a page served over HTTPS can't reach it anyway. When a server in
+  front of the proxy (nginx, a load balancer) does HTTPS, write `:tls
+  :in-front`. A renewed certificate is taken up by sending the proxy
+  `SIGHUP` (`kill -HUP`), with no restart.
+* **A token per user.** `:auth {:mode :users}` keeps the users in
+  `recdep-proxy-users.edn` beside the settings file. Add one, saying
+  what they may use (a database alone is read, `:write` writes it too):
+
+  ```bash
+  node out/recdep-proxy.js add-user alice shop:write notes recdep-proxy.edn
+  ```
+
+  It prints Alice's token once: give it to her alone. Only a hash of it
+  is kept, so a lost token is replaced by running `add-user` again,
+  which also changes what she may use. `remove-user alice` takes her
+  token away, and `users` lists who may use what. Each takes effect at
+  once, without a restart.
+* **What each user sees.** A user is shown only their databases.
+  Writing needs both the database's `:mode :write` and their `:write`;
+  someone who may only read is told so, and told who can change it.
+
+In RecDep nothing changes: the first query asks for the token, here
+the one you were given.
+
+**In a container.** `scripts/recdep-proxy.Dockerfile` makes an image of
+the proxy:
+
+```bash
+docker build -f scripts/recdep-proxy.Dockerfile -t recdep-proxy out
+```
+
+Its settings, users and token live in `/config`, a folder of the host's
+mounted there. The proxy runs as the image's `node` user (uid 1000), so
+that folder must be writable by it (`chown 1000 /srv/recdep-proxy`). A
+SQLite file is reached through a mount of its own, its `:file` the path
+inside the container. Its `:listen` host is `"0.0.0.0"`, usually with
+`:tls :in-front`:
+
+```bash
+docker run -d -p 8787:8787 -v /srv/recdep-proxy:/config -e SHOP_DATABASE_URL=postgres://… recdep-proxy
+```
+
+```bash
+docker run --rm -v /srv/recdep-proxy:/config recdep-proxy node recdep-proxy.js add-user alice shop:write /config/recdep-proxy.edn
+```

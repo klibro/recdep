@@ -38,6 +38,10 @@
   --paren-0: #9c5f00; --paren-1: #c2185b; --paren-2: #1565c0;
   --paren-3: #2e7d32; --paren-4: #7b1fa2; --paren-5: #00838f;
   --paren-match-bg: rgba(34, 33, 31, .12); --paren-match-edge: rgba(34, 33, 31, .7);
+  /* (P337) buttons: raised off the page and the cells, with a deeper
+     bottom edge, so they read as things to press */
+  --btn-bg: #e9e6df; --btn-hover: #dfdbd2; --btn-down: #d3cec3;
+  --btn-edge: #b9b4a9; --btn-edge-low: #918b7e;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -62,6 +66,8 @@
     --paren-0: #ffd54f; --paren-1: #f48fb1; --paren-2: #64b5f6;
     --paren-3: #81c784; --paren-4: #ce93d8; --paren-5: #4dd0e1;
     --paren-match-bg: rgba(232, 230, 225, .2); --paren-match-edge: rgba(232, 230, 225, .85);
+    --btn-bg: #3a3936; --btn-hover: #45443f; --btn-down: #2f2e2b;
+    --btn-edge: #5c5a54; --btn-edge-low: #121211;
   }
 }
 :root[data-theme="dark"] {
@@ -86,15 +92,21 @@
     --paren-0: #ffd54f; --paren-1: #f48fb1; --paren-2: #64b5f6;
     --paren-3: #81c784; --paren-4: #ce93d8; --paren-5: #4dd0e1;
     --paren-match-bg: rgba(232, 230, 225, .2); --paren-match-edge: rgba(232, 230, 225, .85);
+    --btn-bg: #3a3936; --btn-hover: #45443f; --btn-down: #2f2e2b;
+    --btn-edge: #5c5a54; --btn-edge-low: #121211;
   }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
 #app, .app { height: 100%; }
 .app { display: flex; flex-direction: column; }
-button, label.button { font: inherit; padding: 3px 10px; border: 1px solid var(--line);
-  background: var(--panel); color: var(--text); border-radius: 4px; cursor: pointer; }
-button:hover, label.button:hover { border-color: var(--accent); }
+button, label.button { font: inherit; padding: 3px 10px; border: 1px solid var(--btn-edge);
+  border-bottom-color: var(--btn-edge-low); background: var(--btn-bg); color: var(--text);
+  border-radius: 4px; cursor: pointer; }
+button:hover, label.button:hover { border-color: var(--accent); background-color: var(--btn-hover); }
+/* pressed: sunk, its deep edge on top */
+button:active:not(:disabled), label.button:active { background-color: var(--btn-down);
+  border-top-color: var(--btn-edge-low); border-bottom-color: var(--btn-edge); }
 code, pre { font-family: var(--mono); font-size: 12px; }
 
 .toolbar { display: flex; gap: 8px; align-items: center; padding: 6px 10px;
@@ -139,7 +151,7 @@ select.theme { font: inherit; padding: 2px 4px; background: var(--panel); color:
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
 .formula-bar .fields { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .formula-bar .field { display: flex; gap: 6px; align-items: flex-start; }
-.formula-bar .field label { width: 16px; color: var(--muted); padding-top: 4px; text-align: center; }
+.formula-bar .field label { width: 20px; flex: none; color: var(--muted); padding-top: 4px; text-align: center; }
 /* ƒ / T: edit the cell as a formula or as text */
 .formula-bar .field button.edit-mode { width: 20px; padding: 2px 0; font-size: 12px; line-height: 1.2;
   color: var(--muted); border-color: transparent; background: transparent; font-style: italic; }
@@ -215,6 +227,10 @@ td.cell.has-error { background: var(--err-bg); }
 td.cell.stale:not(.has-grid) > * { opacity: .4; }
 /* P199: a blank cell of a column with a default shows what the table's rows read there, faintly */
 td.cell.default-shown { color: var(--muted); font-style: italic; }
+/* (P334) the row after a query's answer, where a new row is typed: held
+   values italic; a needed cell still blank says so */
+td.cell.db-draft { font-style: italic; background: color-mix(in srgb, var(--accent) 5%, transparent); }
+td.cell .db-needed-mark { color: var(--muted); font-size: .85em; }
 .stale-value { opacity: .5; }
 td.cell .num { display: block; text-align: right; font-variant-numeric: tabular-nums; }
 td.cell .code, td.cell .kw { font-family: var(--mono); font-size: 11.5px; }
@@ -259,6 +275,9 @@ svg.chart .line { fill: none; stroke: var(--ink, var(--pos)); stroke-width: 1.5;
 /* a simulation's runs (§29): histogram, percentile band */
 svg.chart rect.tail { fill: var(--ink, var(--pos)); opacity: .35; }
 svg.chart line.mean { stroke: var(--text); stroke-width: 1; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; }
+.r-histogram { display: flex; flex-direction: column; height: var(--row-h, 56px); }
+.r-histogram svg.chart { flex: 1 1 0; height: auto; min-height: 16px; }
+.r-histogram .ends { display: flex; justify-content: space-between; font-size: 11px; line-height: 1.3; color: var(--muted); }
 .r-band { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
 .r-band svg { flex: 1 1 auto; min-width: 20px; height: 16px; }
 .r-band .whisker { stroke: var(--ink, var(--pos)); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
@@ -325,6 +344,8 @@ td.cell.table-head .r-dropdown { font-size: 11px; font-weight: 400; }
 a.r-wikilink { cursor: pointer; }
 a.r-wikilink:hover { border-bottom-style: solid; }
 .r-image { display: block; max-width: 100%; }
+/* (P384) an image in Markdown with no size of its own: no higher than a few lines, so a big one (a 1000px logo) shows whole, not a corner of it filling the cell */
+.r-md img.r-image { max-height: 6em; width: auto; height: auto; object-fit: contain; }
 /* a test's result (§27) */
 .r-test { font-weight: 600; }
 .r-test.pass { color: var(--good); }
@@ -565,11 +586,12 @@ td.cell {
   --arr-b: 0 0 transparent; --arr-r: 0 0 transparent;
   --open-t: 0 0 transparent; --open-l: 0 0 transparent;
   --open-b: 0 0 transparent; --open-r: 0 0 transparent;
+  --writes: 0 0 transparent;
   --bad-shadow: 0 0 transparent; --heat-tint: 0 0 transparent;
   --row-h: initial;   /* a set row height is the row's own, not its inner grids' */
   --ink: initial;     /* a text colour drawing the renderer (P34): the cell's own */
   box-shadow: var(--ref-outline), var(--arr-t), var(--arr-l), var(--arr-b), var(--arr-r),
-              var(--open-t), var(--open-l), var(--open-b), var(--open-r), var(--bad-shadow), var(--tint),
+              var(--open-t), var(--open-l), var(--open-b), var(--open-r), var(--writes), var(--bad-shadow), var(--tint),
               var(--heat-tint); }
 /* the Profile tab's overlay (§23): a tint as hot as --heat (0..1, set
    inline), and the time or step as a tag, bottom right. The cell is
@@ -667,7 +689,25 @@ th.col-head, th.row-head { cursor: pointer; }
 
 /* ---- Toolbar / format bar ------------------------------------------------- */
 .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 2px; }
-.format-bar { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+/* (P339) the second toolbar, a row of its own under the first */
+.toolbar.format-bar { gap: 4px; padding-top: 4px; padding-bottom: 4px; }
+/* icon buttons (ui/icons): a 16px drawing, the same height as a text button */
+svg.icon { width: 16px; height: 16px; display: block; flex: none; }
+svg.icon.caret { width: 10px; height: 10px; margin-left: -1px; }
+button.icon-btn, label.button.icon-btn { display: inline-flex; align-items: center; justify-content: center;
+  gap: 1px; padding: 3px 6px; min-width: 30px; height: 26px; }
+.format-bar button.fmt { height: 26px; display: inline-flex; align-items: center; justify-content: center; }
+.toolbar label.dim svg.icon { color: var(--muted); }
+/* Examples, a form of help: at the far end of the toolbar, its list
+   opening leftward */
+.toolbar-end { margin-left: auto; }
+.toolbar-end .lib-file-pop { left: auto; right: 0; }
+/* the format bar's fields (number format, unit, the grid's size): one look,
+   framed as fields to type in */
+.format-bar input.numfmt, .format-bar input.unit, .dim input { height: 24px; border: 1px solid var(--btn-edge);
+  border-radius: 4px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+.format-bar input.numfmt:focus, .format-bar input.unit:focus, .dim input:focus {
+  outline: 2px solid var(--accent); outline-offset: -1px; }
 button.fmt { padding: 2px 8px; min-width: 28px; }
 button.fmt.on { background: var(--sel-bg); border-color: var(--accent); }
 /* text / fill colour buttons (ui/colors): a glyph over a bar of the colour */
@@ -777,6 +817,16 @@ button.help-link:hover { text-decoration: underline; }
   background: var(--panel); color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .status-bar .message { margin-left: auto; font-size: 12px; }
 .status-bar .calculating { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* (P387, P391) how the sheet calculates: Auto or Manual ▾, a menu opening upwards */
+.status-bar .calc-menu { position: relative; display: inline-block; font-size: 12px; }
+.status-bar .calc-mode { color: var(--muted); text-decoration: none; }
+.status-bar .calc-mode.manual { color: var(--text); font-weight: 600; }
+.status-bar .calc-pop { position: absolute; bottom: calc(100% + 4px); left: 0; z-index: 41; min-width: 220px; padding: 4px 0;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.status-bar .calc-pop button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 4px 12px; font-size: 12px; color: var(--text); cursor: pointer; }
+.status-bar .calc-pop button:hover { background: var(--head); }
+.status-bar .calc-pop hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; }
+.status-bar a.calculating.waiting { color: var(--text); }
 /* Enter / Edit while the formula bar edits a cell (P32) */
 /* at the right end, after any message: nothing else moves as it comes and goes */
 .status-bar .entry-mode { margin-left: auto; font-size: 12px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); }
@@ -889,7 +939,7 @@ table.grid.inline svg.chart { height: 24px; }
 
 
 /* ---- Breadcrumb (zoom) --------------------------------------------------------- */
-.crumbs { display: flex; gap: 6px; align-items: center; padding: 3px 10px; font-size: 12px;
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 3px 10px; font-size: 12px;
   border-bottom: 1px solid var(--line); background: var(--panel); color: var(--muted); }
 .crumbs a { color: var(--accent); font-family: var(--mono); text-decoration: none; }
 .crumbs a:hover { text-decoration: underline; }
@@ -897,7 +947,7 @@ table.grid.inline svg.chart { height: 24px; }
 /* the grid in view's own step: a click selects it as a whole, as its corner does */
 .crumbs a.here { color: var(--text); }
 .crumbs a.here.on { color: var(--accent); background: var(--sel-bg); border-radius: 3px; padding: 0 3px; }
-.crumbs button { font-size: 11px; padding: 0 8px; }
+.crumbs button { font-size: 11px; padding: 0 8px; white-space: nowrap; }
 .crumbs .hint { margin-left: auto; }
 
 /* ---- Parameters (§6): a grid's named values, outside its cells ------------- */
@@ -1056,6 +1106,8 @@ a.flag.unit-count { --flag: var(--unit); --flag-tint: var(--unit-tint); --flag-e
 a.flag.unsettled-count { --flag: var(--unsettled); --flag-tint: var(--unsettled-tint); --flag-edge: var(--unsettled); }
 a.flag.lint-count { --flag: var(--lint); --flag-tint: var(--lint-tint); --flag-edge: var(--lint); }
 a.flag.comment-count { --flag: var(--comment); --flag-tint: var(--comment-tint); --flag-edge: var(--comment); }
+/* (P368) keys wanted: a key field not given, a web request waiting for one */
+a.flag.key-count { --flag: var(--unit); --flag-tint: var(--unit-tint); --flag-edge: var(--unit); }
 /* tests all passing: a quiet green, no tag */
 a.flag.test-count.pass { color: var(--good); background: none; box-shadow: none; }
 .lint-warnings { margin: 2px 0 0; padding-left: 16px; list-style: none; }
@@ -1066,7 +1118,7 @@ a.flag.test-count.pass { color: var(--good); background: none; box-shadow: none;
 /* the Inspector's word on a failing validation and an unsettled cycle: in their flags' colours */
 .invalid-text { color: var(--invalid); }
 .unsettled-text { color: var(--unsettled); }
-.format-bar input.unit { width: 64px; font-family: var(--mono); font-size: 12px; }
+.format-bar input.unit { width: 64px; font-family: var(--mono); font-size: 12px; padding: 0 6px; }
 /* the unit dropdown: just its arrow, beside the field; the list opens full width */
 .format-bar select.unit-pick { width: 26px; margin-left: 2px; padding: 0 2px; }
 .unit-field { display: inline-flex; align-items: center; }
@@ -1395,8 +1447,7 @@ td.cell.span-drag.span-drag-bad { --tint: inset 0 0 0 9999px var(--err-bg); outl
 /* The number format field and its gallery (§10): under the field, on the
    left; the renderer gallery's tiles and rows */
 .numfmt-field { position: relative; display: inline-flex; }
-.format-bar input.numfmt { width: 150px; height: 24px; font-family: var(--mono); font-size: 12px;
-  border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: inherit; padding: 0 6px; }
+.format-bar input.numfmt { width: 150px; font-family: var(--mono); font-size: 12px; padding: 0 6px; }
 .render-gallery.format-gallery { position: fixed; top: 80px; right: 8px; left: auto; width: min(600px, 80vw);
   max-height: calc(100vh - 100px); }
 .format-gallery .g-tile.small .g-face td.cell { min-width: 70px; height: 20px; padding: 0 6px; font-size: 12px; }
@@ -1525,7 +1576,7 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
 .modal.solver tr.miss td { color: var(--err); }
 /* the unit popover (§25), under the unit field */
 .unit-field { position: relative; }
-.unit-field .unit-pick { padding: 0 5px; margin-left: 1px; }
+.unit-field .unit-pick { padding: 0 5px; margin-left: 1px; height: 24px; }
 .unit-gallery { position: absolute; top: 100%; left: 0; z-index: 45; margin-top: 3px; width: 520px; max-height: 70vh;
   overflow: auto; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
   box-shadow: 0 6px 22px rgba(0,0,0,.2); font-size: 12px; text-align: left; }
@@ -1577,6 +1628,14 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
 .data-columns { border-collapse: collapse; margin: 2px 0 6px 16px; font-size: 12px; }
 .data-columns td { padding: 1px 8px 1px 0; vertical-align: baseline; }
 .data-columns .key { color: var(--accent); }
+/* (P357, P369, P370) the sheet's own database's schema, edited under a table */
+.data-schema { margin: 2px 0 8px 16px; font-size: 12px; }
+.data-schema-part { margin: 4px 0; }
+.data-schema-list { margin: 2px 0; padding-left: 16px; }
+.data-schema-sql { margin: 2px 0; padding: 4px 6px; white-space: pre-wrap; font: 11px var(--mono); background: var(--head); border: 1px solid var(--line); border-radius: 3px; }
+.data-schema-add { margin-top: 2px; }
+.data-schema-add label { white-space: nowrap; }
+.data-drop { color: var(--err); }
 
 /* The Data tab's grid (P76 stage 2): a table read in blocks (recdep.ui.datagrid) */
 .data-tab { display: flex; flex-direction: column; height: 100%; min-height: 0; }
@@ -1771,6 +1830,11 @@ td.cell.steps-shown-cell { position: relative; overflow: visible; z-index: 30; }
 .steps-shown { position: absolute; top: 0; left: 0; min-width: 100%; width: max-content; max-width: 70vw;
   max-height: 22em; overflow: auto; font-size: 12px; background: var(--panel); text-align: left;
   border: 2px dashed var(--accent); box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+/* (P382) ⤢ on a heading opens a column of lists or records */
+button.steps-unnest { margin-left: 4px; padding: 0 4px; border: 1px solid var(--line); border-radius: 3px;
+  background: var(--bg); color: var(--accent); font-size: 11px; line-height: 14px; cursor: pointer; }
+button.steps-unnest:hover { background: var(--sel-bg); }
+.steps-unnest-all { padding: 2px 6px; }
 .steps-shown-head { position: sticky; top: 0; z-index: 1; padding: 1px 6px; background: var(--sel-bg); color: var(--text);
   border-bottom: 1px solid var(--accent); white-space: nowrap; }
 .steps-shown table { border-collapse: collapse; }
@@ -2107,10 +2171,18 @@ table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(6), table.grid.frz-c9 > the
 table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(7), table.grid.frz-c9 > thead th.col-head:nth-of-type(8) { left: var(--frz-l-6); }
 table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(8), table.grid.frz-c9 > thead th.col-head:nth-of-type(9) { left: var(--frz-l-7); }
 table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(9), table.grid.frz-c9 > thead th.col-head:nth-of-type(10) { left: var(--frz-l-8); }
-/* the toolbar's lock (P193): protection off is worth seeing */
-.toolbar button.lock.off { background: var(--warn-bg, #fff1c2); }
-/* (P319) every sheet shown, the model's too */
-.toolbar button.advanced.on { background: var(--sel-bg); border-color: var(--accent); }
+/* The toolbar's toggles: the state worth seeing is a tint of one hue, an
+   edge of it, and the icon drawn in it, dark on light or light on dark, so
+   the glyph keeps its contrast in either theme; the other state is a plain
+   button. Hover deepens the tint. */
+/* the lock (P193): protection off, in the warning gold */
+.toolbar button.lock.off { background: color-mix(in srgb, var(--warn) 26%, var(--btn-bg));
+  border-color: var(--warn); color: color-mix(in srgb, var(--warn) 60%, var(--text)); }
+.toolbar button.lock.off:hover { background: color-mix(in srgb, var(--warn) 36%, var(--btn-bg)); }
+/* Advanced (P319): every sheet shown, the model's too, in the accent */
+.toolbar button.advanced.on { background: color-mix(in srgb, var(--accent) 26%, var(--btn-bg));
+  border-color: var(--accent); color: color-mix(in srgb, var(--accent) 75%, var(--text)); }
+.toolbar button.advanced.on:hover { background: color-mix(in srgb, var(--accent) 36%, var(--btn-bg)); }
 /* a flat list of values shown in a cell (P196): on one line, each in the cell's format */
 td.cell .r-list-inline, td.cell .r-list-inline .num { display: inline; }
 td.cell .r-list-inline { display: block; text-align: right; }
@@ -2120,8 +2192,13 @@ td.cell .r-list-inline.text { text-align: left; }
 .menu.submenu { z-index: 22; min-width: 180px; }
 .menu-item.has-sub.open { background: var(--sel-bg); }
 /* a view's cell that writes back to its table (P198): typing here changes
-   the table's cell; marked so it isn't taken for a formula's result */
-td.cell.writes-through { box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+   the table's cell; marked so it isn't taken for a formula's result. One
+   layer of the cell's composed shadow (--writes), not a box-shadow of its
+   own, which would drop the open frame and the selection tint (a facade's
+   links showed no green frame); beside an open frame's left edge it is
+   drawn just inside it, so both show */
+td.cell.writes-through { --writes: inset 2px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+td.cell.writes-through.open-l { --writes: inset 4px 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
 
 /* the place right of a table's last column, where typing adds one (P207) */
 th.col-head.next-col { color: var(--muted, #888); font-weight: normal; opacity: .6; }
