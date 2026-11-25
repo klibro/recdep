@@ -145,7 +145,10 @@ and `column` flatten them for Clojure's own.
   `#UP` error naming the upstream cell, where the error started when
   that's further up, and the error itself: `A2 has an error, from A1:
   #ERR there's no item 3: there are no items`. The Inspector's *Starts at*
-  row links to the cell where it started. (Excel's error values, `#N/A`,
+  row links to the cell where it started, and every cell or range an
+  error's message names is a link there (`A2`, `A1`; `base (C1)` as one
+  link): click your way back up the chain to where it went wrong. The
+  same goes for *Step through*'s summary. (Excel's error values, `#N/A`,
   `#DIV/0!` and the rest, are a different thing: ordinary values that the
   operators and Excel's functions pass along, §17.)
 * **Catching another cell's error**. A formula that only *tests* a
@@ -1336,7 +1339,20 @@ Renderers use the variables, so they follow too; charts redraw.
   names), *Clear style* (keeping the number format and renderer) and
   *Clear formats* (all three).
 * **Point mode.** While writing a formula, after `(`, `[`, `{`, a space or a
-  comma, clicking or dragging over cells inserts a ref instead of selecting.
+  comma (and in a formula starting with `=`, after that `=` and after
+  `+`, `-`, `*`, `/`, `^` or `&`), clicking or dragging over cells inserts a ref instead
+  of selecting; so do the arrow keys, as in Excel: `=` then ↓ ↓ gives
+  `=A3` (each arrow moves the pointed cell, replacing the reference it
+  put in), Shift-arrows grow a range (`=A3:A4`), and typing `+` then
+  an arrow points again from the cell you're writing. A click right
+  after a reference you pointed at replaces it too, so you can keep
+  clicking until it's the one you want. A click on a cell picks that
+  cell whatever it shows: a date picker, a slider, a toggle or a button
+  in it doesn't act, and a grid's link (`▦ 4×2 grid ›`) picks the grid.
+  Double-click a grid's cell to go into it and pick one of its cells
+  instead. In a grid drawn in its cell, a click on one of its cells
+  picks that cell (`box>A1`), and a click on its corner ▦ picks the
+  grid (`box`).
   The formula bar's `refs:` toggle cycles between `B2:B5` (or the cell's
   name), `$B$2:$B$5` (kept by copies) and relative `u4:u1`; plain A1 is the
   default because it reads as what was clicked. The Inspector's *Inputs*
@@ -1350,8 +1366,12 @@ Renderers use the variables, so they follow too; charts redraw.
   table's last row however many rows it has; elsewhere by its letter,
   as Excel writes it (`B:B`). A table drawn in a cell
   (`(grid-view)`, a facade's link) has its letters too.
-  Names and grids anywhere in the sheet are picked from the Outline the
-  same way (§11).
+  To pick a cell in another grid, just go there while you write: the
+  Outline, the breadcrumb, a sheet tab, a double-click on a grid's link, or Alt-↓ / Alt-↑
+  show that grid and leave the formula open; click the cell (or point
+  with the arrows) and its reference goes in by names (`model>rate`).
+  Enter enters the formula and takes you back (§11, *Picking while you
+  write a formula*).
 * **AutoSum (Σ)** writes `(SUM …)` under each selected column holding
   numbers, its heading left out, in the row below its last filled one
   (or right of a selected row, its label left out), the grid growing
@@ -1695,7 +1715,11 @@ sheet has recalculated:
   with ✕, at your next edit, or once the error's gone (undo). An error in the cell you typed into
   itself only flashes the count: you can see it already.
 * 🔔 in the box turns on a short sound with it (off until you do; the
-  setting is kept in this browser).
+  setting is kept in this browser). It plays once as you turn it on, so
+  you know what to listen for; if you don't hear it then, check the
+  browser tab isn't muted and your speakers are on. Like the box, it's
+  for errors outside the cell you typed into. If the browser holds a
+  sound back, the box says so; turning 🔔 off and on again lets it play.
 
 Only errors the edit has just made count, not those already there:
 inserting a row above an error moves it without alerting, and undo,
@@ -1842,7 +1866,9 @@ formulas, renderers, styles and names.
   in; the name box says where in it: `A1`, or `hike>A2` in a grid drawn
   inside it, not the whole path again. A path typed there is read from
   the grid you're in first (`hike>A2`), then from the top grid
-  (`basics>A1`); `$>` starts at the top always.
+  (`basics>A1`); `$>` starts at the top always. Beside its size, the
+  breadcrumb says what's protected in the grid you're in, with the lock
+  that turns protection off (§47).
 * **A name, and its address beside it.** Wherever RecDep names a cell,
   a grid or a range for you to read (the Inspector, messages and
   refusals, tooltips, the breadcrumb, sheet tabs, the Outline, Find,
@@ -2149,7 +2175,7 @@ nothing inside it mentions what's around it.
 * **An example.** Examples ▾ → *Project plan* opens on its facade
   (§54): the plan as its team sees it, the dates to set, where it
   stands, the Gantt and the task picked in it, with resources, tasks
-  and load as its sheets. *Advanced*, in the toolbar, shows the rest: a
+  and load as its sheets. *Advanced*, beside Home under the grid, shows the rest: a
   project plan built from blocks (§46, *The project plan*): a working calendar, a
   timesheet, a scheduler, baselines, tracking, a Gantt, two loading
   views and a next project, each a self-contained grid saying what it
@@ -2306,9 +2332,22 @@ linked.
   replaced, for that call only.
 * Edit the template, or anything it reads, and every call re-runs. The
   Inspector's "Used by" on the grid cell lists its callers.
+* **A call with an output works out only what that output needs**, and
+  works that out the same way each time: called many times (in a
+  simulation's runs, a what-if table, goal seek), it costs about the
+  template's own work for that output, however big the sheet around it.
+  So when you need one result, name it: `(call scheduler {:tasks t}
+  :plan)` doesn't work out the Scheduler's bookings.
 * Use `$` (`$E$32`) when the calling formula will be copied or filled, so
   every copy calls the same template.
 * `call` works in cell formulas, not in renderers.
+* A block that works can be compiled to a function (§58): `call` takes
+  that function as it took the block.
+* **A cell showing an input.** A template shows its inputs in its body
+  by writing their names as formulas (the tour's loan: B1 is `amount`).
+  Typing a value into such a cell sets the input, so the payment and
+  every call follow; the status bar says so. A formula typed there
+  replaces what the cell shows, as anywhere.
 * When the template fails for these inputs, the error names the inner
   cell where it started, by its name and address: `call: E2>pick (E2>A3): No item 5 in
   vector of length 2`, even when the output is a cell that only reads
@@ -2541,6 +2580,11 @@ Validation rules (§16) sit in the same list.
   Excel's: for the cell itself write `%`, for its neighbours `l1`, `u1`. When
   a cell it reads has an error, the condition doesn't apply, and the
   Rules tab says why.
+  **True or false, whatever the cell holds**: a condition can also be a
+  formula that is true or false, as Excel's are: `(> limit 3)` applies
+  to every cell it covers while `limit` is over 3. A name inside a grid
+  isn't seen from the grids within it: there, write the path from the
+  top (`$>order-card>order-head>B5`).
 * `:format` — a number format code, as a cell's `:format`.
 * `:render` — renderer source, as in a cell's renderer field.
 * `:style` — a CSS map, as a cell's style.
@@ -2634,21 +2678,28 @@ every grid at once.
     value of its column's kind. So a table that's the sort of thing you
     want tells you what to say a parameter takes (⚙ Parameters, beside
     the parameter: *takes a calendar*).
-  * **Picking a name into a binding.** While you type what a grid's cell
-    gives a parameter (in ⚙ Parameters, after ←), the Outline says so at
-    its top, and a click on a grid or name puts its reference there
-    instead of going to it, written from the grid's cell, by names
-    (`working-calendar>calendar`); Enter applies it. Opening the Outline
-    tab and unfolding its grids leave the field where you were typing.
-  * **Picking names into a formula.** The same while you write a
-    formula (in a cell or the formula bar, once it starts with `(` or
-    `=`) or code in the REPL: the Outline's top says *Click a name or
-    grid to put it in the formula of C1*, and a click puts its reference
-    at the cursor, by names (`model>rate`), so a formula reaching across
-    grids, or a facade's links (§54), are picked rather than typed.
-    Click several in turn; Enter enters the formula as ever. Typing
-    text, or leaving the cell, puts the Outline back to going where you
-    click.
+  * **Picking while you write a formula.** A click in the Outline
+    always goes where you click, also while you're writing a formula (in
+    a cell or the formula bar, once it starts with `(` or `=`, code in
+    the REPL, or a field that takes a formula, like an instance's
+    inputs): then it only *shows* that grid or name, and the formula
+    stays open, so you see what's there before you pick it. Click the
+    cell you want (or point at it with the arrows) and its reference
+    goes in, by names (`model>rate`), so a formula reaching across
+    grids, or a facade's links (§54), are picked rather than typed. The
+    same goes for every other way of getting about: the breadcrumb, the
+    sheet tabs, a double-click on a grid's link in a cell, and Alt-↓ into the grid the
+    pointed cell holds and Alt-↑ out. (A box that takes typing, as
+    Find's or the name box, takes the cursor: going there enters the
+    formula.) The breadcrumb says *writing the formula of D1* while
+    you're away from it, the Outline says so at its top, and the cell
+    the arrows would point on from is outlined. Enter enters the formula
+    and brings you back to its cell; Esc cancels it and brings you back
+    too; clicking a cell where no reference can go selects that cell,
+    entering the formula and staying there; so does pressing a row or
+    column head when no reference can go at the cursor. Opening the
+    Outline tab and unfolding its grids leave the cursor in the formula.
+    The REPL picks the same way once something is typed in it.
 * **Errors in the status bar**: `⚠ 2 errors` beside `✗ n invalid`
   counts the errors in the whole sheet, wherever you are, so stepping
   through them goes from one grid to the next. On one of them it reads
@@ -2887,7 +2938,7 @@ matching outlines on the grid, completion, F4 for `$`, and values on hover.
   lines: edit in the formula bar ↑*: click it and the bar opens on it,
   laid out and coloured. In a protected cell the bar can't be typed
   into, so the link unfolds the formula in the Inspector instead, as
-  written, with the way to edit it (open the lock 🔒 in the toolbar).
+  written, with the way to edit it (open the lock 🔒 above the grid).
 
 ### What typing enters: text unless it says otherwise
 
@@ -2967,12 +3018,15 @@ and the other formula help are still in the bar.
 
 How the keys behave depends on how the edit started, as in Excel:
 
-* **Enter mode**: you typed over the cell. The arrows finish the entry
-  and move that way, so a row fills as fast as a column does: `1` → `2`
-  → `3` →.
-* **Edit mode**: you opened the cell with F2, Enter or a double-click,
-  clicked into the formula bar, or switched ƒ/T. The arrows move the
-  cursor in what you're writing.
+* **Enter mode**: you typed over the cell, or opened it with F2, Enter
+  or a double-click. The arrows finish the entry and move that way, so
+  a row fills as fast as a column does: `1` → `2` → `3` →. In a formula,
+  where a reference can go (after `(`, `=`, a space, an operator in an
+  `=` formula), they point at cells instead and put their reference in
+  (§5, *Point mode*).
+* **Edit mode**: you clicked into the formula bar (also while you're
+  already writing), or switched ƒ/T. The arrows move the cursor in what
+  you're writing.
 * **F2** switches between the two while you write. The status bar shows
   which you're in (**Enter** or **Edit**, at its right end) for as long as
   the edit lasts.
@@ -4232,7 +4286,7 @@ table has one more column, in the same undo step:
 
 Rules that run to the right edge (`re`) cover the new column. In a
 protected grid, typing there is refused, as Insert is, and the message
-says so by the cell; open the lock 🔒 in the toolbar to add a column. A
+says so by the cell; open the lock 🔒 above the grid to add a column. A
 table drawn in its cell, or more than 50 columns wide, doesn't have the
 empty column: there Tab from the last column adds one, headed *Column1*
 (§12, *At a grid's edge*).
@@ -5116,7 +5170,7 @@ units (metres over seconds is m/s), and a kilometre plus 500 metres is
   `{:area "D:D" :unit "km"}`. Emptying the field, or *Clear formats*
   (cell menu), removes it.
   Typed, °F is `degF` and Δ°C `delta-degC`.
-* **The unit popover.** Focusing the unit field (or its **▾**) opens a
+* **The unit popover.** Focusing or clicking the unit field opens a
   gallery of units, as the format field opens the format gallery:
   * a **search** (*fahrenheit*, *mile*, *speed*, *swiss*, by unit, its
     name and its kind; a unit's own text begun, too, so `$`, `€`, `°C`
@@ -6732,7 +6786,15 @@ after a rename on the shelf. *Move up* goes one grid at a time.
 A new "sheet" in RecDep is a grid in a cell of `$`. The strip under the grid is Excel's sheet tabs for
 these grids.
 
-* **The tabs.** First `$`, then every grid in a cell of `$` that's drawn
+* **Home and Advanced.** At the strip's left, the house is *Home*: it
+  goes to `$`, the top grid, or, on a sheet with a facade (§54) and
+  Advanced off, to the facade, the sheet as its users see it. It goes
+  to that grid itself, out of any grid inside it, and is lit while
+  you're there. Beside it, on a sheet with a facade, is *Advanced*
+  (stacked layers), lit while it's on: it says which sheets have tabs
+  (§54). Home is never a tab of its own: `$` has none, nor has the
+  facade with Advanced off.
+* **The tabs.** Every grid in a cell of `$` that's drawn
   as a link (the ▦ button, `grid-link`, which a grid has unless it's
   given another renderer), in reading order. Each is labelled by its
   name, or by its address when it has none. A grid drawn in place
@@ -6745,18 +6807,19 @@ these grids.
   workbook's sheets (§17) are tabs as soon as it's opened, and a grid
   put in `$` (the Inspector's *Make grid*) becomes one.
 * **Which tab is lit:** the one holding the grid in view, however deep
-  you've zoomed into it (the breadcrumb says how deep). `$` is lit while
-  you're in `$`, or in a grid drawn in place there.
+  you've zoomed into it (the breadcrumb says how deep). Home is lit
+  while you're in `$`, or in a grid drawn in place there.
 * **Switching.** Click a tab to go back to where you last were in it
   (the grid in view and the selected cells), or to its grid the first
   time. Clicking the lit tab goes out to its own grid.
-  Ctrl-Alt-← / → go to the previous / next tab, wrapping round (not
+  Ctrl-Alt-← / → go to the previous / next tab, Home counted first,
+  wrapping round (not
   while typing in the formula bar or a box). Alt-PgUp / Alt-PgDn do
   too, on keyboards that send Alt with PageUp (some laptops, where
   PageUp is a Fn key, don't). Excel's Ctrl-PgUp / PgDn work where the
   browser passes them on; Chrome and Edge keep them for their own
   tabs. ▾ lists
-  every tab, and ◂ ▸ scroll the strip. Switches are jumps: Back returns.
+  every tab, Home's grid first, and ◂ ▸ scroll the strip. Switches are jumps: Back returns.
 * **+ makes a sheet:** a 30×10 grid (a New sheet's size) named Sheet1,
   Sheet2 … (the first name that's free). It goes in the first empty cell
   going down the column of the last tab, or of column A when there's
@@ -6765,9 +6828,8 @@ these grids.
 * **Renaming:** double-click a tab (or right-click → *Rename*), type,
   then Enter; Esc keeps the old name. This renames the cell, as the
   Inspector does: formulas that used the old name are rewritten (§6),
-  and a name that can't be used is refused, saying why. `$` has no
-  name to change, and says so.
-* **Right-click a tab** for *Rename*, *Select its cell in $* (to give it
+  and a name that can't be used is refused, saying why.
+* **Right-click a tab** (or Home, for `$`'s *New sheet*) for *Rename*, *Select its cell in $* (to give it
   a renderer, move it or comment it), *New sheet* and *Delete sheet…*.
   Deleting removes the grid with everything in it, and its name. You're
   asked first. Formulas reaching into it show `#NAME` when they use its
@@ -7329,6 +7391,27 @@ rolling forecast's window.
   one. A step that refuses is marked in red, and why is said under the
   list, with *Change it* to open its form. An *own values* step (typing
   into the table, below) has no form: a click shows the table after it.
+  Neither has a step that can't be read, nor one worked out by a
+  formula rather than written as a map: under any of these, a click
+  says why there's no form, with **▴ Earlier**, **▾ Later** and **×
+  Take out** all the same.
+* **Steps inside a formula.** The steps needn't be the whole formula:
+  `(record-view (query "orders" [step …]))`, `(:total (first (query
+  "order_summary" [step …])))`, `(IFERROR (count (steps orders [step
+  …])) "none")` or a `let` around them all have the same *Steps* list.
+  Clicking a step shows the table after it in the cell's place, worked
+  out where the steps sit (with the `let`'s names; inside a `for`, the
+  last time round, which the line above the table says), whatever the
+  cell itself shows: a form, a number, the text IFERROR gives. A step
+  that refuses inside IFERROR, which the cell doesn't show, is marked
+  and said once you've clicked a step. Changing, moving, adding and
+  taking out steps rewrite only the steps; the formula around them
+  stays as written. A formula with several lists of steps (two queries,
+  or a join's other table written as steps) names each above the list:
+  click one to list it. In the *Trace* row, **Step through** gives each
+  list its own **↘ its steps**, which lists it and brings it into view.
+  Own values are typed only into a steps formula's own table, so they
+  stay with steps that are the whole formula.
 * **What a step reads.** Above an open step's form, a line names the
   cells and ranges the step reads, each a link to it: the Schedule step
   *Reads settings>level, settings>calendar*, a cost worked out from a
@@ -7356,7 +7439,7 @@ rolling forecast's window.
   the field to show the step itself again.
 * **In a protected cell** (§47), the list works as ever, and the forms
   open so you can read them, with Apply, ▴ ▾ and × switched off and the
-  line beside them saying to open the lock 🔒 in the toolbar first.
+  line beside them saying to open the lock 🔒 above the grid first.
 * **Dates stay dates.** A column of dates (its kind, §19: Tasks' Started
   and Finished) is still one after any step that keeps it: filtered,
   sorted, joined, chosen and renamed. A worked-out column is a date when
@@ -7742,8 +7825,10 @@ opened the same way.
   and Undo changes it back; an order's lines can be added and removed;
   browser Back returns to the search. *Shapes* says what each table
   holds. A green frame shows where to type: the boxes, and the columns
-  of the database grids you can type over. It's a `.recdep.db`, so Save
-  keeps the database with it.
+  of the database grids you can type over. The form sheets are
+  protected (§47), so everything else on them refuses typing: their
+  tabs carry a lock, and the bar above each says so. It's a
+  `.recdep.db`, so Save keeps the database with it.
 * **Open from a web address…** (at the bottom of Examples ▾) opens a
   sheet (`.recdep.edn`) or an Excel workbook from any address, such as
   a file in a GitHub repository (`https://raw.githubusercontent.com/…`)
@@ -7845,14 +7930,15 @@ insides.
 * **Next project** (a block): a second project's tasks, scheduled into
   what the relaunch leaves its people, and beside it on the calendar
   alone.
-* **Schedule risk** (a block): how sure the finish is. It takes what
-  the Scheduler takes and works the plan out again *Runs* times (300),
-  each time with the work of every task that has a Low and a High drawn
-  afresh between them, most often its Work (a part day leaving the rest
-  of the day free). *Drawn plan*
-  is one run's plan, by steps: the work drawn, then the Scheduler's
-  steps (select it to read or change them); on the sheet each draw
-  shows its mean, so it shows the plan at the means. *Finishes*
+* **Schedule risk** (a block): how sure the finish is. It takes Tasks,
+  and the Scheduler itself, which it calls as a function: it works the
+  plan out again *Runs* times (300), each time with the work of every
+  task that has a Low and a High drawn afresh between them, most often
+  its Work (a part day leaving the rest of the day free). *Drawn tasks*
+  is Tasks with the work drawn (select it for its step); on the sheet
+  each draw shows its mean. *Drawn plan* is `(call scheduler {:tasks
+  drawn-tasks} :plan)`: the Scheduler's plan for the drawn tasks, so
+  whatever you change in the Scheduler, the runs follow. *Finishes*
   draws the runs' last days as a histogram; *Likely by*, *80% sure by*
   and *95% sure by* are the dates half, four in five and nineteen in
   twenty of the runs finish by; type the date the launch was promised
@@ -7860,7 +7946,7 @@ insides.
   A task without Low and High, or finished, keeps its Work, so with none
   every run is the plan. The facade shows *80% sure by* under the
   forecast. More runs are steadier and slower: every change to the
-  tasks works them all out again (300 take about half a second).
+  tasks works them all out again (300 take about a second).
 * The summary: forecast and baseline finish, the slip, work done,
   schedule and cost performance (SPI, CPI), late tasks, the critical
   path, the days someone is booked twice, the weeks overbooked, and the
@@ -7900,6 +7986,26 @@ it off.
 * **Protect part of a grid**: a rule `{:area "1:1" :protect true}` on the
   Rules tab protects that area of a grid that isn't protected as a
   whole: a table's heading row, say, so its column names stay.
+* **Protect while something is true**: a protect rule can have a
+  condition (*Only while* on the Rules tab, `:when`), and then protects
+  its cells only while the condition holds: an order's details once it
+  has shipped,
+  `{:area "B3:B4" :protect true :when "(not= $>order-card>order-head>B5 \"open\")"}`.
+  The condition is written as a conditional format's is (§10): a formula
+  that's true or false, or a function of the cell's own value. Its frames
+  come and go with it, and typing into a cell it protects says why at the
+  first key. Give it what to say (*Refusal says*, `:msg`), such as *a
+  shipped order is kept as it was: set its status back to open to change
+  it*, and that is what a refusal says; without one, it names the
+  condition. A condition that fails (a cell it reads has an error)
+  protects nothing. An *open* rule can have a condition too: in a
+  protected grid it leaves its cells open only while the condition holds.
+* **Records the database keeps**: protection is the sheet's guard against
+  slips, and the lock turns it off. A rule that must hold whatever is
+  typed, and wherever (another sheet, a button, the Data tab), belongs
+  in the database itself, as a trigger (§53). The two go together: the
+  database refuses, and a protect rule with a condition says so before
+  anything is typed.
 * **You can see where typing goes**: every input has a soft green frame
   round it (one round each block of them), so the places to type stand
   out, whether or not anything is protected and whether the lock is open
@@ -7911,16 +8017,31 @@ it off.
   in a protected grid. Labels nothing reads and formulas aren't framed,
   nor is what's worked out (an order's total); typing into a cell that
   can't take it says why at the first key.
-* **The lock** 🔒 *Protected* appears in the toolbar once anything is
-  protected. Click it to turn protection off while you work on the sheet
-  (*🔓 Editing all*), and again to turn it back on. It isn't saved: a sheet
-  opens protected.
+* **You can see what's protected**: a sheet with anything protected has
+  a small lock after its name on its tab, and the bar above its grid
+  (where the grid's name is) says *🔒 Protected* and *type in the green
+  frames*, or *🔒 Partly protected* and *some cells here refuse typing*
+  when only some of what's shown is (a heading row, a form drawn inside
+  it). A grid that protects nothing shows the lock alone and *nothing
+  here is protected*: everything there takes typing. (A sheet with
+  nothing protected anywhere shows no lock at all.)
+* **The lock** is that *🔒 Protected* in the bar above the grid. Click it
+  to turn protection off while you work on the sheet (*🔓 Editing all*,
+  in gold; the tabs' locks open too), and again to turn it back on.
+  It's one switch for the whole sheet, so *Editing all* shows above every
+  grid while it's open. It isn't saved: a sheet opens protected.
 * **What isn't stopped**: the sheet's own buttons and controls (a button
   setting the baseline writes it, a tick box in an open cell ticks);
   column widths, row heights, freezing panes and what a grid shows;
   comments; libraries, scenarios, tests and templates; and protection
   itself (*Protect*, *Leave open*), the way out.
-* The Project plan example protects the heading rows of its tables.
+* The Project plan example protects the heading rows of its tables; the
+  Order book protects its form sheets, leaving their boxes open. An
+  order that has shipped (or is invoiced or cancelled) is kept as it
+  was: its customer, its days and its lines no longer take typing, and
+  the database refuses changes to them however they come, *Mark as
+  shipped today* pressed again included. Its status and note still
+  change, and setting its status back to open lets you change the rest.
 
 ## 48. Views that write back
 
@@ -9097,6 +9218,15 @@ usual form actions, each a button labelled with its cell's value:
   Rules the database keeps itself, a trigger filling a line's price
   from the product's or refusing a discontinued product, are the
   sheet's rules too: nothing in the sheet repeats them.
+* **Records kept as they were**: a record that is history (a shipped
+  order) is kept by triggers refusing changes to it, which hold however
+  the change comes, with the lock open too. Undo still takes back what
+  you did (a *Mark as shipped* undone): it puts the rows back as they
+  were without running the triggers. A protect rule with a condition
+  (§47) shows the same thing on the form before anything is typed: the
+  order book's
+  `create trigger order_kept before update of customer_id, placed, shipped on orders when old.status <> 'open' … select raise(abort, 'order … is shipped, so its details are kept as they were: set its status back to open to change them')`,
+  and on its order card `{:protect true :when "(not= $>order-card>order-head>B5 \"open\")"}`.
 A drop-down with no options of its own (`(dropdown)`, offering its
 cell's kind) has a blank first choice, which empties the cell: a
 search's criterion goes back to *any*. A lookup's ▾ over a list of a
@@ -9167,8 +9297,9 @@ the new results.
   is.
 * **Paste link** builds them: copy cells of the model, go to the
   facade, right-click → *Paste special ▸ Paste link*. Or pick them one at a time: type `=`
-  in a facade cell and click a name in the Outline (§11), or click the
-  cell itself (point mode, §5). Each copied cell
+  in a facade cell, go to the model's cell (the Outline, the breadcrumb,
+  a sheet tab: the formula stays open, §11) and click it (point mode,
+  §5); Enter brings you back to the facade. Each copied cell
   becomes a link at the same place in the block, by name where it has
   one, in its cell's number format. A label copied with its value is
   linked too, so the facade's label follows the model's when it's
@@ -9189,13 +9320,14 @@ the new results.
   for a cell on a facade, what it does there: a link and where a value
   typed into it goes, a link shown only, a result, or part of the
   layout.
-* **Advanced**: with a facade, the toolbar has *Advanced*. On, every
-  sheet has its tab, the facade's first. Off, only the facade's sheets
+* **Advanced**: with a facade, the sheet tabs have *Advanced* (stacked
+  layers), beside Home (§36). On, Home is `$` and every sheet has its
+  tab, the facade's first. Off, Home is the facade, only its sheets
   have tabs, there is no + for new sheets, and the sheet opens on the
   facade: the sheet as its users see it. It is saved with the sheet.
   The project plan example opens so: Advanced shows how it's worked
   out.
-* **What its users can do** while the lock 🔒 in the toolbar is closed
+* **What its users can do** while the lock 🔒 above the grid is closed
   (as a sheet opens):
   * Type into a link to a value the model holds (an input): the value
     goes into the model's cell, checked there as if typed there (its
@@ -9271,9 +9403,8 @@ starting with the name this manual uses for it.
   or an Excel workbook into the selected cell, as a grid.
 * **Library ▾** (books): the library file (§14).
 * **Undo** and **Redo** (curved arrows).
-* **Advanced** (stacked layers), on a sheet with a facade (§54), and
-  the lock (**Protected**, or **Editing all** when open), on a sheet
-  with something protected (§47). They're there only when they apply.
+* (The lock, §47, is in the bar above the grid, and *Advanced*, §54,
+  beside Home in the sheet tabs.)
 * **Light / Dark / Auto**, a drop-down (§4, *Light and dark*).
 * **Examples ▾** (a light bulb), at the far right: the guided tour and
   the example sheets (§46).
@@ -9284,7 +9415,7 @@ in view:
 * **Bold**, **Italic**, text colour (A), fill colour, and align left,
   centre and right.
 * The **number format** field (*General* when it has none, §10) and
-  the **unit** field with its ▾ (§25). Both are framed as fields to type
+  the **unit** field (§25). Both are framed as fields to type
   in; clicking either opens its popover. The popover's heading names
   the selection: a cell with a name by its name, its address after it
   in grey (*Number format for* **price** (B2)); otherwise by address.
@@ -9708,3 +9839,99 @@ docker run -d -p 8787:8787 -v /srv/recdep-proxy:/config -e SHOP_DATABASE_URL=pos
 ```bash
 docker run --rm -v /srv/recdep-proxy:/config recdep-proxy node recdep-proxy.js add-user alice shop:write /config/recdep-proxy.edn
 ```
+
+## 58. Calculations compiled to functions
+
+A block is worth its grid while there's something to see inside it.
+Once it works, you can compile it to a function instead: one function in
+your library, documented from what the block says, that does what the
+block does, so a project can use it without the grid. The same goes for
+any calculation on a sheet: mark its inputs and outputs, and compile
+the cells between them.
+
+* **Compile to a function…** is on the menu of a block's cell (a grid
+  with named outputs), and on any formula's cell: there, the selected
+  formulas are the outputs.
+  * *Name* and *into*: the function's name (the block's, or the grid's
+    around it, with `-fn` added when the sheet already names something
+    so: `loan-fn`; for cells, the first output's with `-fn`: `res-fn`)
+    and its library: **My library**, so every sheet has it (a
+    file that uses it carries it), or **this sheet's library**.
+  * *What it's for*: the first line of its documentation.
+  * *Outputs* and *Inputs*. A block's are its named outputs and its
+    inputs. For cells on a sheet, the inputs offered are the values
+    typed in that the outputs are worked out from: tick the ones the
+    function takes (the Scenarios tab's inputs come ticked); the rest
+    are **fixed**, written into the function as they are now. A cell
+    without a name is named in the function only (its key there),
+    proposed from its label (*Monthly payment* → `monthly-payment`) and
+    yours to change; the sheet's cell isn't renamed. Any name will do,
+    `p1` too; one that can't be (`count`, which the code uses) is said
+    beside its field, and Compile waits for another.
+  * *default*, beside each input (greyed while the cell is a fixed
+    value: tick it as an input first): ticked (as it starts), an input left
+    out of a call takes its value now; not ticked, it has no default,
+    the documentation says *(required)*, and leaving it out is refused,
+    saying so (`calc-fn needs :p1: it has no default`), where a default
+    would hide the mistake.
+  * The code it will write is shown below, as it changes. What can't be
+    compiled is listed instead, each cell saying why, with a link to it.
+    A name the sheet already gives a cell or grid is refused: a formula
+    naming it in reach means that, not the function.
+  * **Compile** first runs the function on the inputs as they are and
+    compares every output with the sheet's; any difference stops it,
+    saying which. Then, in one undo step, it writes the function. A block's grid goes to the shelf as the
+    function's name with `-grid` (`loan-fn-grid`): its source (another
+    template of that name there is replaced only if you say). A block placed in the sheet with its
+    inputs bound (`{:tasks tasks …}`) can be **replaced** by a call of
+    the function: its cell becomes `(risk {:tasks tasks …})`, and
+    whatever read it, `risk>p80`, `risk>drawn-plan>finish`, reads the
+    same value from the function's outputs. The cell works out all of
+    them: one that fails makes the cell, and what reads it, an error.
+* **Using it.** `(loan {:rate 0.03})` gives every output by name,
+  `{:payment 359.37}`; `(loan {:rate 0.03} :payment)` one of them; an
+  input left out takes its value from when it was compiled.
+  `(call loan {:rate 0.03} :payment)`, `what-if`, `goal-seek` and
+  `optimize` take it as they take the block. A name it doesn't have is
+  refused, listing the ones it has. With several outputs, asking for one
+  works out only what that one needs.
+* **What it is.** In the Library tab it reads like any function: what
+  it's for, each input with its note and default, each output, and the
+  block's test cases as examples. What its outputs are (a plan, say) is
+  kept with it, so a block's input looking for a plan finds one it
+  gives.
+* **Its tests.** A block's test cases go with it, and run with the
+  sheet's tests: the Tests tab lists them under the function's name.
+* **Draws and simulations.** A cell drawing from a distribution draws
+  as it did on the sheet: its central value normally, afresh in each run
+  of a simulation, from the same random streams, so a compiled
+  simulation gives the sheet's very runs. A formula calling a function
+  that draws is drawn afresh in the sheet's own simulations too.
+  `(simulate x runs)` is compiled when it's a cell's whole formula.
+* **Changing it.** A function keeps no addresses of the sheet it was
+  compiled in: a scratch sheet's cells don't outlive it. To compile
+  cells again, select them and compile under the same name: it replaces
+  the earlier compilation. One compiled from a block has, in the Library
+  tab, **Compile again** (the block, on the sheet by its name) and **Its
+  grid** (the shelf, where its block is kept, to place, change and
+  compile again).
+  You can also edit its code by hand, as any function's; compiling again
+  over a change made by hand asks first, since it replaces it.
+* **What can't be compiled**, each saying why: cells that wait for a
+  database or a web request; a cell calling the function being compiled
+  (one where you tried it: compiled, it would call itself); a formula
+  using a function from a grid's
+  own library (move it to My library), or from the sheet's library when
+  compiling into My library (compile into the sheet's); cells that change with time (`NOW`,
+  `history`, ticks); formulas that ask where they are (`here`, `down`,
+  `across`); a cycle; a block's cell reading outside the block (*Make
+  input* turns it into an input); `compare-scenarios`, and `simulate`
+  inside a larger formula. A cell reading a table by position
+  (`t>B2`) reads whatever is at that place in the table each time, as
+  the sheet does: read it by column (`t>z`) when its rows can change.
+* A compiled function runs a small calculation about ten times faster
+  than calling its block: the tour's loan, about 5 µs a call against 55.
+  A block whose time is its own work gains little: the Schedule risk
+  block's run, 2.7 ms compiled against about 3.
+* When it fails, the error says what failed, not yet in which of its
+  cells: Compile again opens the cells, where the sheet says which.

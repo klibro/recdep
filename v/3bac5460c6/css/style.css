@@ -237,6 +237,8 @@ td.cell .code, td.cell .kw { font-family: var(--mono); font-size: 11.5px; }
 td.cell .fn { color: var(--muted); font-style: italic; }
 .error { color: var(--err); font-family: var(--mono); font-size: 11.5px; font-weight: 600; }
 .error-text { color: var(--err); }
+/* a cell an error names: a link there, told from the error's red */
+a.said-link { color: var(--accent); }
 /* Excel's error values (#N/A, #DIV/0!) and logicals, centred as Excel shows them */
 td.cell .xl-error, td.cell .xl-bool { display: block; text-align: center; }
 .xl-error { color: var(--err); font-weight: 600; }
@@ -621,12 +623,15 @@ td.cell.in-sel { --tint: inset 0 0 0 9999px var(--range-tint); }
 td.cell.sel { --tint: inset 0 0 0 9999px var(--active-tint); }
 td.cell.pointing { --tint: inset 0 0 0 9999px var(--point-tint);
   outline: 1px dashed #1a6; outline-offset: -2px; }
+/* (P396) where pointing goes on from while a formula is written */
+td.cell.pick-at { outline: 1px dashed #1a6; outline-offset: -2px; }
+.crumbs .picking { padding: 1px 6px; border: 1px dashed #1a6; border-radius: 4px; font-size: 12px; }
 /* a spilled result: one thin frame around the cells it fills */
 td.cell.array-t { --arr-t: inset 0 1px 0 var(--array-edge); }
 td.cell.array-l { --arr-l: inset 1px 0 0 var(--array-edge); }
 td.cell.array-b { --arr-b: inset 0 -1px 0 var(--array-edge); }
 td.cell.array-r { --arr-r: inset -1px 0 0 var(--array-edge); }
-/* open to typing in a protected grid (P193, while the toolbar's lock is
+/* open to typing in a protected grid (P193, while the lock is
    closed): one quiet frame round each region of open cells */
 td.cell.open-t { --open-t: inset 0 2px 0 var(--open-edge); }
 td.cell.open-l { --open-l: inset 2px 0 0 var(--open-edge); }
@@ -1119,8 +1124,6 @@ a.flag.test-count.pass { color: var(--good); background: none; box-shadow: none;
 .invalid-text { color: var(--invalid); }
 .unsettled-text { color: var(--unsettled); }
 .format-bar input.unit { width: 64px; font-family: var(--mono); font-size: 12px; padding: 0 6px; }
-/* the unit dropdown: just its arrow, beside the field; the list opens full width */
-.format-bar select.unit-pick { width: 26px; margin-left: 2px; padding: 0 2px; }
 .unit-field { display: inline-flex; align-items: center; }
 ul.tree a.locate { color: var(--muted); font-family: inherit; }
 ul.tree li.leaf { display: flex; gap: 6px; align-items: baseline; padding: 0 4px 0 22px; font-size: 12px;
@@ -1576,7 +1579,6 @@ table.grid th.row-head.shown { box-shadow: inset -3px 0 0 var(--accent); }
 .modal.solver tr.miss td { color: var(--err); }
 /* the unit popover (§25), under the unit field */
 .unit-field { position: relative; }
-.unit-field .unit-pick { padding: 0 5px; margin-left: 1px; height: 24px; }
 .unit-gallery { position: absolute; top: 100%; left: 0; z-index: 45; margin-top: 3px; width: 520px; max-height: 70vh;
   overflow: auto; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
   box-shadow: 0 6px 22px rgba(0,0,0,.2); font-size: 12px; text-align: left; }
@@ -1824,6 +1826,15 @@ ol.steps-list .recipe-editor { margin: 0; border-top-left-radius: 0; border-top-
 .steps-why input { flex: 1; min-width: 10em; }
 .steps-reads { margin: 4px 2px; }
 .steps-locked-tools { color: var(--muted); font-size: 11.5px; }
+/* (P400) a formula's several lists of steps, named above the list: the others as links */
+.steps-calls { margin: 0 0 6px; overflow-wrap: anywhere; }
+.steps-calls b { color: var(--text); font-weight: 600; }
+.steps-calls button.link { padding: 0; border: none; background: none; color: var(--accent); cursor: pointer; font: inherit; }
+.steps-calls button.link:hover { text-decoration: underline; }
+/* (P401) under a step with no form: why, then its moves and Take out */
+.steps-formless { margin: 2px 0 6px; padding: 6px 8px; border: 1px solid var(--line); border-top: none;
+  border-radius: 0 0 6px 6px; }
+.steps-formless .steps-form-tools { margin-top: 4px; }
 /* a chip selected: the cell shows the table after that step, in the sheet (recdep.ui.stepsview) */
 td.cell.steps-shown-cell { position: relative; overflow: visible; z-index: 30; }
 /* drawn over the cell and its neighbours while shown, as big as the table needs (a long one scrolls) */
@@ -1933,6 +1944,16 @@ button.steps-unnest:hover { background: var(--sel-bg); }
 .sheet-tabs button.tab.on { background: var(--panel); color: var(--text); font-weight: 600;
   box-shadow: inset 0 -2px 0 var(--accent); }
 .sheet-tabs .tab-nav { padding: 3px 6px; }
+/* Home and Advanced (P407), at the strip's left: small icons */
+.sheet-tabs .tab-home, .sheet-tabs .tab-advanced { padding: 3px 7px; display: inline-flex; align-items: center; }
+.sheet-tabs .tab-home svg.icon, .sheet-tabs .tab-advanced svg.icon { width: 14px; height: 14px; }
+.sheet-tabs .tab-home .tab-lock { margin-left: 3px; }
+.sheet-tabs .tab-home.on { background: var(--panel); color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
+.sheet-tabs .tab-advanced { margin-right: 4px; }
+/* Advanced on (P319): every sheet shown, the model's too, in the accent */
+.sheet-tabs button.tab-advanced.on { background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: color-mix(in srgb, var(--accent) 75%, var(--text)); box-shadow: inset 0 0 0 1px var(--accent); }
+.sheet-tabs button.tab-advanced.on:hover { background: color-mix(in srgb, var(--accent) 34%, transparent); }
 .sheet-tabs .tab-add { font-weight: 600; padding: 3px 10px; }
 .sheet-tabs .tab-facade { color: var(--accent); font-size: 0.85em; }
 .sheet-tabs .tab-edit { font: inherit; font-family: var(--mono); margin: 2px 0; padding: 0 6px;
@@ -2175,14 +2196,6 @@ table.grid.frz-c9 > tbody > tr > td.cell:nth-of-type(9), table.grid.frz-c9 > the
    edge of it, and the icon drawn in it, dark on light or light on dark, so
    the glyph keeps its contrast in either theme; the other state is a plain
    button. Hover deepens the tint. */
-/* the lock (P193): protection off, in the warning gold */
-.toolbar button.lock.off { background: color-mix(in srgb, var(--warn) 26%, var(--btn-bg));
-  border-color: var(--warn); color: color-mix(in srgb, var(--warn) 60%, var(--text)); }
-.toolbar button.lock.off:hover { background: color-mix(in srgb, var(--warn) 36%, var(--btn-bg)); }
-/* Advanced (P319): every sheet shown, the model's too, in the accent */
-.toolbar button.advanced.on { background: color-mix(in srgb, var(--accent) 26%, var(--btn-bg));
-  border-color: var(--accent); color: color-mix(in srgb, var(--accent) 75%, var(--text)); }
-.toolbar button.advanced.on:hover { background: color-mix(in srgb, var(--accent) 36%, var(--btn-bg)); }
 /* a flat list of values shown in a cell (P196): on one line, each in the cell's format */
 td.cell .r-list-inline, td.cell .r-list-inline .num { display: inline; }
 td.cell .r-list-inline { display: block; text-align: right; }
@@ -2239,7 +2252,6 @@ select.steps-add.ready { outline: 2px solid var(--accent); outline-offset: 1px; 
 
 /* (P302) the Outline while a field takes a pick (a parameter's binding being typed) */
 .outline-pick { margin: 4px 0 6px; padding: 4px 8px; font-size: 12px; border: 1px dashed var(--accent); border-radius: 4px; background: var(--sel-bg); }
-.outline a.pick { text-decoration: underline dotted; cursor: copy; }
 /* (P302) the shapes a table is, beside it in the Outline: a filled slate
    chip, quiet but set apart from the names (blue) and the sizes (grey
    text), in a hue no flag uses */
@@ -2249,3 +2261,33 @@ select.steps-add.ready { outline: 2px solid var(--accent); outline-offset: 1px; 
 }
 :root[data-theme="dark"] { --shape-chip-bg: #343c48; --shape-chip-text: #b9c2cf; }
 .outline-shapes { margin-left: 6px; font-size: 11px; color: var(--shape-chip-text); background: var(--shape-chip-bg); border-radius: 8px; padding: 1px 7px; }
+
+/* (P398) the lock, in the bar above the grid, beside what the grid in view
+   has protected; open (Editing all), in the warning gold */
+.crumbs .lock-bar { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; }
+.crumbs button.lock { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px 0 6px; }
+.crumbs button.lock svg.icon { width: 13px; height: 13px; }
+.crumbs button.lock.off { background: color-mix(in srgb, var(--warn) 26%, var(--btn-bg));
+  border-color: var(--warn); color: color-mix(in srgb, var(--warn) 60%, var(--text)); }
+.crumbs button.lock.off:hover { background: color-mix(in srgb, var(--warn) 36%, var(--btn-bg)); }
+.crumbs .lock-note { color: var(--muted); }
+/* nothing protected here: the sheet's switch, quiet, its icon alone */
+.crumbs .lock-bar.none button.lock { padding: 0 5px; color: var(--muted); }
+/* a protected sheet's tab: a small lock after its name */
+.sheet-tabs .tab-lock { display: inline-block; margin-left: 5px; vertical-align: -1px; }
+.sheet-tabs .tab-lock svg.icon { width: 11px; height: 11px; display: inline-block; }
+.sheet-tabs .tab-lock.off { color: var(--warn); }
+
+/* Compile to a function… (P409) */
+.modal.compile { max-width: 860px; width: 90vw; }
+.modal.compile .compile-about { display: block; margin: 6px 0; }
+.modal.compile .compile-about input { display: block; width: 100%; margin-top: 2px; }
+.modal.compile .compile-replace { display: block; margin: 6px 0; }
+.modal.compile .compile-cells { border-collapse: collapse; margin: 6px 0; font-size: 12px; }
+.modal.compile .compile-cells th { text-align: left; padding: 6px 4px 2px; font-weight: 600; }
+.modal.compile .compile-cells td { padding: 1px 6px 1px 4px; }
+.modal.compile .compile-refusals { color: var(--error, #c0392b); font-size: 12px; }
+.modal.compile .compile-code { max-height: 280px; overflow: auto; font-size: 11px; background: var(--bg-2, rgba(0,0,0,.04));
+  border: 1px solid var(--line); padding: 6px; white-space: pre; }
+.modal.compile .compile-name-problem { color: var(--error, #c0392b); font-size: 11px; }
+.modal.compile .compile-default.off { color: var(--muted, #999); }
